@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body{
+    background-color: #F8F8F8;
+}
+
+#calendar-demo {
+    display: flex;
+  }
+  
+  .calendar-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .caption {
+    font-weight: 500;
+    font-size: 18px;
+  }
+  
+  .options {
+    padding: 20px;
+    background-color: rgba(191, 191, 191, 0.15);
+  }
+  
+  .option {
+    margin-top: 10px;
+  }
+
+  /* InformationData.css */
+
+.information-container {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 20px;
+  background-color: #f9f9f9;
+}
+
+.info-item {
+  margin-bottom: 10px;
+}
+
+.info-item label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.info-item span {
+  color: #333;
+}
+
+.contact-container {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 20px;
+  background-color: #f9f9f9;
+}
+
+.contact-item {
+  margin-bottom: 10px;
+}
+
+.contact-item label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.contact-item span {
+  color: #333;
+}
+  
