@@ -23,7 +23,7 @@ function Signup() {
     console.log("otpText", otpText, otpIs);
     if (otpIs !== otpText) return alert("OTP not match! Please try again");
     await axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}auth/register`, {
+      .post(`https://backed.riverketaminestudy.com/api/auth/register`, {
         email: values.email,
         username: values.email, // Assuming username is a separate field
         password: values.password,
@@ -50,7 +50,7 @@ function Signup() {
 
   const sendOtp = async (values) => {
     await axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}auth/otp`, {
+      .post(`https://backed.riverketaminestudy.com/api/auth/otp`, {
         email: values.email,
       })
       .then((res) => {
@@ -178,14 +178,14 @@ function Signup() {
                 className="text-red-500"
               />
 
-              <div class="relative  w-[350px]">
+              <div className="relative  w-[350px]">
                 <Field
                   type={showPassword ? "text" : "password"}
                   name="confirmPassword"
-                  class="h-16 block w-full p-4 ps-5 text-sm text-gray-900 border  rounded-full bg-[#f2f2f2] focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="h-16 block w-full p-4 ps-5 text-sm text-gray-900 border  rounded-full bg-[#f2f2f2] focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Confirm Password"
                 />
-                <div class="text-white absolute end-2.5 bottom-2.5  focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <div className="text-white absolute end-2.5 bottom-2.5  focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                   {showPassword ? (
                     <FaRegEye
                       className="text-[#c5c5c5]"

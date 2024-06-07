@@ -52,7 +52,7 @@ function Home() {
 
   const getNewScript = (id) => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}prescription/get/${id}`, {
+      .get(`https://backed.riverketaminestudy.com/api/prescription/get/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -70,7 +70,7 @@ function Home() {
   const getScreeningData = async (id) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/${id}`,
+        `https://backed.riverketaminestudy.com/api/screeningformanswer/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -112,7 +112,7 @@ function Home() {
   const getScores = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}score/${user?.id}`,
+        `https://backed.riverketaminestudy.com/api/score/${user?.id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -129,7 +129,7 @@ function Home() {
   const getDocumentverification = (id) => {
     axios
       .get(
-        `${process.env.REACT_APP_BACKEND_URL}documentverification/getDocumentverificationByUser/${id}`,
+        `https://backed.riverketaminestudy.com/api/documentverification/getDocumentverificationByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -149,7 +149,7 @@ function Home() {
     //consent
     axios
       .get(
-        `${process.env.REACT_APP_BACKEND_URL}consentform/getConsentformsByUser/${id}`,
+        `https://backed.riverketaminestudy.com/api/consentform/getConsentformsByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -168,7 +168,7 @@ function Home() {
   const getEmergencycontact = (id) => {
     //emergencycontact
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}emergencycontact/${id}`, {
+      .get(`https://backed.riverketaminestudy.com/api/emergencycontact/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -185,7 +185,7 @@ function Home() {
   const getInformation = (id) => {
     //informationform
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}informationform/${id}`, {
+      .get(`https://backed.riverketaminestudy.com/api/informationform/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -205,7 +205,7 @@ function Home() {
   const getuser = async (id) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}users/${id}`,
+        `https://backed.riverketaminestudy.com/api/users/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -221,7 +221,7 @@ function Home() {
   const getRefill = async (id) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}refill/answers/${id}`,
+        `https://backed.riverketaminestudy.com/api/refill/answers/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

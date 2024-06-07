@@ -100,7 +100,7 @@ function Userprofile() {
   const submitScriptData = async () => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}prescription/create`,
+        `https://backed.riverketaminestudy.com/api/prescription/create`,
         scriptData,
         {
           headers: {
@@ -112,7 +112,7 @@ function Userprofile() {
       // setScreening(response.data); // Set the data to state if needed
       const getEMail = localStorage.getItem("Email@@");
       await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}prescription/sendEmail`,
+        `https://backed.riverketaminestudy.com/api/prescription/sendEmail`,
         { ...scriptData, email: getEMail },
         {
           headers: {
@@ -132,7 +132,7 @@ function Userprofile() {
   const updateScriptData = async (value, item) => {
     try {
       const response = await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}prescription/update/${item?.id}`,
+        `https://backed.riverketaminestudy.com/api/prescription/update/${item?.id}`,
         { ...item, tracking_id: value },
         {
           headers: {
@@ -160,7 +160,7 @@ function Userprofile() {
   // const getUsers = async () => {
   //   try {
   //     const response = await axios.get(
-  //       `${process.env.REACT_APP_BACKEND_URL}users`,
+  //       `https://backed.riverketaminestudy.com/api/users`,
   //       {
   //         headers: {
   //           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -177,7 +177,7 @@ function Userprofile() {
   const getScores = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}score/${id}`,
+        `https://backed.riverketaminestudy.com/api/score/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -194,7 +194,7 @@ function Userprofile() {
   const getRefill = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}refill/answers/${id}`,
+        `https://backed.riverketaminestudy.com/api/refill/answers/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -223,7 +223,7 @@ function Userprofile() {
   const getScreeningData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/${id}`,
+        `https://backed.riverketaminestudy.com/api/screeningformanswer/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -240,7 +240,7 @@ function Userprofile() {
   const getDocumentverification = () => {
     axios
       .get(
-        `${process.env.REACT_APP_BACKEND_URL}documentverification/getDocumentverificationByUser/${id}`,
+        `https://backed.riverketaminestudy.com/api/documentverification/getDocumentverificationByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -260,7 +260,7 @@ function Userprofile() {
     //consent
     axios
       .get(
-        `${process.env.REACT_APP_BACKEND_URL}consentform/getConsentformsByUser/${id}`,
+        `https://backed.riverketaminestudy.com/api/consentform/getConsentformsByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -279,7 +279,7 @@ function Userprofile() {
   const getEmergencycontact = () => {
     //emergencycontact
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}emergencycontact/${id}`, {
+      .get(`https://backed.riverketaminestudy.com/api/emergencycontact/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -296,7 +296,7 @@ function Userprofile() {
   const getInformation = async () => {
     //informationform
     await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}informationform/${id}`, {
+      .get(`https://backed.riverketaminestudy.com/api/informationform/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -313,7 +313,7 @@ function Userprofile() {
 
   const getUserRecord = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}users/${id}`, {
+      .get(`https://backed.riverketaminestudy.com/api/users/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -330,7 +330,7 @@ function Userprofile() {
 
   const getNewScript = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}prescription/get/${id}`, {
+      .get(`https://backed.riverketaminestudy.com/api/prescription/get/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -347,11 +347,14 @@ function Userprofile() {
 
   const deletePress = async (item) => {
     await axios
-      .delete(`${process.env.REACT_APP_BACKEND_URL}prescription/${item?.id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      .delete(
+        `https://backed.riverketaminestudy.com/api/prescription/${item?.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
       .then((response) => {
         // setNewScriptData(response.data);
         // console.log("newScript", response.data);
@@ -381,7 +384,7 @@ function Userprofile() {
     setStatus(status);
     axios
       .put(
-        `${process.env.REACT_APP_BACKEND_URL}users/changeStatus`,
+        `https://backed.riverketaminestudy.com/api/users/changeStatus`,
         {
           id: data.id,
           status: status,
@@ -410,7 +413,7 @@ function Userprofile() {
   //     // Update notes
   //     axios
   //       .put(
-  //         `${process.env.REACT_APP_BACKEND_URL}informationform/changenotes`,
+  //         `https://backed.riverketaminestudy.com/api/informationform/changenotes`,
   //         {
   //           id: information?.id,
   //           notes: notes,
@@ -440,7 +443,7 @@ function Userprofile() {
       );
     await axios
       .put(
-        `${process.env.REACT_APP_BACKEND_URL}informationform/changenotes`,
+        `https://backed.riverketaminestudy.com/api/informationform/changenotes`,
         {
           id: information?.id,
           notes: notes,
@@ -486,7 +489,7 @@ function Userprofile() {
 
   const getDocumentverificationImages = async () => {
     await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}media`, {
+      .get(`https://backed.riverketaminestudy.com/api/media`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -555,7 +558,7 @@ function Userprofile() {
 
                 try {
                   const response = await axios.post(
-                    `${process.env.REACT_APP_BACKEND_URL}chat/send`,
+                    `https://backed.riverketaminestudy.com/api/chat/send`,
                     formData,
                     {
                       headers: {

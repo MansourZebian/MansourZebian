@@ -62,11 +62,14 @@ function Form() {
 
   const getQuestions = async () => {
     await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}screeningform/${params.type}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      .get(
+        `https://backed.riverketaminestudy.com/api/screeningform/${params.type}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
       .then((response) => {
         setData(response.data);
         console.log(response.data);
@@ -115,7 +118,7 @@ function Form() {
 
     await axios
       .post(
-        `${process.env.REACT_APP_BACKEND_URL}score/create`,
+        `https://backed.riverketaminestudy.com/api/score/create`,
         {
           key: data[0]?.type,
           score: parseInt(sumAsString),
@@ -143,7 +146,7 @@ function Form() {
           // Push the answer value to the array
 
           const response = await axios.post(
-            `${process.env.REACT_APP_BACKEND_URL}screeningform/useranswer`,
+            `https://backed.riverketaminestudy.com/api/screeningform/useranswer`,
             {
               userId: user.id,
               screeningformId: ques.id,

@@ -50,7 +50,7 @@ function Setting() {
 
               await axios
                 .post(
-                  `${process.env.REACT_APP_BACKEND_URL}users/create`,
+                  `https://backed.riverketaminestudy.com/api/users/create`,
                   formData,
                   {
                     headers: {

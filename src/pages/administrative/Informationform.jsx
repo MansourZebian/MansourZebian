@@ -86,7 +86,7 @@ function Informationform() {
             setSubmitting(true);
             axios
               .post(
-                `${process.env.REACT_APP_BACKEND_URL}informationform/create`,
+                `https://backed.riverketaminestudy.com/api/informationform/create`,
                 {
                   legalname:
                     values.firstName +

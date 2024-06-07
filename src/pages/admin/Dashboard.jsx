@@ -46,7 +46,7 @@ function Dashboard() {
   const getScreeningData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/`,
+        `https://backed.riverketaminestudy.com/api/screeningformanswer/`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -102,7 +102,7 @@ function Dashboard() {
   const getDocumentverification = async (id) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}documentverification/getDocumentverificationByUser/${id}`,
+        `https://backed.riverketaminestudy.com/api/documentverification/getDocumentverificationByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -120,7 +120,7 @@ function Dashboard() {
   const getConsent = async (id) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}consentform/getConsentformsByUser/${id}`,
+        `https://backed.riverketaminestudy.com/api/consentform/getConsentformsByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -138,7 +138,7 @@ function Dashboard() {
   const getEmergencycontact = async (id) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}emergencycontact/${id}`,
+        `https://backed.riverketaminestudy.com/api/emergencycontact/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -156,7 +156,7 @@ function Dashboard() {
   const getInformation = async (id) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}informationform/${id}`,
+        `https://backed.riverketaminestudy.com/api/informationform/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -266,7 +266,7 @@ function Dashboard() {
   const getUsers = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}users`,
+        `https://backed.riverketaminestudy.com/api/users`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -303,7 +303,7 @@ function Dashboard() {
 
     axios
       .put(
-        `${process.env.REACT_APP_BACKEND_URL}users/changeStatus`,
+        `https://backed.riverketaminestudy.com/api/users/changeStatus`,
         {
           id: id,
           status: status,

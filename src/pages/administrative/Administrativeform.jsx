@@ -34,7 +34,7 @@ function Administrativeform() {
   const getDocumentverification = (id) => {
     axios
       .get(
-        `${process.env.REACT_APP_BACKEND_URL}documentverification/getDocumentverificationByUser/${id}`,
+        `https://backed.riverketaminestudy.com/api/documentverification/getDocumentverificationByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -54,7 +54,7 @@ function Administrativeform() {
     //consent
     axios
       .get(
-        `${process.env.REACT_APP_BACKEND_URL}consentform/getConsentformsByUser/${id}`,
+        `https://backed.riverketaminestudy.com/api/consentform/getConsentformsByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -73,7 +73,7 @@ function Administrativeform() {
   const getEmergencycontact = (id) => {
     //emergencycontact
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}emergencycontact/${id}`, {
+      .get(`https://backed.riverketaminestudy.com/api/emergencycontact/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -90,7 +90,7 @@ function Administrativeform() {
   const getInformation = (id) => {
     //informationform
     axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}informationform/${id}`, {
+      .get(`https://backed.riverketaminestudy.com/api/informationform/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

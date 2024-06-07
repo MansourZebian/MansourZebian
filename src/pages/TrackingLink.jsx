@@ -12,11 +12,14 @@ const TrackingLink = () => {
 
   const getNewScript = async () => {
     await axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}prescription/get/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      .get(
+        `https://backed.riverketaminestudy.com/api/prescription/get/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
       .then((response) => {
         setNewScriptData(response.data);
         console.log("newScript", response.data);
