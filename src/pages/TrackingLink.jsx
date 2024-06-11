@@ -13,7 +13,7 @@ const TrackingLink = () => {
   const getNewScript = async () => {
     await axios
       .get(
-        `https://backed.riverketaminestudy.com/api/prescription/get/${userId}`,
+        `https://backend.riverketaminestudy.com/api/prescription/get/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

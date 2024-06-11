@@ -34,7 +34,7 @@ function Administrativeform() {
   const getDocumentverification = (id) => {
     axios
       .get(
-        `https://backed.riverketaminestudy.com/api/documentverification/getDocumentverificationByUser/${id}`,
+        `https://backend.riverketaminestudy.com/api/documentverification/getDocumentverificationByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -54,7 +54,7 @@ function Administrativeform() {
     //consent
     axios
       .get(
-        `https://backed.riverketaminestudy.com/api/consentform/getConsentformsByUser/${id}`,
+        `https://backend.riverketaminestudy.com/api/consentform/getConsentformsByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -73,11 +73,14 @@ function Administrativeform() {
   const getEmergencycontact = (id) => {
     //emergencycontact
     axios
-      .get(`https://backed.riverketaminestudy.com/api/emergencycontact/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      .get(
+        `https://backend.riverketaminestudy.com/api/emergencycontact/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
       .then((response) => {
         setEmergencycontact(response.data);
         console.log("Emergency contact ", response.data);
@@ -90,7 +93,7 @@ function Administrativeform() {
   const getInformation = (id) => {
     //informationform
     axios
-      .get(`https://backed.riverketaminestudy.com/api/informationform/${id}`, {
+      .get(`https://backend.riverketaminestudy.com/api/informationform/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

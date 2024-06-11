@@ -28,7 +28,7 @@ function Screeningform() {
   const getScreeningData = async (id) => {
     try {
       const response = await axios.get(
-        `https://backed.riverketaminestudy.com/api/screeningformanswer/${id}`,
+        `https://backend.riverketaminestudy.com/api/screeningformanswer/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

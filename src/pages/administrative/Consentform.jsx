@@ -32,7 +32,7 @@ function Consentform() {
     console.log("Signature Data:", signatureData);
     axios
       .post(
-        `https://backed.riverketaminestudy.com/api/consentform/create`,
+        `https://backend.riverketaminestudy.com/api/consentform/create`,
         {
           signature: signatureData,
           uid: user.id,

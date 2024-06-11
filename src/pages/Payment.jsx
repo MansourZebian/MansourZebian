@@ -77,7 +77,7 @@ function Payment() {
             values.cost = parseInt(values.session) * 15;
             try {
               const response = await axios.post(
-                `https://backed.riverketaminestudy.com/api/payment/create`,
+                `https://backend.riverketaminestudy.com/api/payment/create`,
                 {
                   uid: user.id,
                   dosagerequest: `${values.dosage.request},${values.dosage.previous}`,

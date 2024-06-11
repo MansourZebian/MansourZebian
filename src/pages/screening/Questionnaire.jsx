@@ -62,7 +62,7 @@ function Questionnaire() {
   const getQuestions = async () => {
     await axios
       .get(
-        `https://backed.riverketaminestudy.com/api/screeningform/entry questionaire`,
+        `https://backend.riverketaminestudy.com/api/screeningform/entry questionaire`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -90,7 +90,7 @@ function Questionnaire() {
       await Promise.all(
         data.map(async (ques) => {
           const response = await axios.post(
-            `https://backed.riverketaminestudy.com/api/screeningform/useranswer`,
+            `https://backend.riverketaminestudy.com/api/screeningform/useranswer`,
             {
               userId: user.id,
               screeningformId: ques.id,

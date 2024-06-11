@@ -23,7 +23,7 @@ function Signup() {
     console.log("otpText", otpText, otpIs);
     if (otpIs !== otpText) return alert("OTP not match! Please try again");
     await axios
-      .post(`https://backed.riverketaminestudy.com/api/auth/register`, {
+      .post(`https://backend.riverketaminestudy.com/api/auth/register`, {
         email: values.email,
         username: values.email, // Assuming username is a separate field
         password: values.password,
@@ -50,7 +50,7 @@ function Signup() {
 
   const sendOtp = async (values) => {
     await axios
-      .post(`https://backed.riverketaminestudy.com/api/auth/otp`, {
+      .post(`https://backend.riverketaminestudy.com/api/auth/otp`, {
         email: values.email,
       })
       .then((res) => {

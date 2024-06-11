@@ -15,7 +15,7 @@ const AuthGuard = ({ children }) => {
       try {
         if (authToken) {
           const response = await axios.post(
-            `https://backed.riverketaminestudy.com/api/auth/protected`,
+            `https://backend.riverketaminestudy.com/api/auth/protected`,
             null, // No data to send in the request body
             {
               headers: {

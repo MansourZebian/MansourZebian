@@ -86,7 +86,7 @@ function Informationform() {
             setSubmitting(true);
             axios
               .post(
-                `https://backed.riverketaminestudy.com/api/informationform/create`,
+                `https://backend.riverketaminestudy.com/api/informationform/create`,
                 {
                   legalname:
                     values.firstName +

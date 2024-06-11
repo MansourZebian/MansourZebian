@@ -28,7 +28,7 @@ function Survey() {
 
   const getQuestions = async () => {
     await axios
-      .get(`https://backed.riverketaminestudy.com/api/survey`, {
+      .get(`https://backend.riverketaminestudy.com/api/survey`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -54,7 +54,7 @@ function Survey() {
       await Promise.all(
         data.map(async (ques) => {
           const response = await axios.post(
-            `https://backed.riverketaminestudy.com/api/survey/usersurvey`,
+            `https://backend.riverketaminestudy.com/api/survey/usersurvey`,
             {
               uid: user.id,
               s_id: ques.id,

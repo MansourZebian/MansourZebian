@@ -34,7 +34,7 @@ export default function ScreeningQuestionstable() {
   const getScreeningData = async () => {
     try {
       const response = await axios.get(
-        `https://backed.riverketaminestudy.com/api/screeningform/`,
+        `https://backend.riverketaminestudy.com/api/screeningform/`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -69,7 +69,7 @@ export default function ScreeningQuestionstable() {
   const handleDelete = async (id) => {
     try {
       const response = await axios.delete(
-        `https://backed.riverketaminestudy.com/api/screeningform/${id}`,
+        `https://backend.riverketaminestudy.com/api/screeningform/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -111,7 +111,7 @@ export default function ScreeningQuestionstable() {
                   console.log(values);
 
                   const response = await axios.put(
-                    `https://backed.riverketaminestudy.com/api/screeningform/update/${src.id}`,
+                    `https://backend.riverketaminestudy.com/api/screeningform/update/${src.id}`,
                     {
                       type: type,
                       question: values.questions.title,

@@ -50,7 +50,7 @@ function Setting() {
 
               await axios
                 .post(
-                  `https://backed.riverketaminestudy.com/api/users/create`,
+                  `https://backend.riverketaminestudy.com/api/users/create`,
                   formData,
                   {
                     headers: {

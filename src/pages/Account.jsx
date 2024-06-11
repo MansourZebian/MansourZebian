@@ -15,7 +15,7 @@ function Account() {
   const getuser = async (id) => {
     try {
       const response = await axios.get(
-        `https://backed.riverketaminestudy.com/api/users/${id}`,
+        `https://backend.riverketaminestudy.com/api/users/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

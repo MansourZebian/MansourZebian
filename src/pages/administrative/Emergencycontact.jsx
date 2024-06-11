@@ -87,7 +87,7 @@ function Emergencycontact() {
             setSubmitting(true);
             axios
               .post(
-                `https://backed.riverketaminestudy.com/api/emergencycontact/create`,
+                `https://backend.riverketaminestudy.com/api/emergencycontact/create`,
                 {
                   contactname:
                     values.firstName +

@@ -46,7 +46,7 @@ function Login() {
 
             await axios
               .post(
-                `https://backed.riverketaminestudy.com/api/auth/login`,
+                `https://backend.riverketaminestudy.com/api/auth/login`,
                 {
                   email: values.email,
                   password: values.password,

@@ -24,7 +24,7 @@ function Sidebar2() {
 
   function logout() {
     axios
-      .post(`https://backed.riverketaminestudy.com/api/auth/logout`, null, {
+      .post(`https://backend.riverketaminestudy.com/api/auth/logout`, null, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

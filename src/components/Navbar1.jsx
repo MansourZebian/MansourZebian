@@ -29,7 +29,7 @@ function Navbar1() {
   const readmsgbyuser = async (id) => {
     try {
       await axios
-        .get(`https://backed.riverketaminestudy.com/api/chat/count/${id}`, {
+        .get(`https://backend.riverketaminestudy.com/api/chat/count/${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

@@ -55,7 +55,7 @@ function Chatting() {
 
   const getChats = async (id) => {
     await axios
-      .get(`https://backed.riverketaminestudy.com/api/chat/${id}`, {
+      .get(`https://backend.riverketaminestudy.com/api/chat/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -70,7 +70,7 @@ function Chatting() {
 
   const RefreshChat = async (id) => {
     await axios
-      .get(`https://backed.riverketaminestudy.com/api/chat/${user.id}`, {
+      .get(`https://backend.riverketaminestudy.com/api/chat/${user.id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -95,7 +95,7 @@ function Chatting() {
     try {
       await axios
         .post(
-          `https://backed.riverketaminestudy.com/api/chat/readmsgbyuser/${id}`,
+          `https://backend.riverketaminestudy.com/api/chat/readmsgbyuser/${id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -138,7 +138,7 @@ function Chatting() {
 
                 try {
                   const response = await axios.post(
-                    `https://backed.riverketaminestudy.com/api/chat/send`,
+                    `https://backend.riverketaminestudy.com/api/chat/send`,
                     formData,
                     {
                       headers: {
@@ -304,7 +304,7 @@ function Chatting() {
 
                       try {
                         const response = await axios.post(
-                          `https://backed.riverketaminestudy.com/api/chat/send`,
+                          `https://backend.riverketaminestudy.com/api/chat/send`,
                           formData,
                           {
                             headers: {
