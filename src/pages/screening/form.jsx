@@ -228,7 +228,7 @@ function Form() {
 
           {data.map((item, index) => (
             <div key={index} className="mb-4">
-              <p className="text-[#6984FB] font-bold">{item.question}</p>
+              <p className="text-[#6984FB] text-left font-bold">{item.question}</p>
 
               {item.option !== null &&
                 JSON.parse(item.option).map((option, index_) => (

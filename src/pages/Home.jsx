@@ -303,13 +303,16 @@ function Home() {
             is_gad7 &&
             is_pcl5 &&
             is_entryquestionaire &&
-            information !== null &&
-            consent !== null &&
-            emergencycontact !== null &&
-            documentverification !== null &&
+            // information !== null &&
+            // consent !== null &&
+            // emergencycontact !== null &&
+            // documentverification !== null &&
             allowRefill &&
             user.status === "approved"
-              ? `Done, Please schedule a tele-health visit here: https://telehealthvisit.timetap.com` //`Refills are Available for ${refill_length}/3 times`
+              ? `Thank you for filling out the forms.
+              Our team will get back to you
+              shortly. You can schedule a free
+              consultation call at any moment.` //`Refills are Available for ${refill_length}/3 times`
               : user.status !== "approved"
               ? phl9Sc[0]?.score > 9 && pcl9Sc[0]?.score > 30
                 ? "Based on your answers, you might be a good candidate for the RIVER Ketamine Study. Please fill out the administrative forms."
@@ -324,14 +327,14 @@ function Home() {
               : "Please fill out the forms below to move to the next step"
           }
           trackingLink={newScriptData[newScriptData?.length - 1]?.tracking_id}
-          status={
-            information !== null &&
-            consent !== null &&
-            emergencycontact !== null &&
-            documentverification !== null
-              ? "Complete"
-              : "Incomplete"
-          }
+          // status={
+          //   information !== null &&
+          //   consent !== null &&
+          //   emergencycontact !== null &&
+          //   documentverification !== null
+          //     ? "Complete"
+          //     : "Incomplete"
+          // }
         />
 
         <a
@@ -375,7 +378,12 @@ function Home() {
               : "/administrative"
           }
         >
-          <Card1
+           <Card1
+            title={"Administrative Forms"}
+            img={"writeicon.png"}
+            
+          />
+          {/* <Card1
             title={"Administrative Forms"}
             img={"writeicon.png"}
             disabled={
@@ -388,7 +396,7 @@ function Home() {
                 ? true
                 : false
             }
-          />
+          /> */}
         </a>
         <a
           href={
@@ -439,9 +447,9 @@ function Home() {
             consent !== null &&
             emergencycontact !== null &&
             documentverification !== null
-              ? "https://telehealthvisit.timetap.com"
-              : "https://ketamine-consultation.timetap.com/"
-          }
+            ? "https://calendly.com/river-ketamine-program/tele-health-call"
+            : "https://calendly.com/river-ketamine-program/free-ketamine-consultation"
+        }
         >
           <Card1
             title={

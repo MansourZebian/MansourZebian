@@ -38,19 +38,15 @@ function Info() {
         </div>
 
         <div
-          class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
+          class="flex p-4 mb-4 text-md text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
           role="alert"
         >
           <div className="text-left">
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry. Lorem Ipsum has been the industry's standard dummy text
-            ever since the 1500s, when an unknown printer took a galley of type
-            and scrambled it to make a type specimen book. It has survived not
-            only five centuries, but also the leap into electronic typesetting,
-            remaining essentially unchanged. It was popularised in the 1960s
-            with the release of Letraset sheets containing Lorem Ipsum passages,
-            and more recently with desktop publishing software like Aldus
-            PageMaker including versions of Lorem Ipsum.
+          Affordable Ketamine for
+          Depression, Anxiety, and Chronic
+          Pain. <br /> 
+          <a className='text-red-700 underline' href='https://riverofchange.org/'>Learn More.</a>
+  
           </div>
         </div>
       </div>

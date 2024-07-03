@@ -6,13 +6,26 @@ import SignatureCanvas from "react-signature-canvas";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
+import { Document, Page } from 'react-pdf'
+import { pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
 
 function Consentform() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const signatureRef = useRef();
   const [user, setUser] = useState({});
   const [isDisabled, setIsDisabled] = useState(false);
-
+  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`;
+  const [numPages, setNumPages] = useState();
+  const [pageNumber, setPageNumber] = useState(1);
+  const [loaded, setLoaded] = useState(false);
+  
+  function onDocumentLoadSuccess( numPages ){
+    setNumPages(numPages);
+    console.log("Numpages ",numPages._pdfInfo.numPages);
+    setLoaded(true)
+  }
   useEffect(() => {
     // Check if authentication token exists in localStorage
     const authToken = localStorage.getItem("token");
@@ -69,6 +82,20 @@ function Consentform() {
         <p className="text-black font-bold text-md mb-5 text-left">
           Patient Signature record.
         </p>
+
+        <div className="mb-4" style={{maxHeight: '500px', overflowY:'scroll', width:'100%'}}>
+
+          <Document file="https://riverdocumentverificationpics.s3.us-east-2.amazonaws.com/RIVER-Research-Consent-Form-%28C%29.pdf" onLoadSuccess={onDocumentLoadSuccess}>
+          { loaded &&  Array.from({ length: numPages._pdfInfo.numPages }, (_, i) => (
+        
+          <Page pageNumber={i+1} />
+          ))}
+          {/* <Page pageNumber={2} />
+          <Page pageNumber={3} /> */}
+          {/* <div class="page-controls"><button type="button">‹</button><span>4 of 4</span><button type="button" disabled="">›</button></div> */}
+          
+        </Document>
+        </div>
 
         <p className="text-gray-500 font-bold text-sm mb-5 text-left">
           I have read and agree to the terms of RIVER - Research-Consent Form. I

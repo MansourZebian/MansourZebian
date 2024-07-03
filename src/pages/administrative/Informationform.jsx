@@ -310,6 +310,12 @@ function Informationform() {
                 City
               </p>
               <Field
+                type="text"
+                name="city"
+                placeholder="City"
+                className="w-[48%] flex border h-10 border-[#dbdbdb] items-center p-4 mb-3 rounded-lg "
+              />
+              {/* <Field
                 as="select"
                 name="city"
                 placeholder={"City"}
@@ -330,7 +336,7 @@ function Informationform() {
                 ].map((item) => {
                   return <option value={item.city}>{item.city}</option>;
                 })}
-              </Field>
+              </Field> */}
               <ErrorMessage
                 name="city"
                 component="div"
@@ -342,6 +348,12 @@ function Informationform() {
                 State
               </p>
               <Field
+                type="text"
+                name="state"
+                placeholder="State"
+                className="w-[48%] flex border h-10 border-[#dbdbdb] items-center p-4 mb-3 rounded-lg "
+              />
+              {/* <Field
                 as="select"
                 name="state"
                 placeholder={"State"}
@@ -362,7 +374,7 @@ function Informationform() {
                 ].map((item) => {
                   return <option value={item.state}>{item.state}</option>;
                 })}
-              </Field>
+              </Field> */}
               <ErrorMessage
                 name="city"
                 component="div"

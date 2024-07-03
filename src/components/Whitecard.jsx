@@ -7,8 +7,8 @@ function Whitecard({ title, status, msg, isL, onClickMsg, trackingLink }) {
         isL ? "" : "border-2 border-[#7a92fb]"
       }  items-center p-4 mb-3`}
     >
-      <div className="flex  w-full gap-5">
-        <div className="text-left pt-4">
+      <div className="flex items-center w-full gap-5">
+        <div className="text-left">
           <p
             className=" font-semibold text-lg"
             style={{ color: isL ? "#7a92fb" : null }}
@@ -17,8 +17,8 @@ function Whitecard({ title, status, msg, isL, onClickMsg, trackingLink }) {
           </p>
         </div>
 
-        <div className="pt-2 text-left ">
-          {!isL && <p className=" font-semibold text-sm ">{status}</p>}
+        <div className=" text-left ">
+          {!isL && status && <p className=" font-semibold text-sm ">{status}</p>}
           {isL ? (
             <p
               className=""
