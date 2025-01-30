@@ -62,7 +62,7 @@ function Questionnaire() {
   const getQuestions = async () => {
     await axios
       .get(
-        `https://backend.riverketaminestudy.com/api/screeningform/entry questionaire`,
+        `${process.env.REACT_APP_BACKEND_URL}screeningform/entry questionaire`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -90,7 +90,7 @@ function Questionnaire() {
       await Promise.all(
         data.map(async (ques) => {
           const response = await axios.post(
-            `https://backend.riverketaminestudy.com/api/screeningform/useranswer`,
+            `${process.env.REACT_APP_BACKEND_URL}screeningform/useranswer`,
             {
               userId: user.id,
               screeningformId: ques.id,
@@ -131,7 +131,7 @@ function Questionnaire() {
         <div className="px-5 flex flex-col items-start">
           {data.map((item, index) => (
             <div key={index} className="mb-4">
-              <p className="text-[#6984FB] text-left font-bold">{item.question}</p>
+              <p className="text-[#6984FB] font-bold">{item.question}</p>
 
               {item.option !== null &&
                 JSON.parse(item.option).map((option, index_) => (

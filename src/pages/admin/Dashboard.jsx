@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowDown, IoIosRemove } from "react-icons/io";
 import Sidebar from "../../components/Sidebar";
 import { Modal, Button, Label, Radio } from "flowbite-react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -15,6 +15,8 @@ import {
 } from "@ant-design/icons";
 
 function Dashboard() {
+  const navigate = useNavigate();
+
   const param = useParams();
   const [searchTerm, setSearchTerm] = useState(null);
 
@@ -25,11 +27,870 @@ function Dashboard() {
   const [regClickBool, setRegClickBool] = useState(false);
   const [statusClickBool, setStatusClickBool] = useState(false);
 
+
+  const [newUserFilteredData, setNewUserFilteredData] = useState([])
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const [user, setUser] = useState({});
 
   const [data, setData] = useState([]);
+
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingIndexes, setLoadingIndexes] = useState(false);
+  const [isFetchingLoading, setIsFetchingLoading] = useState(false)
+
+  const [currentNewUserRecords, setCurrentNewUserRecords] = useState([])
+  // pagination handling
+  const [currentNewUserPage, setCurrentNewUserPage] = useState(1);
+
+
+  const [totalNewUserDataPages, setTotalNewUserDataPages] = useState(0);
+
+
+  const [newUser, setNewUser] = useState([])
+  const [oldUser, setOldUser] = useState([]) // will save same value when useEffect fetches to compare later
+  const [Progress, setProgress] = useState(null)
+
+  //filter to do
+
+  const [sortDirection, setSortDirection] = useState('asc'); // Initial sort direction
+  const [sortedColumn, setSortedColumn] = useState(null); // Track the column being sorted
+
+  const [filters, setFilters] = useState({
+    first_name: "",
+    last_name: "",
+    type: "",
+    formSent: null,
+    formFill: null,
+    status: "",
+  });
+
+
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, newUser]);
+
+  // useEffect(() => {
+  //   applyFilters(); // Reapply filters when page changes
+  // }, [currentNewUserPage, newUser]);
+
+  useEffect(() => {
+    if (currentNewUserPage > totalNewUserDataPages) {
+      setCurrentNewUserPage(1); // Reset page to 1 if the current page is invalid
+    }
+  }, [totalNewUserDataPages]);
+
+  const applyFilters = () => {
+    const filtered = newUser.filter((item) => {
+      return (
+        (filters.first_name
+          ? (item.first_name.toLowerCase().includes(filters.first_name.toLowerCase()) ||
+            item.last_name.toLowerCase().includes(filters.first_name.toLowerCase()))
+          : true) &&
+
+        (filters.type ? item.type === filters.type : true) &&
+        (filters.status ? item.status === filters.status : true)
+      );
+    });
+
+
+    if (filtered.length === 0) {
+      // Set empty array and total pages to 0 if no matches
+      setTotalNewUserDataPages(0);
+      setCurrentNewUserRecords([]);
+      return;
+    }
+
+
+    // Update the filtered data state
+    setNewUserFilteredData(filtered);
+
+    // Update total pages dynamically based on filtered data
+    const totalPages = Math.ceil(filtered.length / newUserItemsPerPage);
+    setTotalNewUserDataPages(totalPages);
+
+    // Handle pagination for filtered data
+    const startIndex = (currentNewUserPage - 1) * newUserItemsPerPage;
+    const endIndex = startIndex + newUserItemsPerPage;
+    setCurrentNewUserRecords(filtered.slice(startIndex, endIndex));
+  };
+
+  // const applyFilters = () => {
+  //   const filtered = newUser.filter((item) => {
+  //     return (
+  //       (filters.first_name ? item.first_name.toLowerCase().includes(filters.first_name.toLowerCase()) : true) &&
+  //       (filters.type ? item.type === filters.type : true) &&
+  //       (filters.status ? item.status === filters.status : true)
+  //     );
+  //   });
+
+  //   // alert('see filtered',JSON.stringify(filtered))
+
+  //   // Update the filtered data state
+  //   setNewUserFilteredData(filtered);
+
+  //   // Handle case when there are no filtered results
+  //   if (filtered.length === 0) {
+  //     // Set empty array and total pages to 0 if no matches
+  //     setTotalNewUserDataPages(0);
+  //     setCurrentNewUserRecords([]);
+  //     return;
+  //   }
+  //   else{
+
+
+  //   // Update total pages dynamically based on filtered data
+  //   const totalPages = Math.ceil(filtered.length / newUserItemsPerPage);
+  //   setTotalNewUserDataPages(totalPages);
+
+  //   // Handle pagination for filtered data
+  //   const startIndex = (currentNewUserPage - 1) * newUserItemsPerPage;
+  //   const endIndex = startIndex + newUserItemsPerPage;
+  //   setCurrentNewUserRecords(filtered.slice(startIndex, endIndex));
+  //   }
+  // };
+
+
+
+
+
+
+  const getPrevSceeningData = async () => {
+    try {
+      // Fetch users who filled the form
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      setData(
+        response.data.filter(
+          (item, index, self) =>
+            // Check if the current item's key is the first occurrence in the array
+            self.findIndex((t) => t.key === item.key) === index
+        )
+      ); // Set the data to state if needed
+    }
+    catch (error) {
+      console.log('error while getting data')
+    }
+  }
+
+  // const getScreeningData = async () => {
+  //   try {
+  //     // Fetch users who filled the form
+  //     const usersListWhoFilledForm = await axios.get(
+  //       `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/userfilledforms`,
+  //       {
+  //         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //       }
+  //     );
+
+  //     // Extract valid data from usersListWhoFilledForm
+  //     const usersListWhoFilledList = Array.isArray(usersListWhoFilledForm.data?.data)
+  //       ? usersListWhoFilledForm.data.data.filter(
+  //         (user) => user && user.userId && user.first_name && user.last_name && user.email
+  //       )
+  //       : [];
+  //     // console.log("Filtered usersListWhoFilledList:", usersListWhoFilledList);
+
+  //     // Fetch existing form data
+  //     const existingFormData = await axios.get(
+  //       `${process.env.REACT_APP_BACKEND_URL}existingforms/get/`,
+  //       {
+  //         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //       }
+  //     );
+
+  //     // Extract valid data from existingFormData
+  //     const existingFormDataList = Array.isArray(existingFormData.data?.data)
+  //       ? existingFormData.data.data
+  //       : [];
+  //     // console.log("Existing form data:", existingFormDataList);
+
+  //     // Find users who are not already in existingFormDataList
+  //     const existingUserIds = existingFormDataList.map((form) => form.userId);
+  //     const usersToAdd = usersListWhoFilledList.filter(
+  //       (user) => !existingUserIds.includes(user.userId)
+  //     );
+  //     // console.log("Users to add to existing form data:", usersToAdd);
+
+  //     // Function to create new entries in existing forms
+  //     const createExistingFormEntry = async (user) => {
+  //       const payload = {
+  //         userId: user.userId,
+  //         first_name: user.first_name || "",
+  //         last_name: user.last_name || "",
+  //         email: user.email || null,
+  //         status: user.status,
+  //         active: true
+  //       };
+  //       const response = await axios.post(
+  //         `${process.env.REACT_APP_BACKEND_URL}existingforms/create`,
+  //         payload,
+  //         {
+  //           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //         }
+  //       );
+  //       if (response.status === 201) {
+  //         console.log("Successfully created entry for user:", user.userId);
+  //       } else {
+  //         console.error("Failed to create entry for user:", user.userId);
+  //       }
+  //     };
+
+  //     // If there are users to add, create them and refetch the updated form data
+  //     if (usersToAdd.length > 0) {
+  //       for (const user of usersToAdd) {
+  //         await createExistingFormEntry(user);
+  //       }
+  //       console.log("Finished creating new entries. Refetching updated data...");
+
+  //       // Refetch updated existing form data
+  //       const updatedFormData = await axios.get(
+  //         `${process.env.REACT_APP_BACKEND_URL}existingforms/get/`,
+  //         {
+  //           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //         }
+  //       );
+
+  //       let filteredForStatus = Array.isArray(updatedFormData.data.data)
+  //         ? updatedFormData.data.data.filter(
+  //           (item) => item?.active === "1"
+  //         )
+  //         : [];
+  //       // setNewUser(updatedFormData.data.data);
+  //       // console.log('see filteredforstatus',filteredForStatus)
+  //       setNewUser(filteredForStatus)
+
+  //     } else {
+
+
+  //       let filteredForStatus = Array.isArray(existingFormData.data.data)
+  //         ? existingFormData.data.data.filter(
+  //           (item) => item?.active === "1"
+  //         )
+  //         : [];
+
+
+  //       // console.log(
+  //       //   "Statuses in data:",
+  //       //   existingFormData?.data?.data.map((item) => item?.active==="1")
+  //       // );
+
+  //       // setNewUser(existingFormData.data.data);
+
+  //       // console.log('exsiing:',existingFormData.data.data)
+  //       // console.log(filteredForStatus,'ddddd')
+  //       setNewUser(filteredForStatus)
+
+
+  //     }
+
+  //     // console.log("Finished processing.");
+  //   } catch (error) {
+  //     console.error("Error in getScreeningData:", error);
+  //   }
+  // };
+
+  const getScreeningData = async () => {
+    try {
+      // Fetch all existing forms and user data from the backend
+      const existingFormsResponse = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}existingforms/get/`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      // Log the raw response for debugging
+      // console.log("Raw API Response:", existingFormsResponse.data);
+
+      // Extract valid data
+      const existingFormDataList = Array.isArray(existingFormsResponse.data?.data)
+        ? existingFormsResponse.data.data
+        : [];
+
+      // Filter based on the "active" status (handling multiple formats)
+      const filteredForStatus = existingFormDataList.filter(
+        (item) => (item?.active === true ||
+          item?.active === "1" ||
+          item?.active === 1)
+
+      );
+
+      // console.log("Filtered Active Users:", filteredForStatus);
+
+      // Update state with filtered data
+      if (filteredForStatus.length === 0) {
+        console.warn("No active users found!");
+      }
+      setNewUser(filteredForStatus);
+
+      // console.log("Finished processing existing forms data.");
+    } catch (error) {
+      console.error("Error in getScreeningData:", error);
+
+      // Handle specific errors
+      if (error.response) {
+        console.error("Server responded with error:", error.response.data);
+        toast.error(`Error: ${error.response.data.message || "Unknown error"}`);
+      } else if (error.request) {
+        console.error("No response received from server:", error.request);
+        toast.error("No response from server. Please try again later.");
+      } else {
+        console.error("Error setting up the request:", error.message);
+        toast.error("Error occurred. Please check your input or try again.");
+      }
+
+      // Handle session expiration
+      if (error?.response?.status === 401) {
+        toast.error("Session expired");
+        localStorage.clear();
+        navigate("/login");
+      }
+    }
+  };
+
+
+
+  // const getScreeningData = async () => {
+  //   try {
+  //     // Fetch users who filled the form
+  //     const usersListWhoFilledForm = await axios.get(
+  //       `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/userfilledforms`,
+  //       {
+  //         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //       }
+  //     );
+
+  //     // Extract valid data from usersListWhoFilledForm
+  //     const usersListWhoFilledList = Array.isArray(usersListWhoFilledForm.data?.data)
+  //       ? usersListWhoFilledForm.data.data.filter(
+  //         (user) => user && user.userId && user.first_name && user.last_name && user.email
+  //       )
+  //       : [];
+
+  //     // Fetch existing form data
+  //     const existingFormData = await axios.get(
+  //       `${process.env.REACT_APP_BACKEND_URL}existingforms/get/`,
+  //       {
+  //         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //       }
+  //     );
+
+  //     // Extract valid data from existingFormData
+  //     const existingFormDataList = Array.isArray(existingFormData.data?.data)
+  //       ? existingFormData.data.data
+  //       : [];
+
+  //     // Find users who are not already in existingFormDataList
+  //     const existingUserIds = existingFormDataList.map((form) => form.userId);
+  //     const usersToAdd = usersListWhoFilledList.filter(
+  //       (user) => !existingUserIds.includes(user.userId)
+  //     );
+
+  //     // Function to create new entries in existing forms
+  //     const createExistingFormEntry = async (user) => {
+  //       const payload = {
+  //         userId: user.userId,
+  //         first_name: user.first_name || "",
+  //         last_name: user.last_name || "",
+  //         email: user.email || null,
+  //         status: user.status,
+  //         active: true,
+  //       };
+  //       const response = await axios.post(
+  //         `${process.env.REACT_APP_BACKEND_URL}existingforms/create`,
+  //         payload,
+  //         {
+  //           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //         }
+  //       );
+  //       if (response.status === 201) {
+  //         console.log("Successfully created entry for user:", user.userId);
+  //       } else {
+  //         console.error("Failed to create entry for user:", user.userId);
+  //       }
+  //     };
+
+  //     // Function to handle creating users concurrently
+  //     const createUsersConcurrently = async (usersToAdd) => {
+  //       const promises = usersToAdd.map((user) => createExistingFormEntry(user));
+  //       await Promise.all(promises);
+  //     };
+
+  //     // If there are users to add, create them and refetch the updated form data
+  //     if (usersToAdd.length > 0) {
+  //       await createUsersConcurrently(usersToAdd);
+  //       console.log("Finished creating new entries. Refetching updated data...");
+
+  //       // Refetch updated existing form data
+  //       const updatedFormData = await axios.get(
+  //         `${process.env.REACT_APP_BACKEND_URL}existingforms/get/`,
+  //         {
+  //           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //         }
+  //       );
+
+  //       // Filter based on the "active" status
+  //       let filteredForStatus = Array.isArray(updatedFormData.data.data)
+  //         ? updatedFormData.data.data.filter((item) => item?.active === "1")
+  //         : [];
+  //       setNewUser(filteredForStatus);
+  //     } else {
+  //       // If no new users to add, just filter and update the state
+  //       let filteredForStatus = Array.isArray(existingFormData.data.data)
+  //         ? existingFormData.data.data.filter((item) => item?.active === "1")
+  //         : [];
+  //       setNewUser(filteredForStatus);
+  //     }
+
+  //     console.log("Finished processing.");
+  //   } catch (error) {
+  //     console.error("Error in getScreeningData:", error);
+
+  //     // Handle specific errors such as 401 Unauthorized
+  //     if (error?.response?.status === 401) {
+  //       toast.error("Session expired");
+  //       localStorage.clear();
+  //       navigate("/login");
+  //     } else {
+  //       toast.error("An error occurred while processing the data");
+  //     }
+  //   }
+  // };
+
+
+
+
+
+  useEffect(() => {
+    getPrevSceeningData()
+    getScreeningData();
+    getUsers();
+  }, []);
+
+  const RecordsPerPage = 2;
+
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+
+
+  const totalRecords = data.length;
+  // const totalRecords = newUser.length;
+  const totalPages = Math.ceil(totalRecords / RecordsPerPage);
+  const startIndex = (currentPage - 1) * RecordsPerPage;
+  const endIndex = Math.min(startIndex + RecordsPerPage, totalRecords);
+  const currentRecords = data.slice(startIndex, endIndex);
+
+
+
+
+  useEffect(() => {
+    const fetchExistingFormEntries = async () => {
+      try {
+        setIsFetchingLoading(true);
+        const response = await axios.get(
+          `${process.env.REACT_APP_BACKEND_URL}existingforms/get/`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          const data = response?.data?.data;
+          // setNewUser(data); // Original data
+
+          setIsFetchingLoading(false);
+        } else {
+          toast.error("No data");
+          setIsFetchingLoading(false);
+        }
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          toast.error("Session expired");
+          localStorage.clear();
+          navigate("/login");
+          setIsFetchingLoading(false);
+          return;
+        } else {
+          toast.error("Error while fetching existing form data");
+          setIsFetchingLoading(false);
+        }
+      } finally {
+        setIsFetchingLoading(false);
+      }
+    };
+
+    fetchExistingFormEntries();
+  }, []);
+
+
+
+  //added this
+
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+  
+
+
+  const formatDateTime = (isoString) => {
+    if (!isoString) return ""; // Handle empty or undefined values
+    const date = new Date(isoString);
+    if (isNaN(date)) return ""; // If the date is invalid, return an empty string
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+
+  const handleSaveButton = async () => {
+    if (currentNewUserRecords.some((item) => !item.first_name || !item.last_name || !item.userId)) {
+      toast.error("Please enter first name, last name, and type");
+      return;
+    }
+
+    const successUpdates = [];
+    const failedUpdates = [];
+    const successfullyProcessedUsers = [];
+    let completed = 0;
+
+    try {
+      setIsLoading(true);
+      let date = new Date();
+
+
+      const currentDate = new Date().toISOString();
+
+      // Helper function: Check if a record has changed
+      const hasChanged = (newData, oldData) => {
+        const oldUserData = oldData.find((item) => item.id === newData.id);
+        if (!oldUserData) return true; // New data is considered changed
+        return JSON.stringify(newData) !== JSON.stringify(oldUserData);
+      };
+
+      for (const user of currentNewUserRecords) {
+        if (user.id) {
+          user["updatedAt"] = currentDate;
+          // Update existing user
+          if (!hasChanged(user, oldUser)) continue;
+
+          try {
+            const response = await axios.post(
+              `${process.env.REACT_APP_BACKEND_URL}existingforms/update/${user.id}`,
+              user,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+
+            if (response.status === 200) {
+              successUpdates.push(user.fname);
+              successfullyProcessedUsers.push(user);
+
+              // Update the filtered data (newUserFilteredData) after the update
+              setNewUserFilteredData((prevUsers) =>
+                prevUsers.map((item) =>
+                  item.id === user.id ? { ...item, ...user } : item
+                )
+              );
+
+              // Update the full data (newUser) as well after the update
+              setNewUser((prevUsers) =>
+                prevUsers.map((item) =>
+                  item.id === user.id ? { ...item, ...user } : item
+                )
+              );
+
+              // Update the current page records
+              const startIndex = (currentNewUserPage - 1) * newUserItemsPerPage;
+              const endIndex = startIndex + newUserItemsPerPage;
+              setCurrentNewUserRecords(newUser.slice(startIndex, endIndex));  // Update current page records
+              setOldUser(newUser.slice(startIndex, endIndex)); // Update the old records for comparison
+
+            } else {
+              failedUpdates.push(user.fname);
+            }
+          } catch (error) {
+            failedUpdates.push(user.fname);
+            if (error?.response?.status === 401) {
+              toast.error("Session expired");
+              localStorage.clear();
+              navigate("/login");
+              return;
+            }
+          }
+        } else {
+          // Create new user
+          try {
+            const response = await axios.post(
+              `${process.env.REACT_APP_BACKEND_URL}existingforms/create`,
+              user,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+
+            if (response.status === 201) {
+              successUpdates.push(user.fname);
+              successfullyProcessedUsers.push({
+                ...user,
+                id: response.data.form.id,
+              });
+
+              // Update local state with the new ID
+              setNewUser((prevUsers) =>
+                prevUsers.map((item) =>
+                  item === user ? { ...item, id: response.data.form.id } : item
+                )
+              );
+
+              // Update the filtered data (newUserFilteredData) with the new user
+              setNewUserFilteredData((prevUsers) =>
+                prevUsers.map((item) =>
+                  item === user ? { ...item, id: response.data.form.id } : item
+                )
+              );
+
+              // Update current records to ensure UI reflects changes
+              const startIndex = (currentNewUserPage - 1) * newUserItemsPerPage;
+              const endIndex = startIndex + newUserItemsPerPage;
+              setCurrentNewUserRecords(newUser.slice(startIndex, endIndex));  // Update current page records
+              setOldUser(newUser.slice(startIndex, endIndex)); // Update the old records for comparison
+
+            } else {
+              failedUpdates.push(user.fname);
+            }
+          } catch (error) {
+            failedUpdates.push(user.fname);
+            if (error?.response?.status === 401) {
+              toast.error("Session expired");
+              localStorage.clear();
+              navigate("/login");
+              return;
+            }
+          }
+        }
+
+        completed++;
+        setProgress(`Processing ${completed}/${currentNewUserRecords.length}`);
+      }
+
+      if (successUpdates.length > 0) {
+        toast.success(`Saved successfully: ${successUpdates.join(", ")}`);
+      }
+      if (failedUpdates.length > 0) {
+        toast.error(`Failed to save: ${failedUpdates.join(", ")}`);
+      }
+
+      // After successful updates or creations, reapply the filter to the updated data
+      applyFilters();
+
+      // Update old user state for comparison
+      setOldUser((prevOldUsers) => {
+        const updatedUsers = prevOldUsers.map((oldUser) => {
+          const updatedUser = successfullyProcessedUsers.find(
+            (newUser) => newUser.id === oldUser.id
+          );
+          return updatedUser || oldUser;
+        });
+
+        const newUsers = successfullyProcessedUsers.filter(
+          (newUser) => !prevOldUsers.find((oldUser) => oldUser.id === newUser.id)
+        );
+
+        return [...updatedUsers, ...newUsers];
+      });
+    } catch (error) {
+      console.error("Unexpected error during save:", error);
+      toast.error("An unexpected error occurred during save. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+
+
+  const handleDeleteUser = async (index) => {
+    const userRecord = currentNewUserRecords[index];
+    const { id, userId, first_name } = userRecord;
+
+    if (!userRecord) {
+      toast.error("Invalid user record.");
+      return;
+    }
+
+    setLoadingIndexes(index);
+
+    try {
+      setIsLoading(true);
+
+      // Handle unsaved users (no `id`) - Remove locally
+      if (!id) {
+        setNewUser((prevUsers) => {
+          const updatedUsers = prevUsers.filter((_, i) => i !== index);
+          setNewUserFilteredData(updatedUsers); // Update filtered data
+          reapplyFilters(updatedUsers); // Reapply filters to refresh the list
+          return updatedUsers;
+        });
+
+        setLoadingIndexes(false);
+        return;
+      }
+
+      // Proceed to delete user from the backend
+      const deleteResponse = await axios.put(
+        `${process.env.REACT_APP_BACKEND_URL}existingforms/delete/${id}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (deleteResponse.status === 200) {
+        toast.success(`User ${first_name} deleted successfully.`);
+
+        // Attempt to delete associated screening form answers
+        try {
+          await axios.put(
+            `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/deletebyuserid/${userId}`
+          );
+        } catch (screeningError) {
+          console.warn(
+            `Error deleting screening form answers for user ${first_name}:`,
+            screeningError
+          );
+        }
+
+        // Update state after successful deletion
+        setNewUser((prevUsers) => {
+          const updatedUsers = prevUsers.filter((user) => user.id !== id);
+          setNewUserFilteredData(updatedUsers); // Update filtered data
+          reapplyFilters(updatedUsers); // Reapply filters to refresh the list
+          return updatedUsers;
+        });
+      } else {
+        toast.error(`Failed to delete user ${first_name}.`);
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+
+      if (error?.response?.status === 401) {
+        toast.error("Session expired.");
+        localStorage.clear();
+        navigate("/login");
+      } else {
+        toast.error(`An error occurred while deleting user ${first_name}.`);
+      }
+    } finally {
+      setIsLoading(false);
+      setLoadingIndexes(false);
+    }
+  };
+
+  // Helper function to reapply filters and update paginated records
+  const reapplyFilters = (updatedUsers) => {
+    // Apply the current filter logic to updatedUsers
+    const filteredUsers = applyFiltersToUsers(updatedUsers);
+
+    // Update the paginated records for the current page
+    const startIndex = (currentNewUserPage - 1) * newUserItemsPerPage;
+    const endIndex = startIndex + newUserItemsPerPage;
+    setCurrentNewUserRecords(filteredUsers.slice(startIndex, endIndex));
+  };
+
+  const applyFiltersToUsers = (users) => {
+    // Example filter logic
+    return users.filter((user) => user.active === true);
+  };
+
+
+
+
+  // Update specific field in newUser
+  const handleUpdateUserField = (index, field, value) => {
+    setCurrentNewUserRecords((prevUsers) => {
+      const updatedUsers = [...prevUsers];
+      updatedUsers[index] = { ...updatedUsers[index], [field]: value };
+      return updatedUsers;
+    });
+  };
+
+  const newUserItemsPerPage = 3; // Number of rows per page
+  // let totalNewUserDataPages = Math.ceil(newUser.length / newUserItemsPerPage);
+  // setTotalNewUserDataPages(Math.ceil(newUser.length / newUserItemsPerPage))
+
+  useEffect(() => {
+    setTotalNewUserDataPages(Math.ceil(newUser.length / newUserItemsPerPage));
+  }, [newUser, newUserItemsPerPage]);
+
+  const startNewUserIndex = (currentNewUserPage - 1) * newUserItemsPerPage;
+  const endNewUserIndex = startNewUserIndex + newUserItemsPerPage;
+
+
+  // const currentNewUserRecords = newUser.slice(startNewUserIndex, endNewUserIndex);
+  // setCurrentNewUserRecords(newUser.slice(startNewUserIndex, endNewUserIndex))
+
+
+  const handleNewUserPageChange = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalNewUserDataPages) {
+      setCurrentNewUserPage(pageNumber);
+    }
+  };
+  useEffect(() => {
+    // Always apply filters to determine the correct data slice
+    if (newUserFilteredData.length > 0) {
+      const startIndex = (currentNewUserPage - 1) * newUserItemsPerPage;
+      const endIndex = startIndex + newUserItemsPerPage;
+
+      // Slice filtered data for current page
+      setCurrentNewUserRecords(newUserFilteredData.slice(startIndex, endIndex));
+      setOldUser(newUserFilteredData.slice(startIndex, endIndex)); // Optional: track previous records
+    } else {
+      const startIndex = (currentNewUserPage - 1) * newUserItemsPerPage;
+      const endIndex = startIndex + newUserItemsPerPage;
+
+      // Fallback: handle unfiltered `newUser` if no filters are active
+      setCurrentNewUserRecords(newUser.slice(startIndex, endIndex));
+      setOldUser(newUser.slice(startIndex, endIndex));
+    }
+  }, [newUserFilteredData, currentNewUserPage, newUserItemsPerPage, newUser]);
+
+  
+
+
+
+
+
 
   useEffect(() => {
     // Check if authentication token exists in localStorage
@@ -43,50 +904,14 @@ function Dashboard() {
     }
   }, []);
 
-  const getScreeningData = async () => {
-    try {
-      const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/screeningformanswer/`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      console.log("screeningform...?????????>>", response);
-      setData(
-        response.data.filter(
-          (item, index, self) =>
-            // Check if the current item's key is the first occurrence in the array
-            self.findIndex((t) => t.key === item.key) === index
-        )
-      ); // Set the data to state if needed
-    } catch (error) {
-      console.log(error); // Log any errors that occur during the request
-    }
-  };
 
-  useEffect(() => {
-    getScreeningData();
-    getUsers();
-  }, []);
 
-  const RecordsPerPage = 3;
 
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const totalRecords = data.length;
-  const totalPages = Math.ceil(totalRecords / RecordsPerPage);
-  const startIndex = (currentPage - 1) * RecordsPerPage;
-  const endIndex = Math.min(startIndex + RecordsPerPage, totalRecords);
-  const currentRecords = data.slice(startIndex, endIndex);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
 
   const handleUserProfileClick = async (id) => {
-    console.log(id);
+    // console.log(id);
     const documentVerification = await getDocumentverification(id);
     const consent = await getConsent(id);
     const emergencyContact = await getEmergencycontact(id);
@@ -102,7 +927,7 @@ function Dashboard() {
   const getDocumentverification = async (id) => {
     try {
       const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/documentverification/getDocumentverificationByUser/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}documentverification/getDocumentverificationByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -120,17 +945,17 @@ function Dashboard() {
   const getConsent = async (id) => {
     try {
       const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/consentform/getConsentformsByUser/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}consentform/getConsentformsByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      console.log(response.data.length);
+      // console.log(response.data.length);
       return response.data != null;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   };
@@ -138,7 +963,7 @@ function Dashboard() {
   const getEmergencycontact = async (id) => {
     try {
       const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/emergencycontact/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}emergencycontact/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -148,7 +973,7 @@ function Dashboard() {
       console.log(response.data.length);
       return response.data != null;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   };
@@ -156,17 +981,17 @@ function Dashboard() {
   const getInformation = async (id) => {
     try {
       const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/informationform/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}informationform/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      console.log(response.data.length);
+      // console.log(response.data.length);
       return response.data != null;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   };
@@ -195,56 +1020,56 @@ function Dashboard() {
       setNameClickBool(null);
     }
 
-    console.log("sortOrder", sortOrder);
+    // console.log("sortOrder", sortOrder);
   }, [nameClickBool]);
 
   let currentData = filteredData?.length
     ? filteredData
-        ?.slice(startIndexPagi, startIndexPagi + itemsPerPage)
-        .sort((a, b) => {
-          switch (sortOrder) {
-            case "asc":
-              return a?.email?.localeCompare(b.email);
-            case "date":
-              const dateA = new Date(a?.createdAt);
-              const dateB = new Date(b?.createdAt);
-              console.log("Invalid date format:", a.createdAt, b.createdAt);
-              if (isNaN(dateA) || isNaN(dateB)) {
-                console.log("Invalid date format:", a.createdAt, b.createdAt);
-                return 0;
-              }
+      ?.slice(startIndexPagi, startIndexPagi + itemsPerPage)
+      .sort((a, b) => {
+        switch (sortOrder) {
+          case "asc":
+            return a?.email?.localeCompare(b.email);
+          case "date":
+            const dateA = new Date(a?.createdAt);
+            const dateB = new Date(b?.createdAt);
+            // console.log("Invalid date format:", a.createdAt, b.createdAt);
+            if (isNaN(dateA) || isNaN(dateB)) {
+              // console.log("Invalid date format:", a.createdAt, b.createdAt);
+              return 0;
+            }
 
-              return dateA - dateB;
-            case "status":
-              return a?.status?.localeCompare(b?.status); // Assuming you want to sort by status alphabetically
-            case "desc":
-            default:
-              return b.email?.localeCompare(a?.email);
-          }
-        })
+            return dateA - dateB;
+          case "status":
+            return a?.status?.localeCompare(b?.status); // Assuming you want to sort by status alphabetically
+          case "desc":
+          default:
+            return b.email?.localeCompare(a?.email);
+        }
+      })
     : allUser
-        ?.slice(startIndexPagi, startIndexPagi + itemsPerPage)
-        .sort((a, b) => {
-          switch (sortOrder) {
-            case "asc":
-              return a?.email?.localeCompare(b.email);
-            case "date":
-              const dateA = new Date(a?.createdAt);
-              const dateB = new Date(b?.createdAt);
-              console.log("Invalid date format:", a.createdAt, b.createdAt);
-              if (isNaN(dateA) || isNaN(dateB)) {
-                console.log("Invalid date format:", a.createdAt, b.createdAt);
-                return 0;
-              }
+      ?.slice(startIndexPagi, startIndexPagi + itemsPerPage)
+      .sort((a, b) => {
+        switch (sortOrder) {
+          case "asc":
+            return a?.email?.localeCompare(b.email);
+          case "date":
+            const dateA = new Date(a?.createdAt);
+            const dateB = new Date(b?.createdAt);
+            // console.log("Invalid date format:", a.createdAt, b.createdAt);
+            if (isNaN(dateA) || isNaN(dateB)) {
+              // console.log("Invalid date format:", a.createdAt, b.createdAt);
+              return 0;
+            }
 
-              return dateA - dateB;
-            case "status":
-              return a?.status?.localeCompare(b?.status); // Assuming you want to sort by status alphabetically
-            case "desc":
-            default:
-              return b.email?.localeCompare(a?.email);
-          }
-        });
+            return dateA - dateB;
+          case "status":
+            return a?.status?.localeCompare(b?.status); // Assuming you want to sort by status alphabetically
+          case "desc":
+          default:
+            return b.email?.localeCompare(a?.email);
+        }
+      });
 
   const handleNextClick = () => {
     if (startIndexPagi + itemsPerPage < allUser?.length) {
@@ -264,16 +1089,17 @@ function Dashboard() {
   };
 
   const getUsers = async () => {
+
     try {
       const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/users`,
+        `${process.env.REACT_APP_BACKEND_URL}users`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      console.log(response.data);
+      // console.log(response.data);
       setAllUser(response.data);
     } catch (error) {
       console.log(error);
@@ -298,12 +1124,16 @@ function Dashboard() {
     return { date: formattedDate, time: formattedTime };
   };
 
+
+
+
   const changeStatus = (e, id) => {
+    // console.log(e.target.value)
     const status = e.target.value; // Get the selected status from the event
 
     axios
       .put(
-        `https://backend.riverketaminestudy.com/api/users/changeStatus`,
+        `${process.env.REACT_APP_BACKEND_URL}users/changeStatus`,
         {
           id: id,
           status: status,
@@ -317,7 +1147,10 @@ function Dashboard() {
       .then((response) => {
         // Assuming getUsers is a function to fetch users data, update it as needed
         getUsers();
+
+
         toast.success("Status updated successfully");
+
       })
       .catch((error) => {
         console.log(error);
@@ -350,6 +1183,9 @@ function Dashboard() {
               />
               <Label htmlFor="united-state">Existing</Label>
             </div>
+
+
+
           </div>
         </Modal.Body>
         <Modal.Footer>
@@ -360,345 +1196,688 @@ function Dashboard() {
       </Modal>
 
       <Sidebar />
-      <div class="p-10 sm:ml-64 bg-[#f7f7f7]">
-        <div className="flex items-center  gap-5">
-          <h1 className="text-4xl font-bold">{formtype}</h1>
-          <IoIosArrowDown
-            size={30}
-            onClick={() => setOpenModal(true)}
-            className="mt-2"
-          />
-        </div>
+      <div className="p-10 sm:ml-64 bg-[#f7f7f7]" >
 
-        <div className="mt-10 relative overflow-x-auto">
-          <div class="rounded-t-xl rounded-b-xl overflow-hidden">
-            {formtype === "Screening" && (
-              <>
-                <div className="overflow-x-auto">
-                  <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class="h-20 text-lg text-black bg-[#f0f1fa]">
-                      <tr>
-                        <th scope="col" class="px-6 py-3">
-                          Name
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Sent
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Received
-                        </th>
-                        {/* <th scope="col" class="px-6 py-3">
+        <div style={{ backgroundColor: "#FFFFFF", padding: 20, borderRadius: 10 }}>
+
+          <div className="flex items-center  gap-5" >
+            <h1 className="text-4xl font-bold">{formtype}</h1>
+            <IoIosArrowDown
+              size={30}
+              onClick={() => setOpenModal(true)}
+              className="mt-2"
+            />
+            {formtype === "Existing" && (
+              <div className="filters ms-auto">
+                <input
+                  type="text"
+                  placeholder="Filter by Name"
+                  value={filters.first_name}
+                  style={{
+                    width: 200,
+                    height: 50,
+                    borderRadius: 10,
+                    backgroundColor: "transparent",
+                    border: "1px solid gray",
+                    color: "#000",
+                    // textAlign: "center",
+                    paddingLeft: 10,
+                  }}
+                  onChange={(e) => handleFilterChange("first_name", e.target.value)}
+                />
+                {/* <input
+              type="text"
+              placeholder="Filter by Last Name"
+              value={filters.lname}
+              onChange={(e) => handleFilterChange("lname", e.target.value)}
+            /> */}
+                <select
+                  value={filters.type}
+                  style={{
+                    width: 100,
+                    height: 50,
+                    borderRadius: 10,
+                    backgroundColor: "transparent",
+                    border: "1px solid gray",
+                    color: "#000",
+                    // textAlign: "center",
+                    paddingLeft: 10,
+                  }}
+                  onChange={(e) => handleFilterChange("type", e.target.value)}
+                >
+                  <option value="">Type</option>
+                  <option value="New Participant">New Participant</option>
+                  <option value="Refill">Refill</option>
+                  <option value="Renewal">Renewal</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+                <select
+                  value={filters.status}
+                  style={{
+                    width: 100,
+                    height: 50,
+                    borderRadius: 10,
+                    backgroundColor: "transparent",
+                    border: "1px solid gray",
+                    color: "#000",
+                    // textAlign: "center",
+                    paddingLeft: 10,
+                  }}
+                  onChange={(e) => handleFilterChange("status", e.target.value)}
+                >
+                  <option value="">Status</option>
+                  <option value="inProgress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="payment Pending">Payment Pending</option>
+                  <option value="tracking late">Tracking late</option>
+                </select>
+
+
+              </div>
+            )}
+          </div>
+
+
+
+          <div className="mt-10 relative overflow-x-auto">
+            <div className="rounded-t-xl rounded-b-xl overflow-hidden">
+              {formtype === "Screening" && (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                      <thead className="h-20 text-lg text-black bg-[#f0f1fa]">
+                        <tr>
+                          <th scope="col" className="px-6 py-3">
+                            Name
+                          </th>
+                          <th scope="col" className="px-6 py-3">
+                            Sent
+                          </th>
+                          <th scope="col" className="px-6 py-3">
+                            Received
+                          </th>
+                          {/* <th scope="col" class="px-6 py-3">
                     Processed
                 </th> */}
-                        <th scope="col" class="px-6 py-3">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentRecords.map((item, index) => (
-                        <tr
-                          key={startIndex + index}
-                          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                        >
-                          <th
-                            scope="row"
-                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                          <th scope="col" className="px-6 py-3">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentRecords?.map((item, index) => (
+                          <tr
+                            key={startIndex + index}
+                            className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                           >
-                            <a
-                              href="#"
-                              onClick={() =>
-                                handleUserProfileClick(item.User.id)
-                              }
+                            <th
+                              scope="row"
+                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                             >
-                              {" "}
-                              {item.User.username}{" "}
-                            </a>
-                          </th>
-                          <td class="px-6 py-4">
-                            {parseDateTimeString(item.createdAt).date},{" "}
-                            {parseDateTimeString(item.createdAt)?.time}
-                          </td>
-                          <td class="px-6 py-4">
-                            {parseDateTimeString(item.createdAt).date},{" "}
-                            {parseDateTimeString(item.createdAt)?.time}
-                          </td>
+                              <a
+                                href="#"
+                                onClick={() =>
+                                  handleUserProfileClick(item?.User?.id)
+                                }
+                              >
+                                {" "}
+                                {item?.User?.username}{" "}
+                              </a>
+                            </th>
+                            <td className="px-6 py-4">
+                              {parseDateTimeString(item?.createdAt).date},{" "}
+                              {parseDateTimeString(item?.createdAt)?.time}
+                            </td>
+                            <td className="px-6 py-4">
+                              {parseDateTimeString(item?.createdAt).date},{" "}
+                              {parseDateTimeString(item?.createdAt)?.time}
+                            </td>
 
-                          <td class="px-6 py-4">{item.status}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                            <td className="px-6 py-4">{item?.status}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                <nav aria-label="Page navigation example" className="mt-5">
-                  <ul className="flex items-center -space-x-px h-8 text-sm">
-                    <li>
-                      <a
-                        href="#"
-                        className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${
-                          currentPage === 1 && "opacity-50 cursor-not-allowed"
-                        }`}
-                        onClick={() => handlePageChange(currentPage - 1)}
-                      >
-                        <span className="sr-only">Previous</span>
-                        <svg
-                          className="w-2.5 h-2.5 rtl:rotate-180"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 6 10"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M5 1 1 5l4 4"
-                          />
-                        </svg>
-                      </a>
-                    </li>
-                    {Array.from({ length: totalPages }, (_, index) => (
-                      <li key={index}>
+                  <nav aria-label="Page navigation example" className="mt-5">
+                    <ul className="flex items-center -space-x-px h-8 text-sm">
+                      <li>
                         <a
                           href="#"
-                          className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${
-                            currentPage === index + 1 &&
-                            "text-blue-600 border-blue-300 bg-blue-50"
-                          }`}
-                          onClick={() => handlePageChange(index + 1)}
+                          className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentPage === 1 && "opacity-50 cursor-not-allowed"
+                            }`}
+                          onClick={() => handlePageChange(currentPage - 1)}
                         >
-                          {index + 1}
-                        </a>
-                      </li>
-                    ))}
-                    <li>
-                      <a
-                        href="#"
-                        className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${
-                          currentPage === totalPages &&
-                          "opacity-50 cursor-not-allowed"
-                        }`}
-                        onClick={() => handlePageChange(currentPage + 1)}
-                      >
-                        <span className="sr-only">Next</span>
-                        <svg
-                          className="w-2.5 h-2.5 rtl:rotate-180"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 6 10"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="m1 9 4-4-4-4"
-                          />
-                        </svg>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
-              </>
-            )}
-
-            {formtype === "Existing" && (
-              <>
-                <div class="overflow-x-auto">
-                  <table class=" w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class="h-20 text-lg text-black bg-[#f0f1fa]">
-                      <tr>
-                        <th scope="col" class="px-6 py-3">
-                          Name
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Forms Filled
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Invoice Paid
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Invoice
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Call Scheduled
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Added to MDtoolbox
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Script
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Script Sent
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Tracking Available
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Type
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentRecords.map((record, index) => (
-                        <tr
-                          key={startIndex + index}
-                          className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                        >
-                          <th
-                            scope="row"
-                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                          <span className="sr-only">Previous</span>
+                          <svg
+                            className="w-2.5 h-2.5 rtl:rotate-180"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 6 10"
                           >
-                            {record.name}
-                          </th>
-                          <td className="px-6 py-4">
-                            <input
-                              type="checkbox"
-                              disabled
-                              checked={record.formsFilled}
+                            <path
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M5 1 1 5l4 4"
                             />
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="checkbox"
-                              disabled
-                              checked={record.invoicePaid}
-                            />
-                          </td>
-                          <td className="px-6 py-4">
-                            <select disabled value={record.invoice}>
-                              <option value="Option 1">Option 1</option>
-                              <option value="Option 2">Option 2</option>
-                              <option value="Option 3">Option 3</option>
-                            </select>
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="checkbox"
-                              disabled
-                              checked={record.callScheduled}
-                            />
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="checkbox"
-                              disabled
-                              checked={record.addedToMDtoolbox}
-                            />
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="checkbox"
-                              disabled
-                              checked={record.script}
-                            />
-                          </td>
-                          <td className="px-6 py-4">
-                            <select disabled value={record.scriptSent}>
-                              <option value="Option 1">Option 1</option>
-                              <option value="Option 2">Option 2</option>
-                              <option value="Option 3">Option 3</option>
-                            </select>
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="checkbox"
-                              disabled
-                              checked={record.trackingAvailable}
-                            />
-                          </td>
-                          <td className="px-6 py-4">
-                            <input type="text" disabled value={record.type} />
-                          </td>
-                          <td className="px-6 py-4">
-                            <input type="text" disabled value={record.status} />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <nav aria-label="Page navigation example" className="mt-5">
-                  <ul className="flex items-center -space-x-px h-8 text-sm">
-                    <li>
-                      <a
-                        href="#"
-                        className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${
-                          currentPage === 1 && "opacity-50 cursor-not-allowed"
-                        }`}
-                        onClick={() => handlePageChange(currentPage - 1)}
-                      >
-                        <span className="sr-only">Previous</span>
-                        <svg
-                          className="w-2.5 h-2.5 rtl:rotate-180"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 6 10"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M5 1 1 5l4 4"
-                          />
-                        </svg>
-                      </a>
-                    </li>
-                    {Array.from({ length: totalPages }, (_, index) => (
-                      <li key={index}>
-                        <a
-                          href="#"
-                          className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${
-                            currentPage === index + 1 &&
-                            "text-blue-600 border-blue-300 bg-blue-50"
-                          }`}
-                          onClick={() => handlePageChange(index + 1)}
-                        >
-                          {index + 1}
+                          </svg>
                         </a>
                       </li>
-                    ))}
-                    <li>
-                      <a
-                        href="#"
-                        className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${
-                          currentPage === totalPages &&
-                          "opacity-50 cursor-not-allowed"
-                        }`}
-                        onClick={() => handlePageChange(currentPage + 1)}
-                      >
-                        <span className="sr-only">Next</span>
-                        <svg
-                          className="w-2.5 h-2.5 rtl:rotate-180"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 6 10"
+                      {Array.from({ length: totalPages }, (_, index) => (
+                        <li key={index}>
+                          <a
+                            href="#"
+                            className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentPage === index + 1 &&
+                              "text-blue-600 border-blue-300 bg-blue-50"
+                              }`}
+                            onClick={() => handlePageChange(index + 1)}
+                          >
+                            {index + 1}
+                          </a>
+                        </li>
+                      ))}
+                      <li>
+                        <a
+                          href="#"
+                          className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentPage === totalPages &&
+                            "opacity-50 cursor-not-allowed"
+                            }`}
+                          onClick={() => handlePageChange(currentPage + 1)}
                         >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="m1 9 4-4-4-4"
-                          />
+                          <span className="sr-only">Next</span>
+                          <svg
+                            className="w-2.5 h-2.5 rtl:rotate-180"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 6 10"
+                          >
+                            <path
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="m1 9 4-4-4-4"
+                            />
+                          </svg>
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </>
+              )}
+
+
+
+              {formtype === "Existing" && (
+
+                <>
+
+
+
+                  <div className="overflow-x-auto">
+
+                    <table className=" w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+
+                      <thead className="h-20 text-lg text-black bg-[#f0f1fa]">
+                        <tr>
+                          {[
+                            "First Name", "Last Name", "Type", "Forms Sent", "Fill Forms",
+                            "Invoice Sent", "Accepted", "Invoice", "Invoice Paid", "Link to schedule",
+                            "Call Scheduled", "Date", "Added to MDtoolbox", "Script", "Script Sent",
+                            "Scrip Email", "Status", "Notes", "Doctor"
+                          ].map((header, index) => (
+                            <th key={index} scope="col" className="px-6 py-3">
+                              {header}
+                              <a style={{ marginLeft: "90%", marginTop: -25 }}
+
+
+                              // onClick={() => {
+                              //   if (index === currentIndex) {
+                              //     setCurrentIndex(-1);
+                              //     setNameClickBool(null);
+                              //   } else {
+                              //     setCurrentIndex(index);
+                              //     // setNameClickBool();
+                              //   }
+                              // }}
+                              >
+
+
+                                {/* {index === currentIndex ? (
+                                    <ArrowUpOutlined />
+                                  ) : (
+                                    <ArrowDownOutlined />
+                                  )} */}
+                              </a>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      {/* Loading Spinner */}
+                      {isFetchingLoading && currentNewUserRecords.length === 0 && (
+                        <tbody>
+                          <tr>
+                            <td colSpan={9} className="text-center py-10">
+                              <div className="flex items-center justify-center space-x-4">
+                                <div className="w-10 h-10 border-4 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
+                                <span className="text-lg font-semibold text-gray-700">Loading...</span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      )}
+
+
+
+                      {/* {alert(JSON.stringify(data))} */}
+                      {currentNewUserRecords.length > 0 ? <tbody>
+                        {/* {console.log(JSON.stringify(currentRecords), 'see')} */}
+                        {/* {currentNewUserRecords?.map((item, index) => ( */}
+
+                        {currentNewUserRecords?.map((item, index) => (
+
+                          <tr
+                            key={item?.id}
+                            className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                          >
+                            <th
+                              scope="row"
+                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                            >
+                              <input
+                                readOnly={true}
+                                disabled={true}
+                                type="text"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5"
+                                value={item?.first_name || ""}
+                              // onChange={(e) =>
+                              //   handleUpdateUserField(index, "fname", e.target.value)
+                              // }
+                              />
+                            </th>
+                            <th
+                              scope="row"
+                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                            >
+                              <input
+                                readOnly={true}
+                                disabled={true}
+                                type="text"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+                                value={item?.last_name || ""}
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "lname", e.target.value)
+                                }
+                              />
+                            </th>
+                            <td className="px-6 py-4">
+                              <select
+                                value={item?.type || ""}
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "type", e.target.value)
+                                }
+                              >
+                                <option value="">Select Type</option>
+                                <option value="New Participant">New Participant</option>
+                                <option value="Refill">Refill</option>
+                                <option value="Renewal">Renewal</option>
+                                <option value="Rejected">Rejected</option>
+                              </select>
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "formSent", e.target.checked)
+                                }
+                                checked={item?.formSent === true}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "formFill", e.target.checked)
+                                }
+                                checked={item?.formFill || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "invoiceSent", e.target.checked)
+                                }
+                                checked={item?.invoiceSent || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "accepted", e.target.checked)
+                                }
+                                checked={item?.accepted || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "invoice", e.target.checked)
+                                }
+                                checked={item?.invoice || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "invoicePaid", e.target.checked)
+                                }
+                                checked={item?.invoicePaid || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "linkToSchedule", e.target.checked)
+                                }
+                                checked={item?.linkToSchedule || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "callScheduled", e.target.checked)
+                                }
+                                checked={item?.callScheduled || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              {/* <input
+                                type="date"
+                                disabled={true}
+                                // onChange={(e) =>
+                                //   handleUpdateUserField(index, "date", formatDate(e.target.value))
+                                // }
+                                // value={item?.date || ""}
+                                value= {formatDate(item?.updatedAt) || ""}
+                              />   */}
+                              <input
+                                type="datetime-local"
+                                disabled={true}
+                                value={item?.updatedAt ? formatDateTime(item.updatedAt) : ""} // Format the date and time correctly
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "addedToMdToolBox", e.target.checked)
+                                }
+                                checked={item?.addedToMdToolBox || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="text"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "script", e.target.value)
+                                }
+                                value={item?.script || ""}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "scriptSent", e.target.checked)
+                                }
+                                checked={item?.scriptSent || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "scriptEmail", e.target.checked)
+                                }
+                                checked={item?.scriptEmail || false}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+
+                              <select
+                                value={item?.status || ""}
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "status", e.target.value)
+                                }
+                              >
+                                <option value="">Select Status</option>
+                                <option value="inProgress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="payment Pending">Payment Pending</option>
+                                <option value="tracking late">Tracking late</option>
+                              </select>
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="text"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "notes", e.target.value)
+                                }
+                                value={item?.notes || ""}
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="text"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "doctor", e.target.value)
+                                }
+                                value={item?.doctor || ""}
+                              />
+                            </td>
+                            <th>
+
+
+
+
+                              <button
+                                onClick={() => { handleDeleteUser(index) }}
+                                // disabled={loadingIndexes===index}
+                                // disabled={
+                                //   newUser.length === 0 ||
+                                //   newUser.some(
+                                //     (item) =>
+                                //       !item.fname ||
+                                //       !item.lname ||
+                                //       !item.type
+                                //   ) ||
+                                //   isLoading
+                                // }
+                                className={
+                                  `text-white font-bold py-2 px-6 rounded-lg bg-red-500 hover:bg-red-600 ${loadingIndexes === index ? "animate-pulse" : ""
+                                  }`
+                                }
+                              >
+                                {loadingIndexes === index ? (
+                                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                ) : (
+                                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                )}
+                              </button>
+
+                            </th>
+                          </tr>
+                        ))}
+
+
+
+                      </tbody> :
+
+                        !isFetchingLoading && <tbody className='text-center'>
+                          <tr>
+                            <td colSpan="9" className="px-6 py-4 text-center text-gray-500 mt-5">
+                              No data found</td>
+                          </tr>
+                        </tbody>}
+
+
+
+                      <div className="mx-6 mt-2">
+
+
+                        {/* <button
+                        onClick={() => setNewUser(newUser.slice(0, -1))}
+                        className="text-white font-bold ms-4 py-4 px-4 rounded-lg bg-red-500 hover:bg-red-600"
+                      >
+                        -
+                      </button> */}
+                        {/* <br /> */}
+                        {/* adding new row */}
+                        {/* <button id="addRow"
+                        // onClick={() => setNewUser([...newUser, {}])}
+                        // onClick={()=>setCurrentNewUserRecords([...currentNewUserRecords, {}])}
+                        onClick={() => {
+                          // Add a new record (empty object) to the list
+                          const updatedCurrentNewUserRecords = [...currentNewUserRecords, {}];
+                          
+                        
+                          if (currentNewUserPage === totalNewUserDataPages) {
+                            const totalItems = updatedCurrentNewUserRecords.length;
+                            if (totalItems % 5 === 0) {
+                              // If the page is full, move to the next page
+                              handleNewUserPageChange(currentNewUserPage + 1);
+                              setCurrentNewUserRecords(updatedCurrentNewUserRecords);
+
+                            }
+                            else{
+                              setCurrentNewUserRecords(updatedCurrentNewUserRecords);
+                            }
+
+                          } else {
+                            // If not on the last page, move to the last page after adding the new record
+                            handleNewUserPageChange(totalNewUserDataPages);
+                            setCurrentNewUserRecords(updatedCurrentNewUserRecords);
+                            
+                          }
+                        }}
+                        
+                        className="text-white font-bold ms-4 py-2 px-2 rounded-lg bg-green-500 hover:bg-green-600"
+                      >
+                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
-              </>
-            )}
+                      </button> */}
+
+
+
+                        {!isFetchingLoading && (
+                          <button
+                            onClick={handleSaveButton}
+                            disabled={isLoading}
+                            className={`text-white font-bold py-2 px-6 rounded-lg bg-green-500 hover:bg-green-600 ${isLoading ? "animate-pulse" : ""}`}
+                          >
+                            {isLoading ? (
+                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            ) : (
+                              <span className="flex ">
+                                <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Save
+                              </span>
+                            )}
+                          </button>
+                        )}
+
+
+                      </div>
+                    </table>
+                  </div>
+
+
+
+                  <nav aria-label="Page navigation example" className="mt-5">
+                    <ul className="flex items-center -space-x-px h-8 text-sm">
+                      {/* Previous Button */}
+                      <li>
+                        <a
+                          href="#"
+                          className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentNewUserPage === 1 && "opacity-50 cursor-not-allowed"}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentNewUserPage > 1) {
+                              handleNewUserPageChange(currentNewUserPage - 1);
+                            }
+                          }}
+                          disabled={currentNewUserPage === 1}
+                        >
+                          <span className="sr-only">Previous</span>
+                          <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 1 1 5l4 4" />
+                          </svg>
+                        </a>
+                      </li>
+
+                      {/* Page Number Buttons */}
+                      {Array.from({ length: totalNewUserDataPages }, (_, index) => (
+                        <li key={index}>
+                          <button
+                            className={`px-3 py-2 rounded-lg ${currentNewUserPage === index + 1 ? "bg-green-600 text-white" : "bg-gray-200 hover:bg-blue-400"}`}
+                            onClick={() => handleNewUserPageChange(index + 1)}
+                          >
+                            {index + 1}
+                          </button>
+                        </li>
+                      ))}
+
+                      {/* Next Button */}
+                      <li>
+                        <a
+                          href="#"
+                          className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentNewUserPage === totalNewUserDataPages && "opacity-50 cursor-not-allowed"}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentNewUserPage < totalNewUserDataPages) {
+                              handleNewUserPageChange(currentNewUserPage + 1);
+                            }
+                          }}
+                          disabled={currentNewUserPage === totalNewUserDataPages}
+                        >
+                          <span className="sr-only">Next</span>
+                          <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
+                          </svg>
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </>
+              )}
+
+
+            </div>
+
           </div>
         </div>
 
@@ -754,15 +1933,16 @@ function Dashboard() {
 
         <div className="mt-10 relative overflow-x-auto">
           <div className="overflow-x-auto">
-            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-              <thead class="h-20 text-lg text-black bg-[#f0f1fa]">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead className="h-20 text-lg text-black bg-[#f0f1fa]">
                 <tr>
                   {["Name", "Email", "Registered At", "Status"].map(
                     (i, ind) => {
                       return (
                         <th
+                          key={ind}
                           scope="col"
-                          class="px-6 py-3"
+                          className="px-6 py-3"
                           style={{
                             cursor: "pointer",
                           }}
@@ -777,13 +1957,13 @@ function Dashboard() {
                           }}
                         >
                           <p>{i}</p>
-                          <div style={{ marginLeft: "90%", marginTop: -25 }}>
+                          <a style={{ marginLeft: "90%", marginTop: -25 }}>
                             {ind === currentIndex ? (
                               <ArrowUpOutlined />
                             ) : (
                               <ArrowDownOutlined />
                             )}
-                          </div>
+                          </a>
                         </th>
                       );
                     }
@@ -797,7 +1977,7 @@ function Dashboard() {
                     return (
                       <tr
                         key={startIndex + index}
-                        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                       >
                         <th
                           style={{ cursor: "pointer" }}
@@ -806,17 +1986,17 @@ function Dashboard() {
                             localStorage.setItem("Email@@", item.email);
                           }}
                           scope="row"
-                          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         >
                           {item.username}
                         </th>
-                        <td class="px-6 py-4">{item.email}</td>
-                        <td class="px-6 py-4">
+                        <td className="px-6 py-4">{item.email}</td>
+                        <td className="px-6 py-4">
                           {parseDateTimeString(item.createdAt).date}
                           {parseDateTimeString(item.createdAt)?.time}
                         </td>
 
-                        <td class="px-6 py-4">
+                        <td className="px-6 py-4">
                           <select
                             name="status"
                             value={item.status}
@@ -835,7 +2015,7 @@ function Dashboard() {
             </table>
           </div>
         </div>
-      </div>
+      </div >
 
       <div
         style={{
@@ -880,3 +2060,10 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+
+
+/**
+ * 
+ 
+ */

@@ -38,6 +38,7 @@ import Help from "./pages/admin/Help";
 import ScreeningQuestionstable from "./pages/admin/Questionstable";
 import TrackingLink from "./pages/TrackingLink";
 
+import AdminAccount from '../src/components/AdminAccount';
 function App() {
   return (
     <div className="App">
@@ -73,10 +74,19 @@ function App() {
                   <Route path="/filter/:type" element={<Dashboard />} />
                   <Route path="/userprofile/:id" element={<Userprofile />} />
                   <Route path="/inbox" element={<Inbox />} />
+                  <Route path="/account" element={<AdminAccount />} />
+
+
+                  {/* added */}
+
+
+
                 </Routes>
               </AuthGuard>
             }
           />
+
+
           <Route path="/account" element={<Account />} />
           <Route path="/info" element={<Info />} />
           <Route path="/chatting" element={<Chatting />} />

@@ -66,7 +66,7 @@ function Screeningformquestionnaire() {
               await Promise.all(
                 values.questions.map(async (ques) => {
                   const response = await axios.post(
-                    `https://backend.riverketaminestudy.com/api/screeningform/create`,
+                    `${process.env.REACT_APP_BACKEND_URL}screeningform/create`,
                     {
                       type: type,
                       question: ques.title,

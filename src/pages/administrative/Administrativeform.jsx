@@ -34,7 +34,7 @@ function Administrativeform() {
   const getDocumentverification = (id) => {
     axios
       .get(
-        `https://backend.riverketaminestudy.com/api/documentverification/getDocumentverificationByUser/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}documentverification/getDocumentverificationByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -54,7 +54,7 @@ function Administrativeform() {
     //consent
     axios
       .get(
-        `https://backend.riverketaminestudy.com/api/consentform/getConsentformsByUser/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}consentform/getConsentformsByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -73,14 +73,11 @@ function Administrativeform() {
   const getEmergencycontact = (id) => {
     //emergencycontact
     axios
-      .get(
-        `https://backend.riverketaminestudy.com/api/emergencycontact/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      )
+      .get(`${process.env.REACT_APP_BACKEND_URL}emergencycontact/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
       .then((response) => {
         setEmergencycontact(response.data);
         console.log("Emergency contact ", response.data);
@@ -93,7 +90,7 @@ function Administrativeform() {
   const getInformation = (id) => {
     //informationform
     axios
-      .get(`https://backend.riverketaminestudy.com/api/informationform/${id}`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}informationform/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

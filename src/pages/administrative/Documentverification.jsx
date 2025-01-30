@@ -168,7 +168,7 @@ function Documentverification() {
       // return;
       try {
         const response = await axios.post(
-          `https://backend.riverketaminestudy.com/api/documentverification/create`,
+          `${process.env.REACT_APP_BACKEND_URL}documentverification/create`,
           payload,
           {
             headers: {

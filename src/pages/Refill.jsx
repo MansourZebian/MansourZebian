@@ -29,7 +29,7 @@ function Refill() {
 
   const getQuestions = async () => {
     await axios
-      .get(`https://backend.riverketaminestudy.com/api/refill`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}refill`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -55,7 +55,7 @@ function Refill() {
       await Promise.all(
         data.map(async (ques) => {
           const response = await axios.post(
-            `https://backend.riverketaminestudy.com/api/refill/userrefill`,
+            `${process.env.REACT_APP_BACKEND_URL}refill/userrefill`,
             {
               uid: user.id,
               r_id: ques.id,

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import Navbar1 from '../components/Navbar1';
-import Bottomnav from '../components/Bottomnav';
-import Checkcards from '../components/Checkcards';
-import Sidebar2 from '../components/Sidebar2';
+import Navbar1 from './Navbar1';
+import Bottomnav from './Bottomnav';
+import Checkcards from './Checkcards';
+import Sidebar2 from './Sidebar2';
+import Sidebar from './Sidebar';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
+import { Navbar } from 'flowbite-react';
 
 function Account() {
 
@@ -43,9 +45,11 @@ function Account() {
 
   return (
     <>
-    <Navbar1 />
+    {/* <Navbar1 /> */}
+    <Navbar/>
     <div className='max-[696px]:invisible'>
-    <Sidebar2/>
+    {/* <Sidebar2/> */}
+    <Sidebar/>
     </div>
     
 

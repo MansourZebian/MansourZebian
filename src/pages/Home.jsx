@@ -52,14 +52,11 @@ function Home() {
 
   const getNewScript = (id) => {
     axios
-      .get(
-        `https://backend.riverketaminestudy.com/api/prescription/get/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      )
+      .get(`${process.env.REACT_APP_BACKEND_URL}prescription/get/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
       .then((response) => {
         setNewScriptData(response.data);
         console.log("newScript", response.data);
@@ -73,7 +70,7 @@ function Home() {
   const getScreeningData = async (id) => {
     try {
       const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/screeningformanswer/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -115,7 +112,7 @@ function Home() {
   const getScores = async () => {
     try {
       const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/score/${user?.id}`,
+        `${process.env.REACT_APP_BACKEND_URL}score/${user?.id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -132,7 +129,7 @@ function Home() {
   const getDocumentverification = (id) => {
     axios
       .get(
-        `https://backend.riverketaminestudy.com/api/documentverification/getDocumentverificationByUser/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}documentverification/getDocumentverificationByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -152,7 +149,7 @@ function Home() {
     //consent
     axios
       .get(
-        `https://backend.riverketaminestudy.com/api/consentform/getConsentformsByUser/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}consentform/getConsentformsByUser/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -171,14 +168,11 @@ function Home() {
   const getEmergencycontact = (id) => {
     //emergencycontact
     axios
-      .get(
-        `https://backend.riverketaminestudy.com/api/emergencycontact/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      )
+      .get(`${process.env.REACT_APP_BACKEND_URL}emergencycontact/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
       .then((response) => {
         setEmergencycontact(response.data);
         console.log("Emergency contact ", response.data);
@@ -191,7 +185,7 @@ function Home() {
   const getInformation = (id) => {
     //informationform
     axios
-      .get(`https://backend.riverketaminestudy.com/api/informationform/${id}`, {
+      .get(`${process.env.REACT_APP_BACKEND_URL}informationform/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -211,7 +205,7 @@ function Home() {
   const getuser = async (id) => {
     try {
       const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/users/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}users/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -227,7 +221,7 @@ function Home() {
   const getRefill = async (id) => {
     try {
       const response = await axios.get(
-        `https://backend.riverketaminestudy.com/api/refill/answers/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}refill/answers/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -303,16 +297,13 @@ function Home() {
             is_gad7 &&
             is_pcl5 &&
             is_entryquestionaire &&
-            // information !== null &&
-            // consent !== null &&
-            // emergencycontact !== null &&
-            // documentverification !== null &&
+            information !== null &&
+            consent !== null &&
+            emergencycontact !== null &&
+            documentverification !== null &&
             allowRefill &&
             user.status === "approved"
-              ? `Thank you for filling out the forms.
-              Our team will get back to you
-              shortly. You can schedule a free
-              consultation call at any moment.` //`Refills are Available for ${refill_length}/3 times`
+              ? `Done, Please schedule a tele-health visit here: https://telehealthvisit.timetap.com` //`Refills are Available for ${refill_length}/3 times`
               : user.status !== "approved"
               ? phl9Sc[0]?.score > 9 && pcl9Sc[0]?.score > 30
                 ? "Based on your answers, you might be a good candidate for the RIVER Ketamine Study. Please fill out the administrative forms."
@@ -327,14 +318,14 @@ function Home() {
               : "Please fill out the forms below to move to the next step"
           }
           trackingLink={newScriptData[newScriptData?.length - 1]?.tracking_id}
-          // status={
-          //   information !== null &&
-          //   consent !== null &&
-          //   emergencycontact !== null &&
-          //   documentverification !== null
-          //     ? "Complete"
-          //     : "Incomplete"
-          // }
+          status={
+            information !== null &&
+            consent !== null &&
+            emergencycontact !== null &&
+            documentverification !== null
+              ? "Complete"
+              : "Incomplete"
+          }
         />
 
         <a
@@ -378,12 +369,7 @@ function Home() {
               : "/administrative"
           }
         >
-           <Card1
-            title={"Administrative Forms"}
-            img={"writeicon.png"}
-            
-          />
-          {/* <Card1
+          <Card1
             title={"Administrative Forms"}
             img={"writeicon.png"}
             disabled={
@@ -396,7 +382,7 @@ function Home() {
                 ? true
                 : false
             }
-          /> */}
+          />
         </a>
         <a
           href={
@@ -447,9 +433,9 @@ function Home() {
             consent !== null &&
             emergencycontact !== null &&
             documentverification !== null
-            ? "https://calendly.com/river-ketamine-program/tele-health-call"
-            : "https://calendly.com/river-ketamine-program/free-ketamine-consultation"
-        }
+              ? "https://telehealthvisit.timetap.com"
+              : "https://ketamine-consultation.timetap.com/"
+          }
         >
           <Card1
             title={

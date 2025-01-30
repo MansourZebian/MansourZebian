@@ -10,8 +10,10 @@ function Signup() {
   const [otpText, setOtpText] = useState(null);
   const [otpIs, setOtp] = useState(null);
   const [values, setValues] = useState({
-    email: "",
+    first_name:"",
+    last_name:"",
     username: "",
+    email: "",
     password: "",
   });
 
@@ -23,10 +25,17 @@ function Signup() {
     console.log("otpText", otpText, otpIs);
     if (otpIs !== otpText) return alert("OTP not match! Please try again");
     await axios
-      .post(`https://backend.riverketaminestudy.com/api/auth/register`, {
-        email: values.email,
-        username: values.email, // Assuming username is a separate field
-        password: values.password,
+      .post(`${process.env.REACT_APP_BACKEND_URL}auth/register`, {
+
+        first_name:values.first_name,
+        last_name:values.last_name,
+        email:values.email,
+        password:values.password,
+        username:values.first_name+values.last_name
+
+        // email: values.email,
+        // username: values.email, // Assuming username is a separate field
+        // password: values.password,
       })
       .then((res) => {
         toast.success(res.data.msg);
@@ -50,7 +59,7 @@ function Signup() {
 
   const sendOtp = async (values) => {
     await axios
-      .post(`https://backend.riverketaminestudy.com/api/auth/otp`, {
+      .post(`${process.env.REACT_APP_BACKEND_URL}auth/otp`, {
         email: values.email,
       })
       .then((res) => {
@@ -109,8 +118,10 @@ function Signup() {
           </div>
         ) : (
           <Formik
-            initialValues={{ email: "", password: "", confirmPassword: "" }}
+            initialValues={{ first_name:"", last_name:"", email: "", password: "", confirmPassword: "", }}
             validationSchema={Yup.object({
+              first_name: Yup.string().required(),
+              last_name: Yup.string().required(),
               email: Yup.string().email().required(),
               password: Yup.string().required(),
               confirmPassword: Yup.string()
@@ -122,8 +133,9 @@ function Signup() {
 
               // await onSubmitFunc(values, resetForm);
               setValues({
+                first_name: values.first_name,
+                last_name: values.last_name,
                 email: values.email,
-                username: values.email,
                 password: values.password,
               });
               sendOtp(values);
@@ -132,6 +144,32 @@ function Signup() {
             }}
           >
             <Form className="pt-8">
+              <div className="relative  mb-4 w-[350px]">
+                <Field
+                  type="text"
+                  name="first_name"
+                  className="h-16 block w-full p-4 ps-5 text-sm text-gray-900 border rounded-full bg-[#f2f2f2] focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="First Name"
+                />
+                <div className="text-white absolute end-2.5 bottom-2.5  focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                  <img src="profileicon.png" alt="" />
+                </div>
+              </div>
+              
+
+              <div className="relative  mb-4 w-[350px]">
+                <Field
+                  type="text"
+                  name="last_name"
+                  className="h-16 block w-full p-4 ps-5 text-sm text-gray-900 border rounded-full bg-[#f2f2f2] focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="Last Name"
+                />
+                <div className="text-white absolute end-2.5 bottom-2.5  focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                  <img src="profileicon.png" alt="" />
+                </div>
+              </div>
+              
+            
               <div className="relative  mb-4 w-[350px]">
                 <Field
                   type="email"
@@ -178,14 +216,14 @@ function Signup() {
                 className="text-red-500"
               />
 
-              <div className="relative  w-[350px]">
+              <div class="relative  w-[350px]">
                 <Field
                   type={showPassword ? "text" : "password"}
                   name="confirmPassword"
-                  className="h-16 block w-full p-4 ps-5 text-sm text-gray-900 border  rounded-full bg-[#f2f2f2] focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  class="h-16 block w-full p-4 ps-5 text-sm text-gray-900 border  rounded-full bg-[#f2f2f2] focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Confirm Password"
                 />
-                <div className="text-white absolute end-2.5 bottom-2.5  focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <div class="text-white absolute end-2.5 bottom-2.5  focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                   {showPassword ? (
                     <FaRegEye
                       className="text-[#c5c5c5]"
