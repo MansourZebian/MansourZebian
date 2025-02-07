@@ -41,7 +41,7 @@ function Consentform() {
       return
     }
 
-
+    
     setIsDisabled(true);
     // Get the signature data from the SignatureCanvas component
     const signatureData = signatureRef.current.toDataURL();

@@ -51,12 +51,14 @@ function Screeningform() {
         <Sidebar2 />
       </div>
 
-      {screening.filter((item) => item.Screeningform.type === "phq9" 
-      && item.Screeningform.type === "pcl5" &&
-      
-      item.Screeningform.type === "gad7"&& item.Screeningform.type === "entry questionaire"
-      ).length > 0&&
-      
+      {screening.filter((item) =>
+       item.Screeningform.type === "phq9").length > 0 &&
+       screening.filter((item) =>
+       item.Screeningform.type === "pcl5").length > 0 &&
+       screening.filter((item) =>
+       item.Screeningform.type === "gad7").length > 0 &&
+       screening.filter((item) =>
+       item.Screeningform.type === "entry questionaire").length > 0 &&
 
         <div className="flex pb-10 flex-col items-center justify-center text-center px-5 min-[696px]:px-40 lg:px-60 xl:px-80 min-[696px]:ml-40 max-[696px]:pb-10 text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">
           <p>
