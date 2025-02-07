@@ -35,7 +35,7 @@ function Navbar1() {
           },
         })
         .then((response) => {
-          console.log(response.data.count);
+          // console.log(response.data.count);
           setunreadmsg(response.data.count);
         })
         .catch((error) => {

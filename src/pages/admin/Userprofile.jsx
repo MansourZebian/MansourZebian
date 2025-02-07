@@ -16,7 +16,7 @@ import SearchSVG from "../../assets/svgs/search.svg";
 import { v4 as uuidv4 } from "uuid";
 
 function Userprofile() {
-  const [status, setStatus] = useState("accepted");
+  const [status, setStatus] = useState('Loading..');
   const [openModal, setOpenModal] = useState(false);
   const [imagesDocs, setImagesDocs] = useState(false);
 
@@ -108,7 +108,7 @@ function Userprofile() {
           },
         }
       );
-      console.log("getScreeningData", response.data); // Log the data received from the backend
+      // console.log("getScreeningData", response.data); // Log the data received from the backend
       // setScreening(response.data); // Set the data to state if needed
       const getEMail = localStorage.getItem("Email@@");
       await axios.post(
@@ -140,7 +140,7 @@ function Userprofile() {
           },
         }
       );
-      console.log("getScreeningData", response.data); // Log the data received from the backend
+      // console.log("getScreeningData", response.data); // Log the data received from the backend
       // setScreening(response.data); // Set the data to state if needed
       getNewScript();
     } catch (error) {
@@ -184,7 +184,7 @@ function Userprofile() {
           },
         }
       );
-      console.log("score data.............>", response);
+      // console.log("score data.............>", response);
       setScores(response.data); // Set the data to state if needed
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
@@ -212,9 +212,9 @@ function Userprofile() {
         return acc;
       }, {});
       setRefillGroup(groupedRefill);
-      console.log("refill", groupedRefill);
+      // console.log("refill", groupedRefill);
 
-      console.log("refil is", response?.data);
+      // console.log("refil is", response?.data);
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
     }
@@ -230,7 +230,7 @@ function Userprofile() {
           },
         }
       );
-      console.log("getScreeningData", response.data); // Log the data received from the backend
+      // console.log("getScreeningData", response.data); // Log the data received from the backend
       setScreening(response.data); // Set the data to state if needed
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
@@ -249,7 +249,7 @@ function Userprofile() {
       )
       .then((response) => {
         setDocumentverification(response.data);
-        console.log("documentverification........", response.data);
+        // console.log("documentverification........", response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -269,7 +269,7 @@ function Userprofile() {
       )
       .then((response) => {
         setConsent(response.data);
-        console.log("getConsent........", response.data);
+        // console.log("getConsent........", response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -286,7 +286,7 @@ function Userprofile() {
       })
       .then((response) => {
         setEmergencycontact(response.data);
-        console.log("getEmergencycontact", response.data);
+        // console.log("getEmergencycontact", response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -304,7 +304,7 @@ function Userprofile() {
       .then((response) => {
         setInformation(response?.data);
         setNotes(response?.data?.notes);
-        console.log("response?.data.........", response);
+        // console.log("response?.data.........", response);
       })
       .catch((error) => {
         console.log(error);
@@ -320,7 +320,7 @@ function Userprofile() {
       })
       .then((response) => {
         setData(response.data);
-        console.log("record data", response.data);
+        // console.log("record data", response.data);
         setStatus(response.data.status);
       })
       .catch((error) => {
@@ -337,7 +337,7 @@ function Userprofile() {
       })
       .then((response) => {
         setNewScriptData(response.data);
-        console.log("newScript", response.data);
+        // console.log("newScript", response.data);
         // setStatus(response.data.status);
       })
       .catch((error) => {
@@ -393,7 +393,7 @@ function Userprofile() {
         }
       )
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
         setOpenModal(false);
         getUserRecord();
 
@@ -493,7 +493,7 @@ function Userprofile() {
       })
       .then((response) => {
         setImagesDocs(response.data);
-        console.log("Document verification Images", response?.data);
+        // console.log("Document verification Images", response?.data);
       })
       .catch((error) => {
         console.log(error);
@@ -613,7 +613,7 @@ function Userprofile() {
                   form?.Screeningform?.type
                     ?.replace(/[0-9]/g, "")
                     ?.toUpperCase() ===
-                    clinicalFormModalType?.split("-")[0] && (
+                  clinicalFormModalType?.split("-")[0] && (
                     <div className="flex items-center gap-2" key={index}>
                       {/* <Label className="">
                       {formatDate(form.createdAt)} - {form.Screeningform.type} 
@@ -666,7 +666,7 @@ function Userprofile() {
             {scores.map(
               (item, index) =>
                 item?.key?.replace(/[0-9]/g, "")?.toUpperCase() ===
-                  clinicalFormModalType?.split("-")[0] &&
+                clinicalFormModalType?.split("-")[0] &&
                 item?.uid == id &&
                 item?.score
             )}
@@ -966,7 +966,7 @@ function Userprofile() {
           />
         </button>
       </div> */}
-      <div class="p-10 sm:ml-64 bg-[#f7f7f7]">
+      <div className="p-10 sm:ml-64 bg-[#f7f7f7]">
         <div className="flex flex-col sm:flex-row justify-between">
           <div className="flex items-center gap-5">
             <img
@@ -987,10 +987,10 @@ function Userprofile() {
           </div>
 
           {/* <div className="text-left">
-            <h2 class="mb-2 text-md font-semibold text-gray-900 ">
+            <h2 className="mb-2 text-md font-semibold text-gray-900 ">
               Contact user:{" "}
             </h2>
-            <ul class="max-w-md  list-disc list-inside ">
+            <ul className="max-w-md  list-disc list-inside ">
               <li>
                 <a href={`tel:${information?.mobile}`}>Call</a>
               </li>
@@ -1083,36 +1083,36 @@ function Userprofile() {
               </p>
             </div> */}
             <div className="mt-10 relative overflow-x-auto">
-              <div class="rounded-t-xl rounded-b-xl overflow-x-auto">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                  <thead class="h-20 text-lg text-[#6984FB] bg-white border-b">
+              <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                  <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
                     <tr>
-                      <th scope="col" class="px-6 py-4">
+                      <th scope="col" className="px-6 py-4">
                         Date
                       </th>
-                      <th scope="col" class="px-6 py-4">
+                      <th scope="col" className="px-6 py-4">
                         PHQ-9
                       </th>
-                      <th scope="col" class="px-6 py-4">
+                      <th scope="col" className="px-6 py-4">
                         GAD-7
                       </th>
-                      <th scope="col" class="px-6 py-4">
+                      <th scope="col" className="px-6 py-4">
                         PCL-5
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th
                         scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                       >
                         {scores[0] && formatDate(scores[0]?.createdAt)}
                       </th>
                       {scores?.map(
                         (item, index) =>
                           item?.uid == id && (
-                            <td class="px-6 py-4">{item.score}</td>
+                            <td key={index} className="px-6 py-4">{item.score}</td>
                           )
                       )}
                     </tr>
@@ -1126,90 +1126,90 @@ function Userprofile() {
           <div className="mb-10">
             <h1 className="text-2xl font-bold text-left">Questionnaires</h1>
             <div className="mt-10 relative overflow-x-auto">
-              <div class="rounded-t-xl rounded-b-xl ">
+              <div className="rounded-t-xl rounded-b-xl ">
                 <div className="overflow-x-auto">
-                  <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class="h-20 text-lg text-black bg-[#f0f1fa] ">
+                  <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead className="h-20 text-lg text-black bg-[#f0f1fa] ">
                       <tr>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" className="px-6 py-3">
                           Document
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" className="px-6 py-3">
                           Sent
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" className="px-6 py-3">
                           Received
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" className="px-6 py-3">
                           Status
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                      <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <th
                           scope="row"
-                          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         >
                           Entry Questionnaire
                         </th>
 
-                        <td class="px-6 py-4">
+                        <td className="px-6 py-4">
                           {isTypeExists(screening, "entry questionaire")
                             ? formatDate(
-                                screening.filter(
-                                  (form) =>
-                                    form.Screeningform.type ===
-                                    "entry questionaire"
-                                )[0].createdAt
-                              )
+                              screening.filter(
+                                (form) =>
+                                  form?.Screeningform?.type ===
+                                  "entry questionaire"
+                              )[0]?.createdAt
+                            )
                             : "No Submission"}
                         </td>
-                        <td class="px-6 py-4">
+                        <td className="px-6 py-4">
                           {isTypeExists(screening, "entry questionaire")
                             ? formatDate(
-                                screening.filter(
-                                  (form) =>
-                                    form.Screeningform.type ===
-                                    "entry questionaire"
-                                )[0].createdAt
-                              )
+                              screening.filter(
+                                (form) =>
+                                  form?.Screeningform?.type ===
+                                  "entry questionaire"
+                              )[0]?.createdAt
+                            )
                             : "No Submission"}
                         </td>
-                        <td class="px-6 py-4">
+                        <td className="px-6 py-4">
                           {isTypeExists(screening, "entry questionaire")
                             ? "Processed"
                             : "Pending"}
                         </td>
                       </tr>
-                      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                      <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <th
                           scope="row"
-                          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         >
                           Refill Request
                         </th>
                         {Object.values(refillGroup)?.length ? (
-                          Object.values(refillGroup)?.map((item) => (
-                            <>
-                              <td class="px-6 py-4">
+                          Object.values(refillGroup)?.map((item, index) => (
+                            <React.Fragment key={index}>
+                              <td className="px-6 py-4">
                                 {formatDate(item[0]?.createdAt)}
                               </td>
-                              <td class="px-6 py-4">
+                              <td className="px-6 py-4">
                                 {formatDate(item[0]?.updatedAt)}
                               </td>
-                              <td class="px-6 py-4">
+                              <td className="px-6 py-4">
                                 {Object.values(refillGroup)?.length < 3
                                   ? "Available for Request"
                                   : "3 Completed"}
                               </td>
-                            </>
+                            </React.Fragment>
                           ))
                         ) : (
                           <>
-                            <td class="px-6 py-4">No Submission</td>
-                            <td class="px-6 py-4">No Submission</td>
-                            <td class="px-6 py-4">Pending</td>
+                            <td className="px-6 py-4">No Submission</td>
+                            <td className="px-6 py-4">No Submission</td>
+                            <td className="px-6 py-4">Pending</td>
                           </>
                         )}
                       </tr>
@@ -1224,24 +1224,24 @@ function Userprofile() {
           <div className="mb-10">
             <h1 className="text-2xl font-bold text-left">New Script</h1>
             <div className="mt-10 relative overflow-x-auto">
-              <div class="rounded-t-xl rounded-b-xl ">
+              <div className="rounded-t-xl rounded-b-xl ">
                 <div className="overflow-x-auto">
-                  <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class="h-20 text-lg text-black bg-[#f0f1fa] ">
+                  <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead className="h-20 text-lg text-black bg-[#f0f1fa] ">
                       <tr>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" className="px-6 py-3">
                           Date
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" className="px-6 py-3">
                           Drug
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" className="px-6 py-3">
                           Dispense #
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" className="px-6 py-3">
                           Dosage
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" className="px-6 py-3">
                           Notes
                         </th>
                       </tr>
@@ -1319,49 +1319,49 @@ function Userprofile() {
           <div className="mb-10">
             <h1 className="text-2xl font-bold text-left">Refill History</h1>
             <div className="mt-10 relative overflow-x-auto">
-              <div class="rounded-t-xl rounded-b-xl overflow-x-auto">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                  <thead class="h-20 text-lg text-black bg-[#f0f1fa] ">
+              <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                  <thead className="h-20 text-lg text-black bg-[#f0f1fa] ">
                     <tr>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Date
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Drug
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Dispense #
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Dosage
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Tracking link
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Notes
                       </th>
-                      <th scope="col" class="px-6 py-3 text-[#FF0F0F]">
+                      <th scope="col" className="px-6 py-3 text-[#FF0F0F]">
                         Delete
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {newScriptData?.map((item) => {
+                    {newScriptData?.map((item, index) => {
                       if (item?.uid != id) return;
                       return (
                         // console.log()
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" key={index}>
                           <th
                             scope="row"
-                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                           >
                             {formatDate(item.createdAt)}
                           </th>
 
-                          <td class="px-6 py-4">{item?.drug}</td>
-                          <td class="px-6 py-4">{item?.dispense}</td>
-                          <td class="px-6 py-4">{item?.dosage}</td>
+                          <td className="px-6 py-4">{item?.drug}</td>
+                          <td className="px-6 py-4">{item?.dispense}</td>
+                          <td className="px-6 py-4">{item?.dosage}</td>
                           <td className="px-6 py-4">
                             <input
                               style={{
@@ -1381,11 +1381,11 @@ function Userprofile() {
                               placeholder="write tracking link here.."
                             />
                           </td>
-                          <td class="px-6 py-4" style={{}}>
+                          <td className="px-6 py-4" style={{}}>
                             {item?.note}
                           </td>
                           <td
-                            class="px-6 py-4"
+                            className="px-6 py-4"
                             style={{
                               cursor: "pointer",
                               color: "red",
@@ -1410,29 +1410,29 @@ function Userprofile() {
           <div className="mb-10">
             <h1 className="text-2xl font-bold text-left">Clinical Forms</h1>
             <div className="mt-10 relative overflow-x-auto">
-              <div class="rounded-t-xl rounded-b-xl overflow-x-auto">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                  <thead class="h-20 text-lg text-black bg-[#f0f1fa] ">
+              <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                  <thead className="h-20 text-lg text-black bg-[#f0f1fa] ">
                     <tr>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Document
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Sent
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Received
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Status
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th
                         scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (!screening?.length) return;
@@ -1443,33 +1443,33 @@ function Userprofile() {
                         PCL-5
                       </th>
 
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {isTypeExists(screening, "pcl5")
                           ? formatDate(
-                              screening.filter(
-                                (form) => form.Screeningform.type === "pcl5"
-                              )[0].createdAt
-                            )
+                            screening.filter(
+                              (form) => form?.Screeningform?.type === "pcl5"
+                            )[0].createdAt
+                          )
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {isTypeExists(screening, "pcl5")
                           ? formatDate(
-                              screening.filter(
-                                (form) => form.Screeningform.type === "pcl5"
-                              )[0].createdAt
-                            )
+                            screening.filter(
+                              (form) => form?.Screeningform?.type === "pcl5"
+                            )[0].createdAt
+                          )
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {isTypeExists(screening, "pcl5") ? "Sent" : "Pending"}
                       </td>
                     </tr>
 
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th
                         scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           setClinicalFormModal(true);
@@ -1479,30 +1479,30 @@ function Userprofile() {
                         GAD-7
                       </th>
 
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {isTypeExists(screening, "gad7")
                           ? formatDate(
-                              screening.filter(
-                                (form) => form.Screeningform.type === "gad7"
-                              )[0].createdAt
-                            )
+                            screening.filter(
+                              (form) => form?.Screeningform?.type === "gad7"
+                            )[0].createdAt
+                          )
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {isTypeExists(screening, "gad7")
                           ? formatDate(
-                              screening.filter(
-                                (form) => form.Screeningform.type === "gad7"
-                              )[0].createdAt
-                            )
+                            screening.filter(
+                              (form) => form?.Screeningform?.type === "gad7"
+                            )[0].createdAt
+                          )
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {isTypeExists(screening, "gad7") ? "Sent" : "Pending"}
                       </td>
                     </tr>
                     <tr
-                      class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                      className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                       style={{ cursor: "pointer" }}
                       onClick={() => {
                         setClinicalFormModal(true);
@@ -1511,37 +1511,37 @@ function Userprofile() {
                     >
                       <th
                         scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                       >
                         PHQ-9
                       </th>
 
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {isTypeExists(screening, "phq9")
                           ? formatDate(
-                              screening.filter(
-                                (form) => form.Screeningform.type === "phq9"
-                              )[0].createdAt
-                            )
+                            screening.filter(
+                              (form) => form?.Screeningform?.type === "phq9"
+                            )[0].createdAt
+                          )
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {isTypeExists(screening, "phq9")
                           ? formatDate(
-                              screening.filter(
-                                (form) => form.Screeningform.type === "phq9"
-                              )[0].createdAt
-                            )
+                            screening.filter(
+                              (form) => form?.Screeningform?.type === "phq9"
+                            )[0].createdAt
+                          )
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {isTypeExists(screening, "phq9") ? "Sent" : "Pending"}
                       </td>
                     </tr>
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       {/* <th
                         scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           setClinicalFormModal(true);
@@ -1551,7 +1551,7 @@ function Userprofile() {
                         Verification Document
                       </th> */}
 
-                      {/* <td class="px-6 py-4">
+                      {/* <td className="px-6 py-4">
                         {isTypeExists(screening, "entry questionaire")
                           ? formatDate(
                               screening.filter(
@@ -1562,7 +1562,7 @@ function Userprofile() {
                             )
                           : "No Submission"}
                       </td> */}
-                      {/* <td class="px-6 py-4">
+                      {/* <td className="px-6 py-4">
                         {isTypeExists(screening, "entry questionaire")
                           ? formatDate(
                               screening.filter(
@@ -1573,7 +1573,7 @@ function Userprofile() {
                             )
                           : "No Submission"}
                       </td> */}
-                      {/* <td class="px-6 py-4">
+                      {/* <td className="px-6 py-4">
                         {isTypeExists(screening, "entry questionaire")
                           ? "Sent"
                           : "Pending"}
@@ -1591,29 +1591,29 @@ function Userprofile() {
               Administrative Forms
             </h1>
             <div className="mt-10 relative overflow-x-auto">
-              <div class="rounded-t-xl rounded-b-xl overflow-x-auto">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                  <thead class="h-20 text-lg text-black bg-[#f0f1fa] ">
+              <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                  <thead className="h-20 text-lg text-black bg-[#f0f1fa] ">
                     <tr>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Document
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Sent
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Received
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Status
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th
                         scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (
@@ -1629,27 +1629,27 @@ function Userprofile() {
                         Consent form
                       </th>
 
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {consent
                           ? formatDate(consent.createdAt)
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {consent
                           ? formatDate(consent.createdAt)
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {consent
                           ? consent.status == "pending" && "Completed"
                           : "Pending"}
                       </td>
                     </tr>
 
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th
                         scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (
@@ -1665,26 +1665,26 @@ function Userprofile() {
                         Emergency Contact
                       </th>
 
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {emergencycontact
                           ? formatDate(emergencycontact?.createdAt)
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {emergencycontact
                           ? formatDate(emergencycontact?.createdAt)
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {emergencycontact
                           ? emergencycontact?.status == "pending" && "Completed"
                           : "Pending"}
                       </td>
                     </tr>
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th
                         scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (
@@ -1700,26 +1700,26 @@ function Userprofile() {
                         address
                       </th>
 
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {information
                           ? formatDate(information?.createdAt)
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {information
                           ? formatDate(information?.createdAt)
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {information
                           ? information?.status == "pending" && "Completed"
                           : "Pending"}
                       </td>
                     </tr>
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th
                         scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (
@@ -1735,20 +1735,20 @@ function Userprofile() {
                         Verification Document
                       </th>
 
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {documentverification
                           ? formatDate(documentverification?.createdAt)
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {documentverification
                           ? formatDate(documentverification?.createdAt)
                           : "No Submission"}
                       </td>
-                      <td class="px-6 py-4">
+                      <td className="px-6 py-4">
                         {documentverification
                           ? documentverification?.status == "pending" &&
-                            "Completed"
+                          "Completed"
                           : "Pending"}
                       </td>
                     </tr>

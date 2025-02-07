@@ -8,6 +8,8 @@ import Sidebar from "../components/Sidebar";
 import Sidebar2 from "../components/Sidebar2";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+// import DiscordLogin from "../components/DiscordLogin";
 
 function Home() {
   const [screening, setScreening] = useState([]);
@@ -27,6 +29,24 @@ function Home() {
   const [scores, setScores] = useState([]);
 
   const [allowRefill, setAllowRefill] = useState(false);
+  const navigate = useNavigate()
+
+  useEffect(() => {
+
+    const authToken = localStorage.getItem("token");
+    if (!authToken) {
+      return
+    }
+    const decodedUser = jwtDecode(authToken);
+
+    if (decodedUser.role === "Admin") {
+      // window.location.href = "/admin";
+      navigate("/admin");
+
+    }
+
+  }, [])
+
 
   useEffect(() => {
     // Check if authentication token exists in localStorage
@@ -59,7 +79,7 @@ function Home() {
       })
       .then((response) => {
         setNewScriptData(response.data);
-        console.log("newScript", response.data);
+        // console.log("newScript", response.data);
         // setStatus(response.data.status);
       })
       .catch((error) => {
@@ -77,28 +97,28 @@ function Home() {
           },
         }
       );
-      console.log("..............???", response); // Log the data received from the backend
+      // console.log("..............???", response); // Log the data received from the backend
       setScreening(response.data); // Set the data to state if needed
       const screening = response.data;
       const is_phq9 =
         screening.length > 0 &&
         screening.filter((item) => item.Screeningform.type === "phq9").length >
-          0;
+        0;
       const is_gad7 =
         screening.length > 0 &&
         screening.filter((item) => item.Screeningform.type === "gad7").length >
-          0;
+        0;
       const is_pcl5 =
         screening.length > 0 &&
         screening.filter((item) => item.Screeningform.type === "pcl5").length >
-          0;
+        0;
       const is_entryquestionaire =
         screening.length > 0 &&
         screening.filter(
           (item) => item.Screeningform.type === "entry questionaire"
         ).length > 0;
 
-      console.log(is_phq9, is_gad7, is_pcl5, is_entryquestionaire);
+      // console.log(is_phq9, is_gad7, is_pcl5, is_entryquestionaire);
 
       setIs_phq9(is_phq9);
       setIs_gad7(is_gad7);
@@ -119,7 +139,7 @@ function Home() {
           },
         }
       );
-      console.log("score data.............>", response);
+      // console.log("score data.............>", response);
       setScores(response.data); // Set the data to state if needed
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
@@ -138,7 +158,7 @@ function Home() {
       )
       .then((response) => {
         setDocumentverification(response.data);
-        console.log("Document verification ", response.data);
+        // console.log("Document verification ", response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -158,7 +178,7 @@ function Home() {
       )
       .then((response) => {
         setConsent(response.data);
-        console.log("Consent ", response.data);
+        // console.log("Consent ", response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -175,7 +195,7 @@ function Home() {
       })
       .then((response) => {
         setEmergencycontact(response.data);
-        console.log("Emergency contact ", response.data);
+        // console.log("Emergency contact ", response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -193,7 +213,7 @@ function Home() {
       .then((response) => {
         setInformation(response.data);
 
-        console.log("Information ", response.data);
+        // console.log("Information ", response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -240,12 +260,12 @@ function Home() {
         return acc;
       }, {});
 
-      console.log("refill", groupedRefill);
+      // console.log("refill", groupedRefill);
 
       // Check if any group has less than 3 records
       const lessThanThree = Object.values(groupedRefill).length < 3;
       setRefill_length(Object.values(groupedRefill).length);
-      console.log(lessThanThree);
+      // console.log(lessThanThree);
       setAllowRefill(lessThanThree);
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
@@ -260,11 +280,13 @@ function Home() {
     (i) => i?.uid === user?.id && i?.key === "pcl5" && i.score
   );
 
-  console.log(phl9Sc, pcl9Sc);
+  // console.log(phl9Sc, pcl9Sc);
 
   return (
     <>
       <Navbar1 />
+      {/* <DiscordLogin /> */}
+
       <div className="max-[696px]:invisible">
         <Sidebar2 />
       </div>
@@ -275,11 +297,9 @@ function Home() {
           title={"Latest Script:"}
           msg={
             newScriptData?.length
-              ? `The doctor has prescribed ${
-                  newScriptData[newScriptData?.length - 1]?.dispense
-                } Tablets ${
-                  newScriptData[newScriptData?.length - 1]?.drug
-                } ODT ${newScriptData[newScriptData?.length - 1]?.dosage}mg.`
+              ? `The doctor has prescribed ${newScriptData[newScriptData?.length - 1]?.dispense
+              } Tablets ${newScriptData[newScriptData?.length - 1]?.drug
+              } ODT ${newScriptData[newScriptData?.length - 1]?.dosage}mg.`
               : "The doctor has not prescribed yet."
           }
           status={""}
@@ -294,47 +314,47 @@ function Home() {
           title={"Status:"}
           msg={
             is_phq9 &&
-            is_gad7 &&
-            is_pcl5 &&
-            is_entryquestionaire &&
-            information !== null &&
-            consent !== null &&
-            emergencycontact !== null &&
-            documentverification !== null &&
-            allowRefill &&
-            user.status === "approved"
+              is_gad7 &&
+              is_pcl5 &&
+              is_entryquestionaire &&
+              information !== null &&
+              consent !== null &&
+              emergencycontact !== null &&
+              documentverification !== null &&
+              allowRefill &&
+              user.status === "approved"
               ? `Done, Please schedule a tele-health visit here: https://telehealthvisit.timetap.com` //`Refills are Available for ${refill_length}/3 times`
               : user.status !== "approved"
-              ? phl9Sc[0]?.score > 9 && pcl9Sc[0]?.score > 30
-                ? "Based on your answers, you might be a good candidate for the RIVER Ketamine Study. Please fill out the administrative forms."
-                : phl9Sc[0]?.score < 9 && pcl9Sc[0]?.score < 30
-                ? "Please schedule a consultation call before moving to the next step"
-                : "Please fill out the forms below to move to the next step"
-              : information !== null &&
-                consent !== null &&
-                emergencycontact !== null &&
-                documentverification !== null
-              ? "Click here for the tracking link."
-              : "Please fill out the forms below to move to the next step"
+                ? phl9Sc[0]?.score > 9 && pcl9Sc[0]?.score > 30
+                  ? "Based on your answers, you might be a good candidate for the RIVER Ketamine Study. Please fill out the administrative forms."
+                  : phl9Sc[0]?.score < 9 && pcl9Sc[0]?.score < 30
+                    ? "Please schedule a consultation call before moving to the next step"
+                    : "Please fill out the forms below to move to the next step"
+                : information !== null &&
+                  consent !== null &&
+                  emergencycontact !== null &&
+                  documentverification !== null
+                  ? "Click here for the tracking link."
+                  : "Please fill out the forms below to move to the next step"
           }
           trackingLink={newScriptData[newScriptData?.length - 1]?.tracking_id}
           status={
             information !== null &&
-            consent !== null &&
-            emergencycontact !== null &&
-            documentverification !== null
+              consent !== null &&
+              emergencycontact !== null &&
+              documentverification !== null
               ? "Complete"
               : "Incomplete"
           }
         />
 
-        <a
-          href={
+        <Link
+          to={
             is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire
               ? "/screening"
               : user.status !== "approved"
-              ? "/screening"
-              : "/screening"
+                ? "/screening"
+                : "/screening"
           }
         >
           <Card1
@@ -353,93 +373,93 @@ function Home() {
                 : "Pending"
             }
           />
-        </a>
+        </Link>
 
         {/* is_error={is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire ? false :  true} */}
 
-        <a
-          href={
-            information !== null &&
-            consent !== null &&
-            emergencycontact !== null &&
-            documentverification !== null
-              ? "/"
-              : user.status !== "approved"
-              ? "/"
-              : "/administrative"
+        <Link
+
+          to={
+            (is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire) ? "/administrative" : "/"
           }
+
+        // href={
+        //   information !== null &&
+        //   consent !== null &&
+        //   emergencycontact !== null &&
+        //   documentverification !== null
+        //     ? "/"
+        //     : user.status !== "approved"
+        //     ? "/"
+        //     : "/administrative"
+        // }
         >
           <Card1
             title={"Administrative Forms"}
             img={"writeicon.png"}
-            disabled={
-              information !== null &&
-              consent !== null &&
-              emergencycontact !== null &&
-              documentverification !== null
-                ? true
-                : user.status !== "approved"
-                ? true
-                : false
-            }
+            disabled={!(is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire)}
+
+          // disabled={
+          //  ( information !== null &&
+          //   consent !== null &&
+          //   emergencycontact !== null &&
+          //   documentverification !== null)
+          //     ? true
+          //     : user.status !== "approved"
+          //     ? true
+          //     : false
+          // }
           />
-        </a>
-        <a
-          href={
-            user.status !== "approved"
-              ? "/"
-              : is_phq9 &&
-                is_gad7 &&
-                is_pcl5 &&
-                is_entryquestionaire &&
-                information !== null &&
-                consent !== null &&
-                emergencycontact !== null &&
-                documentverification !== null &&
-                allowRefill
-              ? "/refill"
-              : "/"
+        </Link>
+        {/* <Link
+          to={
+            (!is_phq9 && !is_gad7 && !is_pcl5) ? "/" : "/refill"
           }
+        // href={
+        //   user.status !== "approved"
+        //     ? "/"
+        //     : is_phq9 &&
+        //       is_gad7 &&
+        //       is_pcl5 &&
+        //       is_entryquestionaire &&
+        //       information !== null &&
+        //       consent !== null &&
+        //       emergencycontact !== null &&
+        //       documentverification !== null &&
+        //       allowRefill
+        //       ? "/refill"
+        //       : "/"
+        // }
         >
+
           <Card1
             title={"Request Refill "}
             img={"Applyicon.png"}
             subtext={`${refill_length} of 3 refills are available`}
-            disabled={
-              user.status !== "approved"
-                ? true
-                : is_phq9 &&
-                  is_gad7 &&
-                  is_pcl5 &&
-                  is_entryquestionaire &&
-                  information !== null &&
-                  consent !== null &&
-                  emergencycontact !== null &&
-                  documentverification !== null &&
-                  allowRefill
-                ? false
-                : true
-            }
-          />
-        </a>
 
-        <a
-          href={
+            disabled={(!is_phq9 && !is_gad7 && !is_pcl5)}
+
+          // disabled={
+          //   user.status !== "approved"
+          //     ? true
+          //     : is_phq9 &&
+          //       is_gad7 &&
+          //       is_pcl5 &&
+          //       is_entryquestionaire &&
+          //       information !== null &&
+          //       consent !== null &&
+          //       emergencycontact !== null &&
+          //       documentverification !== null &&
+          //       allowRefill
+          //       ? false
+          //       : true
+          // }
+          />
+        </Link> */}
+
+        <Link
+          to={
             is_phq9 &&
-            is_gad7 &&
-            is_pcl5 &&
-            is_entryquestionaire &&
-            information !== null &&
-            consent !== null &&
-            emergencycontact !== null &&
-            documentverification !== null
-              ? "https://telehealthvisit.timetap.com"
-              : "https://ketamine-consultation.timetap.com/"
-          }
-        >
-          <Card1
-            title={
-              is_phq9 &&
               is_gad7 &&
               is_pcl5 &&
               is_entryquestionaire &&
@@ -447,13 +467,27 @@ function Home() {
               consent !== null &&
               emergencycontact !== null &&
               documentverification !== null
+              ? "https://telehealthvisit.timetap.com"
+              : "https://ketamine-consultation.timetap.com/"
+          }
+        >
+          <Card1
+            title={
+              is_phq9 &&
+                is_gad7 &&
+                is_pcl5 &&
+                is_entryquestionaire &&
+                information !== null &&
+                consent !== null &&
+                emergencycontact !== null &&
+                documentverification !== null
                 ? "Schedule a tele-health visit"
                 : "Schedule a free consultation"
             }
             img={"Calendaricon.png"}
             disabled={false}
           />
-        </a>
+        </Link>
       </div>
 
       <div className="min-[696px]:invisible">

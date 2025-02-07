@@ -60,6 +60,7 @@ function Informationform() {
             maritalStatus: "",
             gender: "",
             city: "",
+            state: "", // <-- Ensure initial value is an empty string
             address1: "",
             address2: "",
             zip: "",
@@ -83,6 +84,10 @@ function Informationform() {
             homePhone: Yup.string(),
           })}
           onSubmit={(values, { setSubmitting }) => {
+            console.log('see values',values)
+            console.log("JSON",JSON.stringify(values))
+
+            
             setSubmitting(true);
             axios
               .post(
@@ -101,7 +106,7 @@ function Informationform() {
                   addressone: values.address1,
                   addresstwo: values.address2,
                   zip: values.zip,
-                  citystate: values.city,
+                  citystate: values.city + "," + values.state,
                   mobile: values.mobile,
                   homephone: values.homePhone,
                   uid: user.id,
@@ -309,7 +314,21 @@ function Informationform() {
               <p className="text-black font-bold text-md mb-5 text-left">
                 City
               </p>
+
+
               <Field
+                name="city"
+                type="text"
+                placeholder="City name"
+                className="w-[48%] flex border h-10 border-[#dbdbdb] items-center p-4 mb-3 rounded-lg "
+              />
+
+              <ErrorMessage
+                name="city"
+                component="div"
+                className="text-red-500 text-sm"
+              />
+              {/* <Field
                 as="select"
                 name="city"
                 placeholder={"City"}
@@ -335,13 +354,29 @@ function Informationform() {
                 name="city"
                 component="div"
                 className="text-red-500 text-sm"
-              />
+              /> */}
+
+
             </div>
             <div className="mb-3">
               <p className="text-black font-bold text-md mb-5 text-left">
                 State
               </p>
+
+
               <Field
+                name="state"
+                type="text"
+                placeholder="State name"
+                className="w-[48%] flex border h-10 border-[#dbdbdb] items-center p-4 mb-3 rounded-lg "
+              />
+               <ErrorMessage
+                name="city"
+                component="div"
+                className="text-red-500 text-sm"
+              /> 
+
+              {/* <Field
                 as="select"
                 name="state"
                 placeholder={"State"}
@@ -367,7 +402,9 @@ function Informationform() {
                 name="city"
                 component="div"
                 className="text-red-500 text-sm"
-              />
+              /> 
+              
+              */}
             </div>
 
             <div>

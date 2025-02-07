@@ -5,7 +5,7 @@ function Card1({ title, subtext, img, status, disabled, is_error }) {
     <div
       className={
         disabled
-          ? "rounded-3xl  w-full bg-[#c6cce9]  items-center p-4 mb-3"
+          ? "rounded-3xl  w-full bg-[#c6cce9]  items-center p-4 mb-3 cursor-not-allowed"
           : "rounded-3xl  w-full bg-[#7a92fb]   items-center p-4 mb-3"
       }
     >

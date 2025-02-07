@@ -58,7 +58,7 @@ function Sidebar2() {
     <img src="/profileimg.png" alt="" style={{cursor:"pointer"}}  onClick={()=>navigate('/account')} />
     <div className='mt-2  '> 
     <div className=' text-gray-500 text-left ' style={{cursor:"pointer"}}>UserId #{user.id}</div>
-    {console.log('see user',user)}
+    {/* {console.log('see user',user)} */}
    
     <div className=' text-black  font-bold float-start  ' style={{cursor:"pointer"}}>{user && user.username && user.username.length > 10 ? `${user.username.slice(0, 15)}.` : user.username}
 </div>
@@ -75,10 +75,10 @@ function Sidebar2() {
          </li>
          
          <li >
-            <Link to="/chatting" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <a href={process.env.REACT_APP_DISCORD.toString()} target='_blank' className="cursor-pointer flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                <img src="/sidebar icon/chat.svg" alt=""/>
-               <span className="ms-3">Chat with us</span>
-            </Link>
+               <span className="ms-3">Chat on Discord</span>
+            </a>
          </li>
 
          <li>

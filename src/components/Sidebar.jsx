@@ -117,25 +117,25 @@ function Sidebar() {
                                    <span className="ms-3">Account</span>
                                 </Link>
                              </li>
-                    <li>
+                    {/* <li>
                         <Link to="/admin/inbox" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                             <img src="/sidebar icon/inbox.svg" alt=""/>
                             <span className="ms-3">Inbox</span>
                         </Link>
-                    </li>
-                    <li>
+                    </li> */}
+                    {/* <li>
                         <Link to="/admin/inbox" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                             <img src="/sidebar icon/chat.svg" alt=""/>
                             <span className="ms-3">Messages</span>
                         </Link>
-                    </li>
+                    </li> */}
                     <li>
-                        <Link to="#" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <Link to="/admin/filter/Existing" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                             <img src="/sidebar icon/partner.svg" alt=""/>
                             <span className="ms-3">Participants</span>
                         </Link>
                     </li>
-                    <li>
+                    {/* <li>
                         <Link to="/admin/filter/Existing" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                             <span className="ms-3 ml-12">Existing</span>
                         </Link>
@@ -144,7 +144,7 @@ function Sidebar() {
                         <Link to="/admin/filter/Screening" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                             <span className="ms-3 ml-12">Screening</span>
                         </Link>
-                    </li>
+                    </li> */}
                 </ul>
                 <div className="absolute bottom-2">
                     <ul className="space-y-2 font-medium">

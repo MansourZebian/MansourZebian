@@ -7,6 +7,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 function Documentverification() {
   const [openCam, setOpenCam] = useState(false);
@@ -14,6 +15,8 @@ function Documentverification() {
   const [isLoading, setLoading] = useState(false);
   const [base64String, setBase64String] = useState("");
   const webcamRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -140,9 +143,7 @@ function Documentverification() {
       file: null,
     },
 
-    onSubmit: async (values, { resetForm }) => {
-      setLoading(true);
-      // const formData = new FormData();
+     // const formData = new FormData();
       // formData.append("modelName", values.modelName);
       // formData.append("modelId", values.modelId);
       // formData.append("uid", user.id);
@@ -158,6 +159,12 @@ function Documentverification() {
       //   formData.append("file", blob, "image.jpg");
       //   console.log("//////////////.././.", base64Response, blob);
       // }
+
+    onSubmit: async (values, { resetForm }) => {
+      setLoading(true);
+     
+
+      //updating form
       let payload = {
         status: "pending",
         uid: user.id,
@@ -167,6 +174,7 @@ function Documentverification() {
       // console.log("//////////////.././.", formData);
       // return;
       try {
+        // to update /
         const response = await axios.post(
           `${process.env.REACT_APP_BACKEND_URL}documentverification/create`,
           payload,
@@ -176,17 +184,57 @@ function Documentverification() {
             },
           }
         );
+
+
+        // also send scriptemail/sendEmail/1 for welcome
+        console.log(user)
+        const response2= await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/1`,
+          {
+            email: user.email,
+            firstName: user?.first_name || user.username,
+
+
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+        }}
+      );
+
+      if(response2.status === 200){
+        console.log("welcome email sent");
+      }
+      
+
+        // console.log("Response:", response?.data);
+        // toast.success("File uploaded successfully.");
+
+    // updating user status to pending in backend
+
+    // console.log("User status updated to pending");
+
+
+
         setLoading(false);
         toast.success("File uploaded successfully.");
         console.log("response", response?.data);
-        window.location = "/administrative";
+        // window.location = "/administrative";
+        navigate('/administrative');
 
         console.log("File uploaded successfully:");
       } catch (error) {
         console.error("Error uploading file:", error.message);
-        setLoading(false);
+        // setLoading(false);
       }
+      
+      finally {
+      setLoading(false); // Ensure loading state is reset
+    }
+      
     },
+
+    
   });
 
   return (

@@ -64,6 +64,7 @@ function Emergencycontact() {
             address2: "",
             zip: "",
             city: "", // Assuming this will hold the selected city value
+            state: "", // <-- Ensure initial value is an empty string
             mobile: "",
             homePhone: "",
             email: "",
@@ -84,6 +85,7 @@ function Emergencycontact() {
               .required("Email address is required"),
           })}
           onSubmit={(values, { setSubmitting }) => {
+            
             setSubmitting(true);
             axios
               .post(
@@ -103,7 +105,7 @@ function Emergencycontact() {
                   addresstwo: values.address2,
                   zip: values.zip,
                   country: "",
-                  citystate: values.city,
+                  citystate: values.city+","+values.state,
                   mobile: values.mobile,
                   homephone: values.homePhone,
                   email: values.email,
@@ -321,12 +323,29 @@ function Emergencycontact() {
               <p className="text-black font-bold text-md mb-5 text-left">
                 City
               </p>
+
               <Field
+                name="city"
+                type="text"
+                placeholder="City name"
+                className="w-[48%] flex border h-10 border-[#dbdbdb] items-center p-4 mb-3 rounded-lg "
+              />
+
+              <ErrorMessage
+                name="city"
+                component="div"
+                className="text-red-500 text-sm"
+              />
+             
+
+
+              {/* <Field
                 as="select"
                 name="city"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[48%]  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[48%]  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               >
                 <option selected>select city</option>
+                
                 {[
                   { city: "New York", state: "New York" },
                   { city: "Los Angeles", state: "California" },
@@ -341,23 +360,37 @@ function Emergencycontact() {
                 ].map((item) => {
                   return <option value={item.city}>{item.city}</option>;
                 })}
-              </Field>
-              <ErrorMessage
+
+              </Field> */}
+              {/* <ErrorMessage
                 name="city"
                 component="div"
                 className="text-red-500 text-sm"
-              />
+              /> */}
             </div>
 
             <div className="mb-3">
               <p className="text-black font-bold text-md mb-5 text-left">
                 State
               </p>
+
               <Field
+                name="state"
+                type="text"
+                placeholder="State name"
+                className="w-[48%] flex border h-10 border-[#dbdbdb] items-center p-4 mb-3 rounded-lg "
+              />
+               <ErrorMessage
+                name="state"
+                component="div"
+                className="text-red-500 text-sm"
+              />
+             
+              {/* <Field
                 as="select"
                 name="state"
                 placeholder={"State"}
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[48%]  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[48%]  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               >
                 <option selected>select State</option>
                 {[
@@ -374,12 +407,12 @@ function Emergencycontact() {
                 ].map((item) => {
                   return <option value={item.state}>{item.state}</option>;
                 })}
-              </Field>
-              <ErrorMessage
-                name="city"
+              </Field> */}
+              {/* <ErrorMessage
+                name="state"
                 component="div"
                 className="text-red-500 text-sm"
-              />
+              /> */}
             </div>
 
             <div>

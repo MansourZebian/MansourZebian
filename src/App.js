@@ -39,6 +39,7 @@ import ScreeningQuestionstable from "./pages/admin/Questionstable";
 import TrackingLink from "./pages/TrackingLink";
 
 import AdminAccount from '../src/components/AdminAccount';
+
 function App() {
   return (
     <div className="App">
@@ -54,11 +55,17 @@ function App() {
             }
           />
 
+
+
           <Route
             path="/admin/*"
             element={
               <AuthGuard>
                 <Routes>
+
+
+
+
                   <Route
                     path="/screeningquestiontable"
                     element={<ScreeningQuestionstable />}
@@ -85,6 +92,7 @@ function App() {
               </AuthGuard>
             }
           />
+
 
 
           <Route path="/account" element={<Account />} />

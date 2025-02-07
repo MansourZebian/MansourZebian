@@ -7,6 +7,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 function Refill() {
   const [data, setData] = useState([]);
@@ -15,6 +16,10 @@ function Refill() {
 
   const [user, setUser] = useState({});
   const [isDisabled, setIsDisabled] = useState(false);
+  const [screening, setScreening] = useState([]);
+
+
+
 
   useEffect(() => {
     // Check if authentication token exists in localStorage
@@ -23,9 +28,27 @@ function Refill() {
       const decodedUser = jwtDecode(authToken);
       setUser(decodedUser);
       // You can validate the token here if needed
+      getScreeningData(decodedUser.id);
       setIsAuthenticated(true);
     }
   }, []);
+
+  const getScreeningData = async (id) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // console.log("getScreeningData", response.data); // Log the data received from the backend
+      setScreening(response.data); // Set the data to state if needed
+    } catch (error) {
+      console.log(error); // Log any errors that occur during the request
+    }
+  };
 
   const getQuestions = async () => {
     await axios
@@ -84,6 +107,10 @@ function Refill() {
       console.error("Error submitting data:", error); // Log error if submission fails
     }
   };
+
+
+
+
 
   return (
     <>
@@ -144,11 +171,56 @@ function Refill() {
           </div>
         ))}
 
-        <Checkcards
-          title={"PHQ9"}
-          checktitle="Complete form"
-          transparent={true}
-        />
+
+        {/* added refill option */}
+
+        {/* <Link
+          to={
+            "/screening/phq9"
+          }
+        >
+          <Checkcards
+            title={"PHQ9"}
+            checktitle={
+              "Refill PHQ9"
+            }
+
+          />
+        </Link>
+        <Link
+          to={
+            "/screening/pcl5"
+          }
+        >
+          <Checkcards
+            title={"PCL5"}
+            checktitle={
+              "Refill PCL5"
+            }
+          />
+        </Link>
+        <Link
+          to={
+            "/screening/gad7"
+          }
+        >
+          <Checkcards
+            title={"GAD7"}
+            checktitle={
+              "Refill GAD7"
+            }
+          />
+        </Link> */}
+
+        {/* {alert(JSON.stringify(setScreening))} */}
+        {/* <Link to={'/screening/phq'}>
+
+          <Checkcards
+            title={"PHQ9"}
+            checktitle="Complete form"
+            transparent={true}
+          />
+        </Link>
 
         <Checkcards
           title={"PCL5"}
@@ -166,7 +238,7 @@ function Refill() {
           title={"Entry Questionnaire"}
           checktitle="Complete form"
           transparent={true}
-        />
+        /> */}
 
         <div className="flex items-center w-full justify-center">
           <button

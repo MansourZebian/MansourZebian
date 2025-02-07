@@ -49,7 +49,7 @@ const AuthGuard = ({ children }) => {
     fetchData();
 
     // Clean up function to prevent navigation after unmounting
-    return () => {};
+    return () => { };
   }, [navigate]);
   // Render children if token is validated, otherwise return null
   return isTokenValidated &&

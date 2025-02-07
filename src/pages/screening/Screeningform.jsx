@@ -6,6 +6,7 @@ import Sidebar2 from "../../components/Sidebar2";
 
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { Link } from "react-router-dom";
 
 function Screeningform() {
   const [screening, setScreening] = useState([]);
@@ -50,12 +51,34 @@ function Screeningform() {
         <Sidebar2 />
       </div>
 
+      {screening.filter((item) => item.Screeningform.type === "phq9" 
+      && item.Screeningform.type === "pcl5" &&
+      
+      item.Screeningform.type === "gad7"&& item.Screeningform.type === "entry questionaire"
+      ).length > 0&&
+      
+
+        <div className="flex pb-10 flex-col items-center justify-center text-center px-5 min-[696px]:px-40 lg:px-60 xl:px-80 min-[696px]:ml-40 max-[696px]:pb-10 text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">
+          <p>
+            Please fill out the
+            <span style={{ marginRight: '8px', marginLeft: '8px' }}>
+              <Link to="/" className="text-[#7A92FA] underline">
+                administrative forms
+              </Link>
+            </span>
+            to continue.
+          </p>
+        </div>
+
+
+      }
+
       <div className="px-5 min-[696px]:px-40 max-[696px]:pb-40 lg:px-60 min-[696px]:ml-40  xl:px-80">
-        <a
-          href={
+        <Link
+          to={
             screening.length > 0 &&
-            screening.filter((item) => item.Screeningform.type === "phq9")
-              .length > 0
+              screening.filter((item) => item.Screeningform.type === "phq9")
+                .length > 0
               ? "/"
               : "/screening/phq9"
           }
@@ -64,18 +87,18 @@ function Screeningform() {
             title={"PHQ9"}
             checktitle={
               screening.length > 0 &&
-              screening.filter((item) => item.Screeningform.type === "phq9")
-                .length > 0
+                screening.filter((item) => item.Screeningform.type === "phq9")
+                  .length > 0
                 ? "Form Completed"
                 : "Pending"
             }
           />
-        </a>
-        <a
-          href={
+        </Link>
+        <Link
+          to={
             screening.length > 0 &&
-            screening.filter((item) => item.Screeningform.type === "pcl5")
-              .length > 0
+              screening.filter((item) => item.Screeningform.type === "pcl5")
+                .length > 0
               ? "/"
               : "/screening/pcl5"
           }
@@ -84,18 +107,18 @@ function Screeningform() {
             title={"PCL5"}
             checktitle={
               screening.length > 0 &&
-              screening.filter((item) => item.Screeningform.type === "pcl5")
-                .length > 0
+                screening.filter((item) => item.Screeningform.type === "pcl5")
+                  .length > 0
                 ? "Form Completed"
                 : "Pending"
             }
           />
-        </a>
-        <a
-          href={
+        </Link>
+        <Link
+          to={
             screening.length > 0 &&
-            screening.filter((item) => item.Screeningform.type === "gad7")
-              .length > 0
+              screening.filter((item) => item.Screeningform.type === "gad7")
+                .length > 0
               ? "/"
               : "/screening/gad7"
           }
@@ -104,20 +127,20 @@ function Screeningform() {
             title={"GAD7"}
             checktitle={
               screening.length > 0 &&
-              screening.filter((item) => item.Screeningform.type === "gad7")
-                .length > 0
+                screening.filter((item) => item.Screeningform.type === "gad7")
+                  .length > 0
                 ? "Form Completed"
                 : "Pending"
             }
           />
-        </a>
+        </Link>
 
-        <a
-          href={
+        <Link
+          to={
             screening.length > 0 &&
-            screening.filter(
-              (item) => item.Screeningform.type === "entry questionaire"
-            ).length > 0
+              screening.filter(
+                (item) => item.Screeningform.type === "entry questionaire"
+              ).length > 0
               ? "/"
               : "/screening/questionnaire"
           }
@@ -126,14 +149,14 @@ function Screeningform() {
             title={"Entry Questionnaire"}
             checktitle={
               screening.length > 0 &&
-              screening.filter(
-                (item) => item.Screeningform.type === "entry questionaire"
-              ).length > 0
+                screening.filter(
+                  (item) => item.Screeningform.type === "entry questionaire"
+                ).length > 0
                 ? "Form Completed"
                 : "Pending"
             }
           />
-        </a>
+        </Link>
       </div>
 
       <div className="min-[696px]:invisible">

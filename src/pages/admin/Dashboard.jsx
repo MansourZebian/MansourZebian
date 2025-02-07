@@ -12,7 +12,10 @@ import {
   ArrowDownOutlined,
   ArrowUpOutlined,
   SearchOutlined,
+  UserOutlined,
+
 } from "@ant-design/icons";
+import { RiUserFill, RiUser3Fill } from "react-icons/ri";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -20,7 +23,7 @@ function Dashboard() {
   const param = useParams();
   const [searchTerm, setSearchTerm] = useState(null);
 
-  const [formtype, setFormtype] = useState(param.type || "Screening");
+  const [formtype, setFormtype] = useState(param.type || "Existing");
   const [openModal, setOpenModal] = useState(false);
   const [nameClickBool, setNameClickBool] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(-1);
@@ -44,7 +47,7 @@ function Dashboard() {
   const [currentNewUserRecords, setCurrentNewUserRecords] = useState([])
   // pagination handling
   const [currentNewUserPage, setCurrentNewUserPage] = useState(1);
-
+const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
 
   const [totalNewUserDataPages, setTotalNewUserDataPages] = useState(0);
 
@@ -67,6 +70,47 @@ function Dashboard() {
     status: "",
   });
 
+  const getAllUsersHasFormsFilled = async () => {
+
+    // users/getAllUserHasFormFilledStatus
+
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}users/getAllUserHasFormFilledStatus`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // console.log(response.data);
+      setAllUsersHasFormsFilled(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
+  //for handling mulitple options purpose field in exisitingform
+
+
+
+
+  // useEffect(() => {
+
+  //   const authToken = localStorage.getItem("token");
+  //   if (!authToken) {
+  //     return
+  //   }
+  //   const decodedUser = jwtDecode(authToken);
+
+  //   if (decodedUser.role === "User") {
+  //     // window.location.href = "/admin";
+  //     navigate("/");
+
+  //   }
+
+  // }, [])
 
 
   const handleFilterChange = (field, value) => {
@@ -480,6 +524,7 @@ function Dashboard() {
 
   useEffect(() => {
     getPrevSceeningData()
+    getAllUsersHasFormsFilled();
     getScreeningData();
     getUsers();
   }, []);
@@ -550,7 +595,7 @@ function Dashboard() {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
-  
+
 
 
   const formatDateTime = (isoString) => {
@@ -596,6 +641,11 @@ function Dashboard() {
           user["updatedAt"] = currentDate;
           // Update existing user
           if (!hasChanged(user, oldUser)) continue;
+
+          // applyLoop on user to convert purpose to JSON.parse(user.purpose);
+          console.log("See in saving purpose:", user.purpose)
+          // user.purpose = [...user?.purpose || ""];
+
 
           try {
             const response = await axios.post(
@@ -840,12 +890,28 @@ function Dashboard() {
   const handleUpdateUserField = (index, field, value) => {
     setCurrentNewUserRecords((prevUsers) => {
       const updatedUsers = [...prevUsers];
+  
+      // Ensure 'purpose' is always stored as an array in state
+      if (field === "purpose") {
+        value = Array.isArray(value) ? value : JSON.parse(value || "[]");
+      }
+  
       updatedUsers[index] = { ...updatedUsers[index], [field]: value };
       return updatedUsers;
     });
   };
+  
 
-  const newUserItemsPerPage = 3; // Number of rows per page
+  //original
+  // const handleUpdateUserField = (index, field, value) => {
+  //   setCurrentNewUserRecords((prevUsers) => {
+  //     const updatedUsers = [...prevUsers];
+  //     updatedUsers[index] = { ...updatedUsers[index], [field]: value };
+  //     return updatedUsers;
+  //   });
+  // };
+
+  const newUserItemsPerPage = 7; // Number of rows per page
   // let totalNewUserDataPages = Math.ceil(newUser.length / newUserItemsPerPage);
   // setTotalNewUserDataPages(Math.ceil(newUser.length / newUserItemsPerPage))
 
@@ -885,7 +951,7 @@ function Dashboard() {
     }
   }, [newUserFilteredData, currentNewUserPage, newUserItemsPerPage, newUser]);
 
-  
+
 
 
 
@@ -1106,6 +1172,11 @@ function Dashboard() {
     }
   };
 
+
+
+
+
+
   const parseDateTimeString = (dateString) => {
     const dateObj = new Date(dateString);
 
@@ -1200,8 +1271,8 @@ function Dashboard() {
 
         <div style={{ backgroundColor: "#FFFFFF", padding: 20, borderRadius: 10 }}>
 
-          <div className="flex items-center  gap-5" >
-            <h1 className="text-4xl font-bold">{formtype}</h1>
+          <div className="flex items-center gap-5 " >
+            <h1 className="text-4xl font-bold ">{formtype}</h1>
             <IoIosArrowDown
               size={30}
               onClick={() => setOpenModal(true)}
@@ -1225,12 +1296,7 @@ function Dashboard() {
                   }}
                   onChange={(e) => handleFilterChange("first_name", e.target.value)}
                 />
-                {/* <input
-              type="text"
-              placeholder="Filter by Last Name"
-              value={filters.lname}
-              onChange={(e) => handleFilterChange("lname", e.target.value)}
-            /> */}
+              
                 <select
                   value={filters.type}
                   style={{
@@ -1326,11 +1392,11 @@ function Dashboard() {
                               </a>
                             </th>
                             <td className="px-6 py-4">
-                              {parseDateTimeString(item?.createdAt).date},{" "}
+                              {parseDateTimeString(item?.createdAt)?.date},{" "}
                               {parseDateTimeString(item?.createdAt)?.time}
                             </td>
                             <td className="px-6 py-4">
-                              {parseDateTimeString(item?.createdAt).date},{" "}
+                              {parseDateTimeString(item?.createdAt)?.date},{" "}
                               {parseDateTimeString(item?.createdAt)?.time}
                             </td>
 
@@ -1427,10 +1493,30 @@ function Dashboard() {
                       <thead className="h-20 text-lg text-black bg-[#f0f1fa]">
                         <tr>
                           {[
-                            "First Name", "Last Name", "Type", "Forms Sent", "Fill Forms",
-                            "Invoice Sent", "Accepted", "Invoice", "Invoice Paid", "Link to schedule",
-                            "Call Scheduled", "Date", "Added to MDtoolbox", "Script", "Script Sent",
-                            "Scrip Email", "Status", "Notes", "Doctor"
+                            "Last Name", "First Name", "Type", "Forms filled",
+
+                            // "Invoice Sent",
+
+                            "Invoice", "Invoice Paid",
+
+                            "Telehealth link",
+                            // "Accepted",
+
+                            // "Link to schedule",
+                            // "Send Telehealth link",
+                            "Send Telehealth Call",
+
+
+                            "Call Scheduled", "Date", "Added to MDtoolbox",
+
+                            "Script",
+                            "Scrip",
+                            "Scrip Email"
+
+                            , "Status", "Notes", "Doctor",
+
+                            "Category",
+                            "Purpose"
                           ].map((header, index) => (
                             <th key={index} scope="col" className="px-6 py-3">
                               {header}
@@ -1464,7 +1550,7 @@ function Dashboard() {
                         <tbody>
                           <tr>
                             <td colSpan={9} className="text-center py-10">
-                              <div className="flex items-center justify-center space-x-4">
+                              <div className="flex items-center justify-center space-x-4 ">
                                 <div className="w-10 h-10 border-4 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
                                 <span className="text-lg font-semibold text-gray-700">Loading...</span>
                               </div>
@@ -1488,23 +1574,19 @@ function Dashboard() {
                           >
                             <th
                               scope="row"
-                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white flex items-center"
                             >
-                              <input
-                                readOnly={true}
-                                disabled={true}
-                                type="text"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5"
-                                value={item?.first_name || ""}
-                              // onChange={(e) =>
-                              //   handleUpdateUserField(index, "fname", e.target.value)
-                              // }
+
+
+
+                              <RiUser3Fill cursor={'pointer'} style={{ transform: 'scale(1.8)', marginRight: 10 }}
+                                onClick={() => {
+                                  // console.log('item',item)
+                                  handleUserProfileClick(item?.userId);
+                                  localStorage.setItem("Email@@", item.email);
+                                }}
+
                               />
-                            </th>
-                            <th
-                              scope="row"
-                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                            >
                               <input
                                 readOnly={true}
                                 disabled={true}
@@ -1515,6 +1597,28 @@ function Dashboard() {
                                   handleUpdateUserField(index, "lname", e.target.value)
                                 }
                               />
+
+
+                            </th>
+                            <th
+                              scope="row"
+                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                            >
+                              <input
+                                readOnly={true}
+                                disabled={true}
+                                type="text"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5"
+                                value={item?.first_name || ""}
+
+
+
+                              // onChange={(e) =>
+                              //   handleUpdateUserField(index, "fname", e.target.value)
+                              // }
+                              />
+
+
                             </th>
                             <td className="px-6 py-4">
                               <select
@@ -1527,10 +1631,12 @@ function Dashboard() {
                                 <option value="New Participant">New Participant</option>
                                 <option value="Refill">Refill</option>
                                 <option value="Renewal">Renewal</option>
-                                <option value="Rejected">Rejected</option>
+                                {/* <option value="Rejected">Rejected</option> */}
                               </select>
                             </td>
-                            <td className="px-6 py-4">
+
+                            {/* removed form sent as per client request */}
+                            {/* <td className="px-6 py-4">
                               <input
                                 type="checkbox"
                                 onChange={(e) =>
@@ -1538,17 +1644,20 @@ function Dashboard() {
                                 }
                                 checked={item?.formSent === true}
                               />
-                            </td>
+                            </td> */}
                             <td className="px-6 py-4">
                               <input
+                                disabled={true}
                                 type="checkbox"
                                 onChange={(e) =>
-                                  handleUpdateUserField(index, "formFill", e.target.checked)
+                                  handleUpdateUserField(index, "formsFilled", e.target.checked)
                                 }
-                                checked={item?.formFill || false}
+                                // checked={item?.formsFilled || false}
+                                checked={allUsersHasFormsFilled.filter((user) => user.id === item?.userId)[0]?.hasFilledForm || false}
                               />
                             </td>
-                            <td className="px-6 py-4">
+
+                            {/* <td className="px-6 py-4">
                               <input
                                 type="checkbox"
                                 onChange={(e) =>
@@ -1556,23 +1665,15 @@ function Dashboard() {
                                 }
                                 checked={item?.invoiceSent || false}
                               />
-                            </td>
+                            </td> */}
+
                             <td className="px-6 py-4">
                               <input
-                                type="checkbox"
+                                type="text"
                                 onChange={(e) =>
-                                  handleUpdateUserField(index, "accepted", e.target.checked)
+                                  handleUpdateUserField(index, "invoice", e.target.value)
                                 }
-                                checked={item?.accepted || false}
-                              />
-                            </td>
-                            <td className="px-6 py-4">
-                              <input
-                                type="checkbox"
-                                onChange={(e) =>
-                                  handleUpdateUserField(index, "invoice", e.target.checked)
-                                }
-                                checked={item?.invoice || false}
+                                value={item?.invoice || ""}
                               />
                             </td>
                             <td className="px-6 py-4">
@@ -1584,13 +1685,79 @@ function Dashboard() {
                                 checked={item?.invoicePaid || false}
                               />
                             </td>
-                            <td className="px-6 py-4">
+
+                            {/* <td className="px-6 py-4">
                               <input
                                 type="checkbox"
                                 onChange={(e) =>
-                                  handleUpdateUserField(index, "linkToSchedule", e.target.checked)
+                                  handleUpdateUserField(index, "accepted", e.target.checked)
                                 }
-                                checked={item?.linkToSchedule || false}
+                                checked={item?.accepted || false}
+                              />
+                            </td> */}
+
+
+                            <td className="px-6 py-4">
+
+                              <select
+                                value={item?.telehealthLink || ""}
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "telehealthLink", e.target.value)
+                                }
+                              >
+                                <option value="">Select</option>
+                                <option value="$495">$495</option>
+                                <option value="veteran">Veteran</option>
+                                <option value="renewal">Renewal</option>
+                                <option value="discounted">Discounted</option>
+                              </select>
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={async (e) =>
+                                {
+                                  // "Send Telehealth link", and  "Send Telehealth Call" same
+                                 
+                                  // console.log('see e', e.target.checked)
+                                  handleUpdateUserField(index, "sendTelehealthLink", e.target.checked)
+
+                                  if(e.target.checked){
+                                    if(!item?.email || !item?.first_name){
+                                      //something went wrong
+                                      toast.error("Something went wrong. Please try again later");
+                                      return
+                                    }
+
+                                    const response2= await axios.post(
+                                      `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/2`,
+                                      {
+                                        email: item?.email,
+                                        firstName: item?.first_name,
+                                      },
+                                      {
+                                        headers: {
+                                          Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                    }}
+                                  );
+                            
+                                  if(response2.status === 200){
+                                    console.log('first response', response2.status)
+                                    toast.success(`Schedule a telehealth visit Email has been sent to ${item?.first_name}`);
+                                  }
+
+                                  else{
+                                    toast.error("Could not send Schedule a telehealth visit Email Please try again later");
+                                  }
+
+                                  }
+
+
+
+                                  }
+                                }
+                                checked={item?.sendTelehealthLink || false}
                               />
                             </td>
                             <td className="px-6 py-4">
@@ -1627,29 +1794,71 @@ function Dashboard() {
                                 checked={item?.addedToMdToolBox || false}
                               />
                             </td>
+
+                            {/* //scriptSent or Script */}
+
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "script", e.target.checked)
+                                }
+                                checked={item?.script || false}
+                              />
+                            </td>
+
                             <td className="px-6 py-4">
                               <input
                                 type="text"
                                 onChange={(e) =>
-                                  handleUpdateUserField(index, "script", e.target.value)
+                                  handleUpdateUserField(index, "scrip", e.target.value)
                                 }
-                                value={item?.script || ""}
+                                value={item?.scrip || ""}
                               />
                             </td>
+
+                            {/* //scripEmail and scriptEmail are same */}
                             <td className="px-6 py-4">
                               <input
                                 type="checkbox"
-                                onChange={(e) =>
-                                  handleUpdateUserField(index, "scriptSent", e.target.checked)
-                                }
-                                checked={item?.scriptSent || false}
-                              />
-                            </td>
-                            <td className="px-6 py-4">
-                              <input
-                                type="checkbox"
-                                onChange={(e) =>
-                                  handleUpdateUserField(index, "scriptEmail", e.target.checked)
+                                onChange={async (e) =>
+                                 { handleUpdateUserField(index, "scriptEmail", e.target.checked)
+
+
+                                  if(e.target.checked){
+                                    if(!item?.email || !item?.first_name ||!item?.scrip ||!item?.invoice){
+                                      //something went wrong 
+                                      toast.error("Something went wrong. Please try again later");
+                                      return
+                                    }
+
+                                    const response3= await axios.post(
+                                      `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/3`,
+                                      {
+                                        email: item?.email,
+                                        firstName: item?.first_name,
+                                        scriptText: item?.scrip,
+                                        invoiceText: item?.invoice
+                                      },
+                                      {
+                                        headers: {
+                                          Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                    }}
+                                  );
+                            
+                                  if(response3.status === 200){
+                                    console.log('first response', response3.status)
+                                    toast.success(`Script Email has been sent to ${item?.first_name}`);
+                                  }
+
+                                  else{
+                                    toast.error("Could not send Script Email Please try again later");
+                                  }
+
+                                  }
+
+
+                                 }
                                 }
                                 checked={item?.scriptEmail || false}
                               />
@@ -1688,6 +1897,97 @@ function Dashboard() {
                                 value={item?.doctor || ""}
                               />
                             </td>
+
+                            {/* category */}
+
+                            <td>
+                              <select
+                                value={item?.category || ""}
+                                onChange={(e) =>
+                                  handleUpdateUserField(index, "category", e.target.value)
+                                }
+                              >
+                                <option value="">Select</option>
+                                <option value="veteran">Veteran</option>
+                                <option value="nativeAmerican">Native American</option>
+                                <option value="other">Other</option>
+
+                              </select>
+
+                            </td>
+
+                            {/* purpose */}
+
+                            <td>
+
+                            <select
+    multiple
+    value={Array.isArray(item?.purpose) ? item.purpose : JSON.parse(item?.purpose || "[]")} 
+    onChange={(e) => {
+      const selectedValues = Array.from(e.target.selectedOptions, (option) => option.value);
+      handleUpdateUserField(index, "purpose", selectedValues);
+    }}
+    style={{
+      resize: "both", // Enables resizing
+      overflow: "auto", // Prevents content cutoff
+      display: "inline-block", // Ensures wrapping
+      minWidth: "150px",
+      height: "40px",
+      border: "1px solid #ccc",
+      padding: "5px"
+    }}
+  >
+
+    <option value="depression" className="checked:bg-blue-500 checked:text-white">Depression</option>
+    <option value="ptsd" className="checked:bg-green-500 checked:text-white">PTSD</option>
+    <option value="anxiety" className="checked:bg-red-500 checked:text-white">Anxiety</option>
+    <option value="chronicPain" className="checked:bg-yellow-500 checked:text-white">Chronic Pain</option>
+    <option value="other" className="checked:bg-purple-500 checked:text-white">Other</option>
+   
+  </select>
+
+
+                              {/* <select
+    // contentEditable={false} 
+
+                                multiple
+
+                                value={Array.isArray(item?.purpose) ? item.purpose : JSON.parse(item?.purpose || "[]")}
+                                onChange={(e) => {
+                                  const selectedValues = Array.from(e.target.selectedOptions, (option) => option.value);
+                                  handleUpdateUserField(index, "purpose", selectedValues);  // Pass the array directly
+                                }}
+
+
+                                // value={Array.isArray(item?.purpose) ? item.purpose : JSON.parse(item?.purpose )}
+
+                                // // value={item?.purpose || []} // Ensure it's an array
+                                // onChange={(e) => {
+                                //   const selectedValues = Array.from(e.target.selectedOptions, (option) => option.value);
+                                //   handleUpdateUserField(index, "purpose", selectedValues);
+                                // }}
+                                // style={{ height: "40px" }}
+                                style={{
+                                  resize: "both", // Enables resizing
+                                  overflow: "auto", // Prevents content cutoff
+                                  display: "inline-block", // Ensures wrapping
+                                  minWidth: "150px",
+                                  height: "40px",
+                                  border: "1px solid #ccc",
+                                  padding: "5px"
+                                }}
+                              >
+
+                                <option value="depression" className="checked:bg-blue-500 checked:text-white">Depression</option>
+                                <option value="ptsd" className="checked:bg-green-500 checked:text-white">PTSD</option>
+                                <option value="anxiety" className="checked:bg-red-500 checked:text-white">Anxiety</option>
+                                <option value="chronicPain" className="checked:bg-yellow-500 checked:text-white">Chronic Pain</option>
+                                <option value="other" className="checked:bg-purple-500 checked:text-white">Other</option>
+                               
+                              </select> */}
+                            </td>
+
+
                             <th>
 
 
@@ -1740,18 +2040,22 @@ function Dashboard() {
 
 
 
-                      <div className="mx-6 mt-2">
 
 
-                        {/* <button
+                    </table>
+
+                    <a className="mx-6 mt-2 flex justify-start ">
+
+
+                      {/* <button
                         onClick={() => setNewUser(newUser.slice(0, -1))}
                         className="text-white font-bold ms-4 py-4 px-4 rounded-lg bg-red-500 hover:bg-red-600"
                       >
                         -
                       </button> */}
-                        {/* <br /> */}
-                        {/* adding new row */}
-                        {/* <button id="addRow"
+                      {/* <br /> */}
+                      {/* adding new row */}
+                      {/* <button id="addRow"
                         // onClick={() => setNewUser([...newUser, {}])}
                         // onClick={()=>setCurrentNewUserRecords([...currentNewUserRecords, {}])}
                         onClick={() => {
@@ -1788,31 +2092,30 @@ function Dashboard() {
 
 
 
-                        {!isFetchingLoading && (
-                          <button
-                            onClick={handleSaveButton}
-                            disabled={isLoading}
-                            className={`text-white font-bold py-2 px-6 rounded-lg bg-green-500 hover:bg-green-600 ${isLoading ? "animate-pulse" : ""}`}
-                          >
-                            {isLoading ? (
-                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      {!isFetchingLoading && (
+                        <button
+                          onClick={handleSaveButton}
+                          disabled={isLoading}
+                          className={`text-white font-bold py-2 px-6 rounded-lg bg-green-500 hover:bg-green-600 ${isLoading ? "animate-pulse" : ""}`}
+                        >
+                          {isLoading ? (
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          ) : (
+                            <span className="flex ">
+                              <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
-                            ) : (
-                              <span className="flex ">
-                                <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                Save
-                              </span>
-                            )}
-                          </button>
-                        )}
+                              Save
+                            </span>
+                          )}
+                        </button>
+                      )}
 
 
-                      </div>
-                    </table>
+                    </a>
                   </div>
 
 
@@ -1879,9 +2182,12 @@ function Dashboard() {
             </div>
 
           </div>
-        </div>
 
-        <div
+
+          {/* removing Users form as per client request */}
+
+
+          {/* <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -1889,46 +2195,46 @@ function Dashboard() {
           }}
         >
           <h1 className="text-4xl font-bold flex mt-10">Users</h1>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: 20,
-              width: 350,
-              height: 50,
-            }}
-          >
-            <input
-              style={{
-                width: 350,
-                height: 50,
-                borderRadius: 10,
-                backgroundColor: "transparent",
-                border: "1px solid gray",
-                color: "#000",
-                // textAlign: "center",
-                paddingLeft: 10,
-              }}
-              value={searchTerm}
-              onChange={handleSearchChange}
-              placeholder="Search user or email address"
-            />
-          </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: 20,
+                  width: 350,
+                  height: 50,
+                }}
+              >
+                <input
+                  style={{
+                    width: 350,
+                    height: 50,
+                    borderRadius: 10,
+                    backgroundColor: "transparent",
+                    border: "1px solid gray",
+                    color: "#000",
+                    // textAlign: "center",
+                    paddingLeft: 10,
+                  }}
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  placeholder="Search user or email address"
+                />
+              </div>
 
-          <div
-            style={{
-              cursor: "pointer",
-            }}
-          >
-            <CSVLink data={currentData}>
-              <img
-                src="https://www.nicepng.com/png/detail/208-2087007_excel-icon-png-upload-csv-icon.png"
-                style={{ width: 75, height: 50 }}
-              />
-              Download
-            </CSVLink>
-          </div>
+              <div
+                style={{
+                  cursor: "pointer",
+                }}
+              >
+                <CSVLink data={currentData}>
+                  <img
+                    src="https://www.nicepng.com/png/detail/208-2087007_excel-icon-png-upload-csv-icon.png"
+                    style={{ width: 75, height: 50 }}
+                  />
+                  Download
+                </CSVLink>
+              </div>
         </div>
 
         <div className="mt-10 relative overflow-x-auto">
@@ -2015,16 +2321,14 @@ function Dashboard() {
             </table>
           </div>
         </div>
-      </div >
-
-      <div
+          <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           marginBottom: 100,
           alignSelf: "flex-start",
-          marginTop: -20,
+          marginTop: 20,
         }}
       >
         <div
@@ -2054,7 +2358,18 @@ function Dashboard() {
         >
           Next
         </div>
-      </div>
+      </div> */}
+
+          {/* ending */}
+        </div>
+
+
+
+
+
+      </div >
+
+
     </>
   );
 }
