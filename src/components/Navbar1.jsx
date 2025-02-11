@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { FaRegBell } from "react-icons/fa6";
 import axios from "axios";
+import { Link } from "react-router-dom";
 function Navbar1() {
   const [user, setUser] = useState({});
 
@@ -49,7 +50,7 @@ function Navbar1() {
   return (
     <div className="flex justify-between px-6 py-10">
       <div className="flex ">
-        <img src="/profileimg.png" alt="" />
+        <Link to="/account"><img src="/profileimg.png" alt="" /></Link>
         <div className="mt-2  ">
           <div className=" text-gray-500  ">Account #{user.id}</div>
           <div className=" text-black  font-bold float-start ">
@@ -60,7 +61,7 @@ function Navbar1() {
         </div>
       </div>
 
-      <a href="/chatting">
+      <a href={`${process.env.REACT_APP_DISCORD}`} target="_blank">
         <div className="flex mt-2">
           <FaRegBell className=" w-8 h-10  " color="gray" />
           <p className=" text-white bg-red-500 rounded-full w-5 h-5 flex justify-center items-center ">

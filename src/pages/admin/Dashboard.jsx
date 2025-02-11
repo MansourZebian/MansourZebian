@@ -1279,68 +1279,104 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
               className="mt-2"
             />
             {formtype === "Existing" && (
-              <div className="filters ms-auto">
-                <input
-                  type="text"
-                  placeholder="Filter by Name"
-                  value={filters.first_name}
-                  style={{
-                    width: 200,
-                    height: 50,
-                    borderRadius: 10,
-                    backgroundColor: "transparent",
-                    border: "1px solid gray",
-                    color: "#000",
-                    // textAlign: "center",
-                    paddingLeft: 10,
-                  }}
-                  onChange={(e) => handleFilterChange("first_name", e.target.value)}
-                />
+
+<div class="filters ms-auto flex flex-wrap justify-end gap-4">
+<input
+  type="text"
+  placeholder="Filter by Name"
+  value={filters.first_name}
+  class="w-full sm:w-48 md:w-56 h-12 rounded-lg bg-transparent border border-gray-400 text-black pl-3"
+  onChange={(e) => handleFilterChange("first_name", e.target.value)}
+/>
+
+<select
+  value={filters.type}
+  class="w-full sm:w-32 md:w-40 h-12 rounded-lg bg-transparent border border-gray-400 text-black pl-3"
+  onChange={(e) => handleFilterChange("type", e.target.value)}
+>
+  <option value="">Type</option>
+  <option value="New Participant">New Participant</option>
+  <option value="Refill">Refill</option>
+  <option value="Renewal">Renewal</option>
+  <option value="Rejected">Rejected</option>
+</select>
+
+<select
+  value={filters.status}
+  class="w-full sm:w-32 md:w-40 h-12 rounded-lg bg-transparent border border-gray-400 text-black pl-3"
+  onChange={(e) => handleFilterChange("status", e.target.value)}
+>
+  <option value="">Status</option>
+  <option value="inProgress">In Progress</option>
+  <option value="completed">Completed</option>
+  <option value="cancelled">Cancelled</option>
+  <option value="payment Pending">Payment Pending</option>
+  <option value="tracking late">Tracking late</option>
+</select>
+</div>
+
+              // <div className="filters ms-auto">
+              //   <input
+              //     type="text"
+              //     placeholder="Filter by Name"
+              //     value={filters.first_name}
+              //     style={{
+              //       width: 200,
+              //       height: 50,
+              //       borderRadius: 10,
+              //       backgroundColor: "transparent",
+              //       border: "1px solid gray",
+              //       color: "#000",
+              //       // textAlign: "center",
+              //       paddingLeft: 10,
+              //     }}
+              //     onChange={(e) => handleFilterChange("first_name", e.target.value)}
+              //   />
               
-                <select
-                  value={filters.type}
-                  style={{
-                    width: 100,
-                    height: 50,
-                    borderRadius: 10,
-                    backgroundColor: "transparent",
-                    border: "1px solid gray",
-                    color: "#000",
-                    // textAlign: "center",
-                    paddingLeft: 10,
-                  }}
-                  onChange={(e) => handleFilterChange("type", e.target.value)}
-                >
-                  <option value="">Type</option>
-                  <option value="New Participant">New Participant</option>
-                  <option value="Refill">Refill</option>
-                  <option value="Renewal">Renewal</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
-                <select
-                  value={filters.status}
-                  style={{
-                    width: 100,
-                    height: 50,
-                    borderRadius: 10,
-                    backgroundColor: "transparent",
-                    border: "1px solid gray",
-                    color: "#000",
-                    // textAlign: "center",
-                    paddingLeft: 10,
-                  }}
-                  onChange={(e) => handleFilterChange("status", e.target.value)}
-                >
-                  <option value="">Status</option>
-                  <option value="inProgress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                  <option value="payment Pending">Payment Pending</option>
-                  <option value="tracking late">Tracking late</option>
-                </select>
+              //   <select
+              //     value={filters.type}
+              //     style={{
+              //       width: 100,
+              //       height: 50,
+              //       borderRadius: 10,
+              //       backgroundColor: "transparent",
+              //       border: "1px solid gray",
+              //       color: "#000",
+              //       // textAlign: "center",
+              //       paddingLeft: 10,
+              //     }}
+              //     onChange={(e) => handleFilterChange("type", e.target.value)}
+              //   >
+              //     <option value="">Type</option>
+              //     <option value="New Participant">New Participant</option>
+              //     <option value="Refill">Refill</option>
+              //     <option value="Renewal">Renewal</option>
+              //     <option value="Rejected">Rejected</option>
+              //   </select>
+              //   <select
+              //     value={filters.status}
+              //     style={{
+              //       width: 100,
+              //       height: 50,
+              //       borderRadius: 10,
+              //       backgroundColor: "transparent",
+              //       border: "1px solid gray",
+              //       color: "#000",
+              //       // textAlign: "center",
+              //       paddingLeft: 10,
+              //     }}
+              //     onChange={(e) => handleFilterChange("status", e.target.value)}
+              //   >
+              //     <option value="">Status</option>
+              //     <option value="inProgress">In Progress</option>
+              //     <option value="completed">Completed</option>
+              //     <option value="cancelled">Cancelled</option>
+              //     <option value="payment Pending">Payment Pending</option>
+              //     <option value="tracking late">Tracking late</option>
+              //   </select>
 
 
-              </div>
+              // </div>
             )}
           </div>
 

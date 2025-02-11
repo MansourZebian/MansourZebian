@@ -42,13 +42,18 @@ function Info() {
             <h1 className='text-4xl font-bold'>Info</h1>
         </div>
    
-
-<div class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
-
-  <div className='text-left'>
-  Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+        <div class="flex p-6 mb-6 text-base text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 shadow-lg" role="alert">
+  <div class="text-left space-y-4">
+    <h2 class="text-lg font-semibold text-blue-900">Welcome to the RIVER Foundation</h2>
+    <p class="text-sm leading-relaxed">
+      At the RIVER Foundation, we are dedicated to improving the lives of individuals seeking innovative treatments. Our primary mission is to provide a safe and supportive environment for individuals exploring the benefits of Ketamine therapy through our research-based clinical studies.
+    </p>
+    <p class="text-sm leading-relaxed">
+      The RIVER Ketamine Study is designed to offer participants a comprehensive, step-by-step approach, ensuring they are well-informed and supported throughout their journey. Our team of dedicated professionals, led by study coordinator Vince, is committed to delivering personalized care and assistance at every stage of the process.
+    </p>
   </div>
 </div>
+
 
 
   

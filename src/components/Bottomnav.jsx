@@ -1,11 +1,12 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Bottomnav() {
   return (
     <div className="fixed bottom-0 left-0 z-50 w-full h-20 bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
       <div className="grid h-full max-w-lg grid-cols-4 mx-auto font-medium">
-        <a
-          href="/"
+        <Link
+          to="/"
           className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
         >
           <img
@@ -16,9 +17,9 @@ function Bottomnav() {
           <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
             Home
           </span>
-        </a>
+        </Link>
         <a
-          href="/chatting"
+          href={process.env.REACT_APP_DISCORD} target="_blank"
           className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
         >
           <img
@@ -28,11 +29,11 @@ function Bottomnav() {
           />
 
           <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
-            Chat&nbsp;with&nbsp;us
+            Chat&nbsp;with&nbsp;Discord
           </span>
         </a>
-        <a
-          href="/account"
+        <Link
+          to="/account"
           className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
         >
           <img
@@ -44,9 +45,9 @@ function Bottomnav() {
           <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
             Account
           </span>
-        </a>
-        <a
-          href="/info"
+        </Link>
+        <Link
+          to="/info"
           className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
         >
           <img
@@ -57,7 +58,7 @@ function Bottomnav() {
           <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
             Info
           </span>
-        </a>
+        </Link>
       </div>
     </div>
   );
