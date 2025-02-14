@@ -30,7 +30,15 @@ function Userprofile() {
   const [consent, setConsent] = useState([]);
   const [documentverification, setDocumentverification] = useState([]);
   const [screening, setScreening] = useState([]);
-  const [scores, setScores] = useState([]);
+  const [scores, setScores] = useState([{
+    id: null,
+    uid: null,
+    score: null,
+    key: null,
+    createdAt: null,
+    updatedAt: null
+  }
+  ]);
   const [refill, setRefill] = useState([]);
   const [refillGroup, setRefillGroup] = useState([]);
   const [scoreModal, setScoreModal] = useState(false);
@@ -148,6 +156,27 @@ function Userprofile() {
     }
   };
 
+  const updateStatusData = async (value, item) => {
+    try {
+      const response = await axios.put(
+        `${process.env.REACT_APP_BACKEND_URL}prescription/update/${item?.id}`,
+        // { status:value },
+        { ...item, status: value },
+
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // console.log("getScreeningData", response.data); // Log the data received from the backend
+      // setScreening(response.data); // Set the data to state if needed
+      getNewScript();
+    } catch (error) {
+      console.log(error); // Log any errors that occur during the request
+    }
+  };
+
   // console.log("-------------------------------", scriptData);
   const isFormValid = () => {
     return; //Object.values(scriptData).every((value) => value?.trim() !== "");
@@ -184,12 +213,70 @@ function Userprofile() {
           },
         }
       );
-      // console.log("score data.............>", response);
+      console.log("score data.............>", response);
       setScores(response.data); // Set the data to state if needed
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
     }
   };
+
+  const processScores = (scores) => {
+    if (!Array.isArray(scores)) return [];
+
+    const grouped = scores?.reduce((acc, item) => {
+      if (!item?.createdAt) return acc;
+
+      const date = item?.createdAt.split("T")[0]; // Extract date only
+
+      // Initialize if date does not exist
+      if (!acc[date]) {
+        acc[date] = { date, phq9: [], gad7: [], pcl5: [] };
+      }
+
+      // Push scores into arrays based on their key
+      acc[date][item?.key]?.push(item?.score);
+
+      return acc;
+    }, {});
+
+    // Convert object to sorted array (oldest date first)
+    return Object.values(grouped).sort((a, b) => new Date(a.date) - new Date(b.date));
+  };
+
+
+
+
+
+  // clinical forms
+  const groupByTypeAndDate = (screening) => {
+    // Create a Map to store unique document-date combinations
+    const grouped = new Map();
+
+    screening.forEach((form) => {
+      const type = form?.Screeningform?.type?.trim();  // Make sure to trim any spaces
+      const createdAt = new Date(form.createdAt).toLocaleDateString();
+
+      // Exclude 'entry questionnaire' rows
+      if (type !== "entry questionnaire") {
+        const key = `${type}-${createdAt}`;
+
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            type,
+            createdAt,
+            sentDate: formatDate(form.createdAt),  // Adjust the field to match your needs
+            receivedDate: formatDate(form.createdAt),  // Same here
+            status: "Sent"  // Adjust based on your logic
+          });
+        }
+      }
+    });
+
+    return Array.from(grouped.values());
+  };
+
+
+
 
   const getRefill = async () => {
     try {
@@ -230,7 +317,7 @@ function Userprofile() {
           },
         }
       );
-      // console.log("getScreeningData", response.data); // Log the data received from the backend
+      console.log("getScreeningData", response.data); // Log the data received from the backend
       setScreening(response.data); // Set the data to state if needed
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
@@ -475,6 +562,22 @@ function Userprofile() {
     return `${day}/${month}/${year}`;
   }
 
+  function formatDateWithTime(dateString) {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear() % 100; // Last two digits of year
+  
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0"); // Ensure two-digit minutes
+    const ampm = hours >= 12 ? "PM" : "AM";
+  
+    hours = hours % 12 || 12; // Convert to 12-hour format
+  
+    return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+  }
+  
+
   function isTypeExists(screeningForms, targetType) {
     return screeningForms?.some(
       (form) => form?.Screeningform?.type === targetType
@@ -600,6 +703,73 @@ function Userprofile() {
         </Modal.Footer>
       </Modal>
 
+      {/* clinical modal */}
+
+
+      {/* <Modal show={clinicalFormModal} onClose={() => setClinicalFormModal(false)}>
+  <Modal.Header>{clinicalFormModalType}</Modal.Header>
+  <Modal.Body>
+    <div className="space-y-6">
+      {screening?.length &&
+        screening
+          ?.filter(
+            (form) =>
+              form?.Screeningform?.type?.toUpperCase() ===
+                clinicalFormModalType?.toUpperCase() && // Filter by form type
+              new Date(form?.createdAt).toLocaleDateString() ===
+                new Date(form?.createdAt).toLocaleDateString() // Ensure the form matches the selected date
+          )
+          ?.map((form, index) => (
+            <div className="flex items-center gap-2" key={index}>
+              <div>
+                <h5 style={{ fontSize: 18, fontWeight: "bold" }}>
+                  {form?.Screeningform?.question}
+                </h5>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <p style={{ fontSize: 13, color: "#000" }}>Answer:</p>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: "#000",
+                      color: "green",
+                      fontWeight: "bolder",
+                    }}
+                  >
+                    {form?.optionanswer || " - "}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+    </div>
+  </Modal.Body>
+  <Modal.Footer>
+    <div
+      style={{
+        position: "absolute",
+        right: 25,
+        fontSize: 20,
+        fontWeight: "bold",
+      }}
+    >
+      Total Score:{" "}
+      {scores
+        .filter(
+          (item) =>
+            item?.key?.replace(/[0-9]/g, "")?.toUpperCase() ===
+              clinicalFormModalType?.split("-")[0] &&
+            item?.uid === id
+        )
+        .map((item) => item?.score)}
+    </div>
+    <Button color="gray" onClick={() => setClinicalFormModal(false)}>
+      Close
+    </Button>
+  </Modal.Footer>
+</Modal> */}
+
+
+      {/* original clinical modal */}
       <Modal
         show={clinicalFormModal}
         onClose={() => setClinicalFormModal(false)}
@@ -615,9 +785,8 @@ function Userprofile() {
                     ?.toUpperCase() ===
                   clinicalFormModalType?.split("-")[0] && (
                     <div className="flex items-center gap-2" key={index}>
-                      {/* <Label className="">
-                      {formatDate(form.createdAt)} - {form.Screeningform.type} 
-                    </Label> */}
+
+
                       <div>
                         <h5 style={{ fontSize: 18, fontWeight: "bold" }}>
                           {form?.Screeningform?.question}
@@ -628,24 +797,39 @@ function Userprofile() {
                             alignItems: "center",
                           }}
                         >
-                          <p
+                          
+
+                          <div
+                            style={{
+                              fontSize: 13,
+                              color: "#000",
+                              color: "green",
+                              fontWeight: "bolder",
+                              display:'flex',
+                              justifyContent:'flex-start',
+                              flexDirection:'row',
+                              // width:'100%'
+                            }}
+                          >
+
+                            <Label className="text-blue-500 mr-5">
+                              {formatDateWithTime(form.createdAt)}
+                            </Label>
+
+                            <p
                             style={{
                               fontSize: 13,
                               color: "#000",
                             }}
                           >
                             Answer:
+
                           </p>
-                          <p
-                            style={{
-                              fontSize: 13,
-                              color: "#000",
-                              color: "green",
-                              fontWeight: "bolder",
-                            }}
-                          >
-                            {form?.optionanswer || " - "}
-                          </p>
+
+                            <p className="mx-3">{form?.optionanswer || " N/A "}</p>
+
+
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -662,13 +846,13 @@ function Userprofile() {
               fontWeight: "bold",
             }}
           >
-            totalScore ={" "}
+            totalScores  ={" "}
             {scores.map(
               (item, index) =>
                 item?.key?.replace(/[0-9]/g, "")?.toUpperCase() ===
                 clinicalFormModalType?.split("-")[0] &&
                 item?.uid == id &&
-                item?.score
+                item?.score + " "
             )}
           </div>
           <Button color="gray" onClick={() => setClinicalFormModal(false)}>
@@ -1082,8 +1266,46 @@ function Userprofile() {
                 Give Score
               </p>
             </div> */}
+
+            {/* {console.log('scores',scores)} */}
+
             <div className="mt-10 relative overflow-x-auto">
               <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                  <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
+                    <tr>
+                      <th scope="col" className="px-6 py-4">Date</th>
+                      <th scope="col" className="px-6 py-4">PHQ-9</th>
+                      <th scope="col" className="px-6 py-4">GAD-7</th>
+                      <th scope="col" className="px-6 py-4">PCL-5</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.isArray(scores) && scores.length > 0 && processScores(scores).length > 0 ? (
+                      processScores(scores).map((entry, index) => (
+                        <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                          <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {entry.date}
+                          </td>
+                          <td className="px-6 py-4">{entry.phq9.length ? entry.phq9.join(", ") : "-"}</td>
+                          <td className="px-6 py-4">{entry.gad7.length ? entry.gad7.join(", ") : "-"}</td>
+                          <td className="px-6 py-4">{entry.pcl5.length ? entry.pcl5.join(", ") : "-"}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="text-center py-4">No data available</td>
+                      </tr>
+                    )}
+                  </tbody>
+
+                </table>
+              </div>
+            </div>
+
+            {/* <div className="mt-10 relative overflow-x-auto">
+              <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
+
                 <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                   <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
                     <tr>
@@ -1107,6 +1329,7 @@ function Userprofile() {
                         scope="row"
                         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                       >
+
                         {scores[0] && formatDate(scores[0]?.createdAt)}
                       </th>
                       {scores?.map(
@@ -1119,8 +1342,9 @@ function Userprofile() {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </div> */}
           </div>
+
 
           {/* Questionnaires */}
           <div className="mb-10">
@@ -1344,10 +1568,14 @@ function Userprofile() {
                       <th scope="col" className="px-6 py-3 text-[#FF0F0F]">
                         Delete
                       </th>
+                      <th scope="col" className="px-6 py-3">
+                        Status
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {newScriptData?.map((item, index) => {
+                      // console.log('see new scriptdata', newScriptData)
                       if (item?.uid != id) return;
                       return (
                         // console.log()
@@ -1373,11 +1601,20 @@ function Userprofile() {
                               defaultValue={item?.tracking_id || ""}
                               name="tackingLink"
                               // value={tackingLink?.value}
-                              onChange={(e) =>
-                                e.target.value?.length > 11
-                                  ? updateScriptData(e.target.value, item)
-                                  : null
-                              }
+                              onChange={async (e) => {
+                                const value = e.target.value;
+                                if (value.length > 8) {
+                                  await updateScriptData(value, item);
+                                }
+                              }}
+
+
+                              // onChange={(e) =>
+                              //   e.target.value?.length > 8
+                              //     ? updateScriptData(e.target.value, item)
+
+                              //     : null
+                              // }
                               placeholder="write tracking link here.."
                             />
                           </td>
@@ -1397,6 +1634,85 @@ function Userprofile() {
                           >
                             Delete
                           </td>
+                          <td
+                            className="px-6 py-4"
+                            style={{
+                              cursor: "pointer",
+                              color: "red",
+                              fontWeight: "bolder",
+                            }}>
+
+
+                            <input
+                              type="checkbox"
+                              disabled={item?.tracking_id?.length < 8}
+                              className={item?.tracking_id?.length < 8 ? "cursor-not-allowed" : ""}
+                              defaultChecked={item?.status || false}
+                              onChange={async (e) => {
+
+
+                                console.log(e.target.checked, "see item.tracking_id:", item?.tracking_id);
+                                if (!item?.tracking_id || item?.tracking_id.length <= 8) {
+                                  toast.error("Please provide a valid tracking link");
+                                  return;
+                                }
+
+
+
+                                await updateScriptData(item?.tracking_id, item)
+                                await updateStatusData(e.target.checked, item)
+
+                                if (e.target.checked) {
+                                  try {
+                                    // Update existingForm type to "Completed"
+
+
+                                    // console.log('See userId from params',id)
+                                    await axios.put(
+                                      `${process.env.REACT_APP_BACKEND_URL}existingforms/updatetype/${id}`,
+                                      { type: "Completed" },
+                                      {
+                                        headers: {
+                                          Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                        },
+                                      }
+                                    );
+
+                                    console.log('Existingform type updated to Completed')
+                                    // toast.success("Submitted successfully!");
+                                  } catch (error) {
+                                    toast.error("Error updating form");
+                                    console.log("error", error);
+                                  }
+                                }
+
+                                // else{
+                                //   try {
+                                //     // Update existingForm type to "Completed"
+
+
+                                //     console.log('See userId from params',id)
+                                //     await axios.put(
+                                //       `${process.env.REACT_APP_BACKEND_URL}existingforms/updatetype/${id}`,
+                                //       { type: "New Participant" },
+                                //       {
+                                //         headers: {
+                                //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                //         },
+                                //       }
+                                //     );
+
+                                //     console.log('Existingform type updated to Completed')
+                                //     // toast.success("Submitted successfully!");
+                                //   } catch (error) {
+                                //     toast.error("Error updating form");
+                                //     console.log("error", error);
+                                //   }
+                                // }
+                              }}
+                            />
+
+                          </td>
                         </tr>
                       );
                     })}
@@ -1406,7 +1722,82 @@ function Userprofile() {
             </div>
           </div>
 
-          {/* Clinical Forms */}
+          {/* new clinical forms */}
+          {/* added */}
+          {/* <div className="mb-10">
+    <h1 className="text-2xl font-bold text-left">Clinical Forms</h1>
+    <div className="mt-10 relative overflow-x-auto">
+      <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="h-20 text-lg text-black bg-[#f0f1fa]">
+            <tr>
+              <th scope="col" className="px-6 py-3">
+                Document
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Sent
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Received
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {screening
+            
+              .filter((form) => form?.Screeningform?.type?.trim() !== "entry questionaire") // Filter out Entry Questionnaire
+              .reduce((acc, form) => {
+                const type = form?.Screeningform?.type;
+                const createdAt = new Date(form.createdAt).toLocaleDateString();
+
+                // Find if the entry already exists for this type and date
+                const existingIndex = acc.findIndex(
+                  (entry) => entry.type === type && entry.createdAt === createdAt
+                );
+
+                // If entry exists, we don't add a new one, just return the accumulated list
+                if (existingIndex === -1) {
+                  acc.push({
+                    type,
+                    createdAt,
+                    sentDate: formatDate(form.createdAt),
+                    receivedDate: formatDate(form.createdAt),
+                    status: "Sent", // Modify this according to your status logic
+                  });
+                }
+
+                return acc;
+              }, [])
+              .map((form, index) => (
+                <tr key={`${form.type}-${form.createdAt}`} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                  <td
+                    scope="row"
+                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      setClinicalFormModal(true);
+                      setClinicalFormModalType(form.type);
+                    }}
+                  >
+                    {form.type}
+                  </td>
+                  <td className="px-6 py-4">{form.sentDate}</td>
+                  <td className="px-6 py-4">{form.receivedDate}</td>
+                  <td className="px-6 py-4">{form.status}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div> */}
+
+
+
+          {/* original Clinical Forms */}
           <div className="mb-10">
             <h1 className="text-2xl font-bold text-left">Clinical Forms</h1>
             <div className="mt-10 relative overflow-x-auto">
@@ -1539,7 +1930,16 @@ function Userprofile() {
                       </td>
                     </tr>
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                      {/* <th
+
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+
+          {/* <th
                         scope="row"
                         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
@@ -1551,7 +1951,7 @@ function Userprofile() {
                         Verification Document
                       </th> */}
 
-                      {/* <td className="px-6 py-4">
+          {/* <td className="px-6 py-4">
                         {isTypeExists(screening, "entry questionaire")
                           ? formatDate(
                               screening.filter(
@@ -1562,7 +1962,7 @@ function Userprofile() {
                             )
                           : "No Submission"}
                       </td> */}
-                      {/* <td className="px-6 py-4">
+          {/* <td className="px-6 py-4">
                         {isTypeExists(screening, "entry questionaire")
                           ? formatDate(
                               screening.filter(
@@ -1573,17 +1973,12 @@ function Userprofile() {
                             )
                           : "No Submission"}
                       </td> */}
-                      {/* <td className="px-6 py-4">
+          {/* <td className="px-6 py-4">
                         {isTypeExists(screening, "entry questionaire")
                           ? "Sent"
                           : "Pending"}
                       </td> */}
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+
 
           {/* Administrative Forms */}
           <div className="mb-10">
@@ -1758,7 +2153,14 @@ function Userprofile() {
             </div>
           </div>
 
-          <Button onClick={() => setChatMsg(true)}>Start Chat</Button>
+          {/* <Button onClick={() => setChatMsg(true)}>Start Chat</Button> */}
+          <Button
+            onClick={() => {
+              window.open('https://discord.com', "_blank");
+            }}
+          >
+            Chat on Discord
+          </Button>
         </div>
       </div>
     </>

@@ -96,13 +96,47 @@ function Refill() {
           console.log(response.data); // Logging the response if needed
         })
       );
+      try {
+        //update existingform.type to "Refill"
 
-      toast.success("Submitted successfully!");
-      setTimeout(() => {
-        window.location = "/payment";
-      }, 2000);
+        axios.put(`${process.env.REACT_APP_BACKEND_URL}existingforms/updatetype/${user?.id}`,
+          {
+            type: "Refill"
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        ).then((response) => {
+          console.log('see response', response)
+          toast.success("Submitted successfully!");
+
+          setTimeout(() => {
+            window.location = "/payment";
+          }, 2000);
+
+        }
+        ).catch((error) => {
+          toast.error("Error submitting data");
+          console.log("error", error)
+          return
+        })
+
+
+
+      } catch (error) {
+        toast.error("Error submitting data");
+        console.log("error", error)
+        setIsDisabled(false);
+
+        return
+      }
+
+
     } catch (error) {
       setIsDisabled(false);
+
       toast.error("Error submitting data: " + error);
       console.error("Error submitting data:", error); // Log error if submission fails
     }
@@ -173,11 +207,16 @@ function Refill() {
 
 
         {/* added refill option */}
+        <div className="w-full text-red-600 text-lg font-bold my-5">
+          <p>Instruction: Select the form below you want to refill again and then come back to this page to submit this form to proceed further</p>
+        </div>
 
-        {/* <Link
-          to={
+        <a
+          href={
             "/screening/phq9"
           }
+          target="_blank"
+          rel="noopener noreferrer"
         >
           <Checkcards
             title={"PHQ9"}
@@ -186,11 +225,12 @@ function Refill() {
             }
 
           />
-        </Link>
-        <Link
-          to={
+        </a>
+        <a
+          href={
             "/screening/pcl5"
           }
+           target="_blank"
         >
           <Checkcards
             title={"PCL5"}
@@ -198,11 +238,12 @@ function Refill() {
               "Refill PCL5"
             }
           />
-        </Link>
-        <Link
-          to={
+        </a>
+        <a
+          href={
             "/screening/gad7"
           }
+          target="_blank"
         >
           <Checkcards
             title={"GAD7"}
@@ -210,7 +251,7 @@ function Refill() {
               "Refill GAD7"
             }
           />
-        </Link> */}
+        </a>
 
         {/* {alert(JSON.stringify(setScreening))} */}
         {/* <Link to={'/screening/phq'}>

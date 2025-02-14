@@ -8,11 +8,13 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 function Emergencycontact() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState({});
   const [city, setCity] = useState([]);
 
+  const navigation = useNavigate()
   useEffect(() => {
     // Check if authentication token exists in localStorage
     const authToken = localStorage.getItem("token");
@@ -121,7 +123,9 @@ function Emergencycontact() {
                 console.log(response.data);
                 toast.success("Submitted successfully");
                 setTimeout(() => {
-                  window.location = "/administrative";
+                  // window.location = "/administrative";
+                  window.location = "/administrative/documentverification";
+
                 }, 2000);
               })
               .catch((error) => {

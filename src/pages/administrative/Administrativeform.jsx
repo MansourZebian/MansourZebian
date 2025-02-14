@@ -304,7 +304,7 @@ function Administrativeform() {
           to={
             (!(consent === null || information === null || emergencycontact === null )&& documentverification === null)
               ? "/administrative/documentverification"
-              : "/administratived"
+              : "/administrative"
           }
         >
           <Checkcards

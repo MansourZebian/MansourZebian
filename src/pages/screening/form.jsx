@@ -79,7 +79,7 @@ function Form() {
   useEffect(() => {
     // getData();
     getQuestions();
-  }, []);
+  }, [params.type]);
 
   const submit = async () => {
     console.log(".............data", data);
@@ -88,19 +88,19 @@ function Form() {
     const filterArry = data?.map((i) =>
       i.answer == "Several days"
         ? 1
-        : i.answer == "More than half the days"
+        : i.answer === "More than half the days"
         ? 2
-        : i.answer == "Nearly every day"
+        : i.answer === "Nearly every day"
         ? 3
-        : i.answer == "Not at all"
+        : i.answer === "Not at all"
         ? 0
-        : i.answer == "A little bit"
+        : i.answer === "A little bit"
         ? 1
-        : i.answer == "Moderately"
+        : i.answer === "Moderately"
         ? 2
-        : i.answer == "Quite a bit"
+        : i.answer === "Quite a bit"
         ? 3
-        : i.answer == "Extremely"
+        : i.answer === "Extremely"
         ? 4
         : 0
     );
@@ -171,7 +171,7 @@ function Form() {
           window.location = "/screening/pcl5";
           break;
         case "pcl5":
-          window.location = "/screening/gad7";
+          window.location = "/screening/gad7";  
           break;
         case "gad7":
           window.location = "/screening/questionnaire";

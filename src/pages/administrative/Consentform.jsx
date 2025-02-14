@@ -65,7 +65,8 @@ function Consentform() {
         console.log(response.data);
         toast.success("Submitted successfully!");
         setTimeout(() => {
-          window.location = "/administrative";
+          // window.location = "/administrative";
+          window.location = "/administrative/information";
         }, 2000);
       })
       .catch((error) => {

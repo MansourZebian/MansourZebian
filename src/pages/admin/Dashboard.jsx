@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { IoIosArrowDown, IoIosRemove } from "react-icons/io";
+import { IoIosArrowDown, IoIosRefresh, IoIosRemove } from "react-icons/io";
 import Sidebar from "../../components/Sidebar";
 import { Modal, Button, Label, Radio } from "flowbite-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { toast } from "react-toastify";
+import './Dashboard.css'
 import SearchSVG from "../../assets/svgs/search.svg";
 import { CSVLink, CSVDownload } from "react-csv";
 import {
@@ -47,7 +48,7 @@ function Dashboard() {
   const [currentNewUserRecords, setCurrentNewUserRecords] = useState([])
   // pagination handling
   const [currentNewUserPage, setCurrentNewUserPage] = useState(1);
-const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
+  const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
 
   const [totalNewUserDataPages, setTotalNewUserDataPages] = useState(0);
 
@@ -69,6 +70,10 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
     formFill: null,
     status: "",
   });
+  // State to trigger the useEffect
+  const [refresh, setRefresh] = useState(false);
+
+
 
   const getAllUsersHasFormsFilled = async () => {
 
@@ -525,9 +530,17 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
   useEffect(() => {
     getPrevSceeningData()
     getAllUsersHasFormsFilled();
+
     getScreeningData();
+
     getUsers();
-  }, []);
+  }, [refresh]);
+
+  // Handle refresh button click
+  const handleRefresh = () => {
+    console.log("Refreshing..."); // Debugging log
+    setRefresh((prev) => !prev); // Toggle refresh state
+  };
 
   const RecordsPerPage = 2;
 
@@ -616,6 +629,7 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
       toast.error("Please enter first name, last name, and type");
       return;
     }
+
 
     const successUpdates = [];
     const failedUpdates = [];
@@ -817,7 +831,7 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
 
       // Proceed to delete user from the backend
       const deleteResponse = await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}existingforms/delete/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}existingforms/delete/${userId}`,
         null,
         {
           headers: {
@@ -830,16 +844,28 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
         toast.success(`User ${first_name} deleted successfully.`);
 
         // Attempt to delete associated screening form answers
-        try {
-          await axios.put(
-            `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/deletebyuserid/${userId}`
-          );
-        } catch (screeningError) {
-          console.warn(
-            `Error deleting screening form answers for user ${first_name}:`,
-            screeningError
-          );
-        }
+        // handled from controller of existingform to delete screning answers
+        // try {
+        //   await axios.put(
+        //     `${process.env.REACT_APP_BACKEND_URL}screeningformanswer/deletebyuserid/${userId}`,null,{
+        //       headers: {
+        //         Authorization: `Bearer ${localStorage.getItem("token")}`,
+        //       },
+        //     }
+
+        //   );
+
+
+
+
+
+
+        // } catch (screeningError) {
+        //   console.warn(
+        //     `Error deleting screening form answers for user ${first_name}:`,
+        //     screeningError
+        //   );
+        // }
 
         // Update state after successful deletion
         setNewUser((prevUsers) => {
@@ -890,17 +916,17 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
   const handleUpdateUserField = (index, field, value) => {
     setCurrentNewUserRecords((prevUsers) => {
       const updatedUsers = [...prevUsers];
-  
+
       // Ensure 'purpose' is always stored as an array in state
       if (field === "purpose") {
         value = Array.isArray(value) ? value : JSON.parse(value || "[]");
       }
-  
+
       updatedUsers[index] = { ...updatedUsers[index], [field]: value };
       return updatedUsers;
     });
   };
-  
+
 
   //original
   // const handleUpdateUserField = (index, field, value) => {
@@ -984,7 +1010,8 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
     const information = await getInformation(id);
 
     // if (documentVerification && consent && emergencyContact && information) {
-    window.location.href = `/admin/userprofile/${id}`;
+    // window.location.href = `/admin/userprofile/${id}`;
+    navigate(`/admin/userprofile/${id}`);
     // } else {
     //   alert("Administration is not submitted");
     // }
@@ -1036,7 +1063,7 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
           },
         }
       );
-      console.log(response.data.length);
+      // console.log(response.data.length);
       return response.data != null;
     } catch (error) {
       // console.log(error);
@@ -1278,42 +1305,49 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
               onClick={() => setOpenModal(true)}
               className="mt-2"
             />
+            <IoIosRefresh
+              size={20}
+              onClick={() => window.location.reload()}
+              className="cursor-pointer hover:text-green-500" // Apply hover effect using Tailwind
+            />
+
+
             {formtype === "Existing" && (
 
-<div class="filters ms-auto flex flex-wrap justify-end gap-4">
-<input
-  type="text"
-  placeholder="Filter by Name"
-  value={filters.first_name}
-  class="w-full sm:w-48 md:w-56 h-12 rounded-lg bg-transparent border border-gray-400 text-black pl-3"
-  onChange={(e) => handleFilterChange("first_name", e.target.value)}
-/>
+              <div className="filters ms-auto flex flex-wrap justify-end gap-4">
+                <input
+                  type="text"
+                  placeholder="Filter by Name"
+                  value={filters.first_name}
+                  className="w-full sm:w-48 md:w-56 h-12 rounded-lg bg-transparent border border-gray-400 text-black pl-3"
+                  onChange={(e) => handleFilterChange("first_name", e.target.value)}
+                />
 
-<select
-  value={filters.type}
-  class="w-full sm:w-32 md:w-40 h-12 rounded-lg bg-transparent border border-gray-400 text-black pl-3"
-  onChange={(e) => handleFilterChange("type", e.target.value)}
->
-  <option value="">Type</option>
-  <option value="New Participant">New Participant</option>
-  <option value="Refill">Refill</option>
-  <option value="Renewal">Renewal</option>
-  <option value="Rejected">Rejected</option>
-</select>
+                <select
+                  value={filters.type}
+                  className="w-full sm:w-32 md:w-40 h-12 rounded-lg bg-transparent border border-gray-400 text-black pl-3"
+                  onChange={(e) => handleFilterChange("type", e.target.value)}
+                >
+                  <option value="">Type</option>
+                  <option value="New Participant">New Participant</option>
+                  <option value="Refill">Refill</option>
+                  <option value="Renewal">Renewal</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
 
-<select
-  value={filters.status}
-  class="w-full sm:w-32 md:w-40 h-12 rounded-lg bg-transparent border border-gray-400 text-black pl-3"
-  onChange={(e) => handleFilterChange("status", e.target.value)}
->
-  <option value="">Status</option>
-  <option value="inProgress">In Progress</option>
-  <option value="completed">Completed</option>
-  <option value="cancelled">Cancelled</option>
-  <option value="payment Pending">Payment Pending</option>
-  <option value="tracking late">Tracking late</option>
-</select>
-</div>
+                <select
+                  value={filters.status}
+                  className="w-full sm:w-32 md:w-40 h-12 rounded-lg bg-transparent border border-gray-400 text-black pl-3"
+                  onChange={(e) => handleFilterChange("status", e.target.value)}
+                >
+                  <option value="">Status</option>
+                  <option value="inProgress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="payment Pending">Payment Pending</option>
+                  <option value="tracking late">Tracking late</option>
+                </select>
+              </div>
 
               // <div className="filters ms-auto">
               //   <input
@@ -1332,7 +1366,7 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
               //     }}
               //     onChange={(e) => handleFilterChange("first_name", e.target.value)}
               //   />
-              
+
               //   <select
               //     value={filters.type}
               //     style={{
@@ -1399,7 +1433,7 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                           <th scope="col" className="px-6 py-3">
                             Received
                           </th>
-                          {/* <th scope="col" class="px-6 py-3">
+                          {/* <th scope="col" className="px-6 py-3">
                     Processed
                 </th> */}
                           <th scope="col" className="px-6 py-3">
@@ -1417,15 +1451,16 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                               scope="row"
                               className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                             >
-                              <a
-                                href="#"
+                              <Link
+                                to={`/userprofile/${item?.User?.id}`}
+                                // href="#"
                                 onClick={() =>
                                   handleUserProfileClick(item?.User?.id)
                                 }
                               >
                                 {" "}
                                 {item?.User?.username}{" "}
-                              </a>
+                              </Link>
                             </th>
                             <td className="px-6 py-4">
                               {parseDateTimeString(item?.createdAt)?.date},{" "}
@@ -1522,14 +1557,24 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
 
 
 
-                  <div className="overflow-x-auto">
+                  <div className="relative overflow-x-auto">
 
                     <table className=" w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 
                       <thead className="h-20 text-lg text-black bg-[#f0f1fa]">
                         <tr>
+                          <th scope="col"
+                            className="px-6 py-3 sticky left-0 z-30 border-r border-gray-300 bg-[red]">
+                            Last Name
+                          </th>
+
+                          <th scope="col"
+                            className="px-6 py-3 sticky left-[140px] z-30 border-r border-gray-300 bg-[#f0f1fa]">
+                            First Name
+                          </th>
+
                           {[
-                            "Last Name", "First Name", "Type", "Forms filled",
+                            "Type", "Forms filled",
 
                             // "Invoice Sent",
 
@@ -1604,16 +1649,46 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
 
                         {currentNewUserRecords?.map((item, index) => (
 
-                          <tr
-                            key={item?.id}
-                            className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                          >
-                            <th
-                              scope="row"
-                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white flex items-center"
-                            >
-
-
+                          // <tr
+                          //   key={item?.id}
+                          //   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                          // >
+                          <tr key={item?.id} className="bg-white border-b hover:bg-gray-50">
+                            {/* Last Name Column */}
+                            <th scope="row" className="sticky left-0 z-20 px-3 py-2 font-medium text-gray-900 whitespace-nowrap bg-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-gray-200">
+                              <div className="flex items-center gap-2">
+                                <div className="relative group">
+                                  <RiUser3Fill
+                                    className="text-lg text-gray-600 cursor-pointer"
+                                    onClick={() => {
+                                      handleUserProfileClick(item?.userId);
+                                      localStorage.setItem("Email@@", item.email);
+                                    }}
+                                  />
+                                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-30">
+                                    View User Profile
+                                  </div>
+                                </div>
+                                <input
+                                  readOnly
+                                  disabled
+                                  type="text"
+                                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-24 p-1"
+                                  value={item?.last_name || ""}
+                                />
+                              </div>
+                            </th>
+                            {/* First Name Column */}
+                            <th scope="row" className="sticky left-[140px] z-20 px-3 py-2 font-medium text-gray-900 whitespace-nowrap bg-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-gray-200">
+                              <input
+                                readOnly
+                                disabled
+                                type="text"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-24 p-1"
+                                value={item?.first_name || ""}
+                              />
+                            </th>
+                            {/* <th scope="row" className="sticky left-[250px] z-10 px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white bg-white border-r">
 
                               <RiUser3Fill cursor={'pointer'} style={{ transform: 'scale(1.8)', marginRight: 10 }}
                                 onClick={() => {
@@ -1635,17 +1710,18 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                               />
 
 
-                            </th>
-                            <th
-                              scope="row"
-                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                            >
-                              <input
-                                readOnly={true}
-                                disabled={true}
-                                type="text"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5"
-                                value={item?.first_name || ""}
+                                </th> */}
+
+                            {/* <th
+                                  scope="row"
+                                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                >
+                                  <input
+                                    readOnly={true}
+                                    disabled={true}
+                                    type="text"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5"
+                                    value={item?.first_name || ""}
 
 
 
@@ -1655,7 +1731,7 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                               />
 
 
-                            </th>
+                            </th> */}
                             <td className="px-6 py-4">
                               <select
                                 value={item?.type || ""}
@@ -1667,6 +1743,7 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                                 <option value="New Participant">New Participant</option>
                                 <option value="Refill">Refill</option>
                                 <option value="Renewal">Renewal</option>
+                                <option value="Completed">Completed</option>
                                 {/* <option value="Rejected">Rejected</option> */}
                               </select>
                             </td>
@@ -1752,47 +1829,50 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                             <td className="px-6 py-4">
                               <input
                                 type="checkbox"
-                                onChange={async (e) =>
-                                {
-                                  // "Send Telehealth link", and  "Send Telehealth Call" same
-                                 
-                                  // console.log('see e', e.target.checked)
-                                  handleUpdateUserField(index, "sendTelehealthLink", e.target.checked)
+                                onChange={async (e) => {
+                                  try {
+                                    handleUpdateUserField(index, "sendTelehealthLink", e.target.checked);
 
-                                  if(e.target.checked){
-                                    if(!item?.email || !item?.first_name){
-                                      //something went wrong
-                                      toast.error("Something went wrong. Please try again later");
-                                      return
+                                    if (e.target.checked) {
+                                      if (!item?.email || !item?.first_name) {
+                                        toast.error("Something went wrong. Please try again later.");
+                                        handleUpdateUserField(index, "sendTelehealthLink", false);
+                                        return;
+                                      }
+
+                                      const response2 = await axios.post(
+                                        `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/2`, // Ensure a `/` in the .env URL
+                                        {
+                                          email: item.email,
+                                          firstName: item.first_name,
+                                        },
+                                        {
+                                          headers: {
+                                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                          },
+                                        }
+                                      );
+
+                                      if (response2.status === 200) {
+                                        console.log("Email sent successfully:", response2.status);
+                                        toast.success(
+                                          `Schedule a telehealth visit Email has been sent to ${item.first_name}`
+                                        );
+                                      } else {
+                                        toast.error(
+                                          "Could not send Schedule a telehealth visit Email. Please try again later."
+                                        );
+                                      }
                                     }
-
-                                    const response2= await axios.post(
-                                      `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/2`,
-                                      {
-                                        email: item?.email,
-                                        firstName: item?.first_name,
-                                      },
-                                      {
-                                        headers: {
-                                          Authorization: `Bearer ${localStorage.getItem("token")}`,
-                                    }}
-                                  );
-                            
-                                  if(response2.status === 200){
-                                    console.log('first response', response2.status)
-                                    toast.success(`Schedule a telehealth visit Email has been sent to ${item?.first_name}`);
+                                  } catch (error) {
+                                    console.error("Error sending email:", error);
+                                    toast.error("An error occurred. Please try again later.");
+                                    handleUpdateUserField(index, "sendTelehealthLink", false);
                                   }
-
-                                  else{
-                                    toast.error("Could not send Schedule a telehealth visit Email Please try again later");
-                                  }
-
-                                  }
+                                }}
 
 
 
-                                  }
-                                }
                                 checked={item?.sendTelehealthLink || false}
                               />
                             </td>
@@ -1806,15 +1886,7 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                               />
                             </td>
                             <td className="px-6 py-4">
-                              {/* <input
-                                type="date"
-                                disabled={true}
-                                // onChange={(e) =>
-                                //   handleUpdateUserField(index, "date", formatDate(e.target.value))
-                                // }
-                                // value={item?.date || ""}
-                                value= {formatDate(item?.updatedAt) || ""}
-                              />   */}
+
                               <input
                                 type="datetime-local"
                                 disabled={true}
@@ -1857,45 +1929,62 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                             <td className="px-6 py-4">
                               <input
                                 type="checkbox"
-                                onChange={async (e) =>
-                                 { handleUpdateUserField(index, "scriptEmail", e.target.checked)
+                                onChange={async (e) => {
+                                  try {
+                                    // Update state optimistically
+                                    handleUpdateUserField(index, "scriptEmail", e.target.checked);
 
+                                    if (e.target.checked) {
+                                      // Check for missing fields
+                                      if (!item?.email || !item?.first_name) {
+                                        toast.error("Something went wrong. Please try again later.");
+                                        handleUpdateUserField(index, "scriptEmail", false); // Reset checkbox
+                                        return;
+                                      }
 
-                                  if(e.target.checked){
-                                    if(!item?.email || !item?.first_name ||!item?.scrip ||!item?.invoice){
-                                      //something went wrong 
-                                      toast.error("Something went wrong. Please try again later");
-                                      return
+                                      if (!item?.scrip) {
+                                        toast.error("Please add scrip text");
+                                        handleUpdateUserField(index, "scriptEmail", false); // Reset checkbox
+                                        return
+                                      }
+                                      if (!item?.invoice) {
+                                        toast.error("Please add invoice text");
+                                        handleUpdateUserField(index, "scriptEmail", false); // Reset checkbox
+                                        return
+                                      }
+
+                                      // Send request
+                                      const response = await axios.post(
+                                        `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/3`, // Ensure `/` in .env
+                                        {
+                                          email: item.email,
+                                          firstName: item.first_name,
+                                          scriptText: item.scrip,
+                                          invoiceText: item.invoice,
+                                        },
+                                        {
+                                          headers: {
+                                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                          },
+                                        }
+                                      );
+
+                                      // Handle success
+                                      if (response.status === 200) {
+                                        console.log("Email sent successfully:", response.status);
+                                        toast.success(`Script Email has been sent to ${item.first_name}`);
+                                      } else {
+                                        toast.error("Could not send Script Email. Please try again later.");
+                                      }
                                     }
-
-                                    const response3= await axios.post(
-                                      `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/3`,
-                                      {
-                                        email: item?.email,
-                                        firstName: item?.first_name,
-                                        scriptText: item?.scrip,
-                                        invoiceText: item?.invoice
-                                      },
-                                      {
-                                        headers: {
-                                          Authorization: `Bearer ${localStorage.getItem("token")}`,
-                                    }}
-                                  );
-                            
-                                  if(response3.status === 200){
-                                    console.log('first response', response3.status)
-                                    toast.success(`Script Email has been sent to ${item?.first_name}`);
+                                  } catch (error) {
+                                    console.error("Error sending script email:", error);
+                                    toast.error("An error occurred. Please try again later.");
+                                    handleUpdateUserField(index, "scriptEmail", false); // Reset checkbox on failure
                                   }
-
-                                  else{
-                                    toast.error("Could not send Script Email Please try again later");
-                                  }
-
-                                  }
+                                }}
 
 
-                                 }
-                                }
                                 checked={item?.scriptEmail || false}
                               />
                             </td>
@@ -1954,74 +2043,39 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
 
                             {/* purpose */}
 
-                            <td>
-
-                            <select
-    multiple
-    value={Array.isArray(item?.purpose) ? item.purpose : JSON.parse(item?.purpose || "[]")} 
-    onChange={(e) => {
-      const selectedValues = Array.from(e.target.selectedOptions, (option) => option.value);
-      handleUpdateUserField(index, "purpose", selectedValues);
-    }}
-    style={{
-      resize: "both", // Enables resizing
-      overflow: "auto", // Prevents content cutoff
-      display: "inline-block", // Ensures wrapping
-      minWidth: "150px",
-      height: "40px",
-      border: "1px solid #ccc",
-      padding: "5px"
-    }}
-  >
-
-    <option value="depression" className="checked:bg-blue-500 checked:text-white">Depression</option>
-    <option value="ptsd" className="checked:bg-green-500 checked:text-white">PTSD</option>
-    <option value="anxiety" className="checked:bg-red-500 checked:text-white">Anxiety</option>
-    <option value="chronicPain" className="checked:bg-yellow-500 checked:text-white">Chronic Pain</option>
-    <option value="other" className="checked:bg-purple-500 checked:text-white">Other</option>
-   
-  </select>
-
-
-                              {/* <select
-    // contentEditable={false} 
-
+                            <td className="relative group">
+                              <select
                                 multiple
-
                                 value={Array.isArray(item?.purpose) ? item.purpose : JSON.parse(item?.purpose || "[]")}
                                 onChange={(e) => {
                                   const selectedValues = Array.from(e.target.selectedOptions, (option) => option.value);
-                                  handleUpdateUserField(index, "purpose", selectedValues);  // Pass the array directly
+                                  handleUpdateUserField(index, "purpose", selectedValues);
                                 }}
-
-
-                                // value={Array.isArray(item?.purpose) ? item.purpose : JSON.parse(item?.purpose )}
-
-                                // // value={item?.purpose || []} // Ensure it's an array
-                                // onChange={(e) => {
-                                //   const selectedValues = Array.from(e.target.selectedOptions, (option) => option.value);
-                                //   handleUpdateUserField(index, "purpose", selectedValues);
-                                // }}
-                                // style={{ height: "40px" }}
-                                style={{
-                                  resize: "both", // Enables resizing
-                                  overflow: "auto", // Prevents content cutoff
-                                  display: "inline-block", // Ensures wrapping
-                                  minWidth: "150px",
-                                  height: "40px",
-                                  border: "1px solid #ccc",
-                                  padding: "5px"
-                                }}
+                                className="custom-multiselect"
                               >
+                                <option value="depression">Depression</option>
+                                <option value="ptsd">PTSD</option>
+                                <option value="anxiety">Anxiety</option>
+                                <option value="chronicPain">Chronic Pain</option>
+                                <option value="other">Other</option>
+                              </select>
 
-                                <option value="depression" className="checked:bg-blue-500 checked:text-white">Depression</option>
-                                <option value="ptsd" className="checked:bg-green-500 checked:text-white">PTSD</option>
-                                <option value="anxiety" className="checked:bg-red-500 checked:text-white">Anxiety</option>
-                                <option value="chronicPain" className="checked:bg-yellow-500 checked:text-white">Chronic Pain</option>
-                                <option value="other" className="checked:bg-purple-500 checked:text-white">Other</option>
-                               
-                              </select> */}
+                              {/* Tooltip with safety check */}
+                              <div className="custom-tooltip">
+                                {Array.isArray(item?.purpose)
+                                  ? item.purpose.length > 0
+                                    ? item.purpose.join(", ")
+                                    : "No purpose selected"
+                                  : (() => {
+                                    try {
+                                      return JSON.parse(item?.purpose || "[]").join(", ") || "No purpose selected";
+                                    } catch {
+                                      return "No purpose selected";
+                                    }
+                                  })()}
+                              </div>
                             </td>
+
 
 
                             <th>
@@ -2031,17 +2085,7 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
 
                               <button
                                 onClick={() => { handleDeleteUser(index) }}
-                                // disabled={loadingIndexes===index}
-                                // disabled={
-                                //   newUser.length === 0 ||
-                                //   newUser.some(
-                                //     (item) =>
-                                //       !item.fname ||
-                                //       !item.lname ||
-                                //       !item.type
-                                //   ) ||
-                                //   isLoading
-                                // }
+
                                 className={
                                   `text-white font-bold py-2 px-6 rounded-lg bg-red-500 hover:bg-red-600 ${loadingIndexes === index ? "animate-pulse" : ""
                                   }`
@@ -2075,23 +2119,23 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                         </tbody>}
 
 
-
-
-
                     </table>
 
-                    <a className="mx-6 mt-2 flex justify-start ">
+
+                  </div>
+
+                  {/* <a className="mx-6 mt-2 flex justify-start "> */}
 
 
-                      {/* <button
+                  {/* <button
                         onClick={() => setNewUser(newUser.slice(0, -1))}
                         className="text-white font-bold ms-4 py-4 px-4 rounded-lg bg-red-500 hover:bg-red-600"
                       >
                         -
                       </button> */}
-                      {/* <br /> */}
-                      {/* adding new row */}
-                      {/* <button id="addRow"
+                  {/* <br /> */}
+                  {/* adding new row */}
+                  {/* <button id="addRow"
                         // onClick={() => setNewUser([...newUser, {}])}
                         // onClick={()=>setCurrentNewUserRecords([...currentNewUserRecords, {}])}
                         onClick={() => {
@@ -2128,8 +2172,9 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
 
 
 
-                      {!isFetchingLoading && (
-                        <button
+                  {/* {!isFetchingLoading && ( */}
+
+                  {/* <button
                           onClick={handleSaveButton}
                           disabled={isLoading}
                           className={`text-white font-bold py-2 px-6 rounded-lg bg-green-500 hover:bg-green-600 ${isLoading ? "animate-pulse" : ""}`}
@@ -2147,69 +2192,97 @@ const [allUsersHasFormsFilled, setAllUsersHasFormsFilled] = useState([])
                               Save
                             </span>
                           )}
-                        </button>
-                      )}
+                        </button> */}
+
+                  {/* )} */}
 
 
-                    </a>
-                  </div>
+                  {/* </a> */}
+
+
 
 
 
                   <nav aria-label="Page navigation example" className="mt-5">
-                    <ul className="flex items-center -space-x-px h-8 text-sm">
-                      {/* Previous Button */}
-                      <li>
-                        <a
-                          href="#"
-                          className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentNewUserPage === 1 && "opacity-50 cursor-not-allowed"}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (currentNewUserPage > 1) {
-                              handleNewUserPageChange(currentNewUserPage - 1);
-                            }
-                          }}
-                          disabled={currentNewUserPage === 1}
-                        >
-                          <span className="sr-only">Previous</span>
-                          <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 1 1 5l4 4" />
-                          </svg>
-                        </a>
-                      </li>
 
-                      {/* Page Number Buttons */}
-                      {Array.from({ length: totalNewUserDataPages }, (_, index) => (
-                        <li key={index}>
-                          <button
-                            className={`px-3 py-2 rounded-lg ${currentNewUserPage === index + 1 ? "bg-green-600 text-white" : "bg-gray-200 hover:bg-blue-400"}`}
-                            onClick={() => handleNewUserPageChange(index + 1)}
+                    <div className="flex justify-between">
+
+                      <ul className="flex items-center -space-x-px h-8 text-sm">
+
+                        {/* Previous Button */}
+                        <li>
+                          <a
+                            href="#"
+                            className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentNewUserPage === 1 && "opacity-50 cursor-not-allowed"}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (currentNewUserPage > 1) {
+                                handleNewUserPageChange(currentNewUserPage - 1);
+                              }
+                            }}
+                            disabled={currentNewUserPage === 1}
                           >
-                            {index + 1}
-                          </button>
+                            <span className="sr-only">Previous</span>
+                            <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 1 1 5l4 4" />
+                            </svg>
+                          </a>
                         </li>
-                      ))}
 
-                      {/* Next Button */}
-                      <li>
-                        <a
-                          href="#"
-                          className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentNewUserPage === totalNewUserDataPages && "opacity-50 cursor-not-allowed"}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (currentNewUserPage < totalNewUserDataPages) {
-                              handleNewUserPageChange(currentNewUserPage + 1);
-                            }
-                          }}
-                          disabled={currentNewUserPage === totalNewUserDataPages}
-                        >
-                          <span className="sr-only">Next</span>
-                          <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
+                        {/* Page Number Buttons */}
+                        {Array.from({ length: totalNewUserDataPages }, (_, index) => (
+                          <li key={index}>
+                            <button
+                              className={`px-3 py-2 rounded-lg ${currentNewUserPage === index + 1 ? "bg-green-600 text-white" : "bg-gray-200 hover:bg-blue-400"}`}
+                              onClick={() => handleNewUserPageChange(index + 1)}
+                            >
+                              {index + 1}
+                            </button>
+                          </li>
+                        ))}
+
+                        {/* Next Button */}
+                        <li>
+                          <a
+                            href="#"
+                            className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentNewUserPage === totalNewUserDataPages && "opacity-50 cursor-not-allowed"}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (currentNewUserPage < totalNewUserDataPages) {
+                                handleNewUserPageChange(currentNewUserPage + 1);
+                              }
+                            }}
+                            disabled={currentNewUserPage === totalNewUserDataPages}
+                          >
+                            <span className="sr-only">Next</span>
+                            <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
+                            </svg>
+                          </a>
+                        </li>
+                      </ul>
+
+                      <button
+                        onClick={handleSaveButton}
+                        disabled={isLoading}
+                        className={`text-white font-bold py-2 px-6 rounded-lg bg-green-500 hover:bg-green-600 ${isLoading ? "animate-pulse" : ""}`}
+                      >
+                        {isLoading ? (
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                        </a>
-                      </li>
-                    </ul>
+                        ) : (
+                          <span className="flex ">
+                            <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Save
+                          </span>
+                        )}
+                      </button>
+                    </div>
+
                   </nav>
                 </>
               )}

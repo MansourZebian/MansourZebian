@@ -123,7 +123,8 @@ function Informationform() {
                 console.log(response.data);
                 toast.success("Submitted successfully");
                 setTimeout(() => {
-                  window.location = "/administrative";
+                  // window.location = "/administrative";
+                  window.location = "/administrative/emergencycontact";
                 }, 2000);
               })
               .catch((error) => {

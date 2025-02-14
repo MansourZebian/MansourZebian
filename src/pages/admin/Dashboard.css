@@ -1,0 +1,91 @@
+
+
+
+
+
+
+
+
+
+
+
+  /* Updated CSS */
+  
+.custom-multiselect {
+  width: 100%;
+  min-width: 180px;
+  max-width: 250px;
+  height: 41px;
+  background-color: white;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.custom-multiselect:focus {
+  height: auto;
+  /* position: absolute; */
+  z-index: 1000;
+}
+.custom-multiselect option {
+  padding: 10px;
+  background-color: white;
+  color: #333;
+}
+.custom-multiselect option:checked {
+  background-color: #7b89f8 !important;
+  color: white !important;
+}
+.custom-multiselect option:hover {
+  background-color: #c3dafe;
+  color: black;
+}
+
+
+/* Tooltip Styles */
+.custom-tooltip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 110%;
+  margin-bottom: 5px;
+  background-color: #333;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  visibility: hidden; /* Initially hidden */
+}
+
+/* Show the tooltip when the select is hovered */
+.custom-multiselect:hover + .custom-tooltip,
+.custom-multiselect:focus + .custom-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Add these CSS classes */
+.sticky {
+  position: sticky;
+  background-color: white; /* Ensures content behind doesn't show through */
+}
+.left-0 {
+  left: 0;
+}
+
+.left-250px { /* Adjust this value based on your first column width */
+  left: 250px;
+}
+
+.z-10 {
+  z-index: 10;
+}
+.border-r {
+  border-right-width: 1px;
+}
