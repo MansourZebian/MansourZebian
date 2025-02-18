@@ -39,6 +39,7 @@ import ScreeningQuestionstable from "./pages/admin/Questionstable";
 import TrackingLink from "./pages/TrackingLink";
 
 import AdminAccount from '../src/components/AdminAccount';
+import RefillForm from "./pages/screening/refillForm";
 
 function App() {
   return (
@@ -100,6 +101,7 @@ function App() {
           <Route path="/chatting" element={<Chatting />} />
           <Route path="/screening" element={<Screeningform />} />
           <Route path="/screening/:type" element={<Form />} />
+          <Route path="/refill/:type" element={<RefillForm />} />
           <Route path="/screening/questionnaire" element={<Questionnaire />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Signup />} />

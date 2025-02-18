@@ -1563,18 +1563,13 @@ function Dashboard() {
 
                       <thead className="h-20 text-lg text-black bg-[#f0f1fa]">
                         <tr>
-                          <th scope="col"
-                            className="px-6 py-3 sticky left-0 z-30 border-r border-gray-300 bg-[red]">
-                            Last Name
-                          </th>
-
-                          <th scope="col"
-                            className="px-6 py-3 sticky left-[140px] z-30 border-r border-gray-300 bg-[#f0f1fa]">
-                            First Name
-                          </th>
+                         
 
                           {[
-                            "Type", "Forms filled",
+                           
+                           "Last Name","First Name",
+                           
+                           "Type", "Forms filled",
 
                             // "Invoice Sent",
 

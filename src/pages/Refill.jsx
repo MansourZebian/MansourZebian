@@ -213,7 +213,7 @@ function Refill() {
 
         <a
           href={
-            "/screening/phq9"
+            "/refill/phq9"
           }
           target="_blank"
           rel="noopener noreferrer"
@@ -228,7 +228,7 @@ function Refill() {
         </a>
         <a
           href={
-            "/screening/pcl5"
+            "/refill/pcl5"
           }
            target="_blank"
         >
@@ -241,7 +241,7 @@ function Refill() {
         </a>
         <a
           href={
-            "/screening/gad7"
+            "/refill/gad7"
           }
           target="_blank"
         >
