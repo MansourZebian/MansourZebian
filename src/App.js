@@ -40,6 +40,7 @@ import TrackingLink from "./pages/TrackingLink";
 
 import AdminAccount from '../src/components/AdminAccount';
 import RefillForm from "./pages/screening/refillForm";
+import HelpUser from "./pages/HelpUser";
 
 function App() {
   return (
@@ -95,7 +96,7 @@ function App() {
           />
 
 
-
+          <Route path="/help" element={<HelpUser />} />
           <Route path="/account" element={<Account />} />
           <Route path="/info" element={<Info />} />
           <Route path="/chatting" element={<Chatting />} />

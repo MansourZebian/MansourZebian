@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Sidebar from '../../components/Sidebar'
+// import Sidebar from '../../components/Sidebar'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import axios from 'axios'
@@ -7,8 +7,11 @@ import { toast } from 'react-toastify'
 import { jwtDecode } from 'jwt-decode'
 import { TbHelpSquareRounded } from 'react-icons/tb'
 import { Link } from 'react-router-dom'
+import Sidebar2 from '../components/Sidebar2'
+import Bottomnav from '../components/Bottomnav'
+// import Sidebar2 from '../components/Sidebar2'
 
-function Help() {
+function HelpUser() {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -29,7 +32,7 @@ function Help() {
     <>
 
 
-      <Sidebar />
+      <Sidebar2 />
       <div class="p-10 sm:ml-64 bg-[#f7f7f7]">
 
         <div className='flex items-center gap-5'>
@@ -43,7 +46,7 @@ function Help() {
   className="flex flex-col p-6 mb-6 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 shadow-md"
   role="alert"
 >
-  <p className="mb-3 text-start">
+<p className="mb-3 text-start">
   Need help? Our team is here to support you every step of the way. You can schedule a call with a RIVER Pathfinder to get personalized guidance on the program, pricing, and next steps. If you prefer, join our Discord community to ask questions, connect with others, and get real-time support from our team. Whether you need help with scheduling, payment, or general inquiries, we’re just a call or message away.
   </p>
   
@@ -76,10 +79,13 @@ function Help() {
             </div>
           </div> */}
         </div>
+        <div className='min-[696px]:invisible'>
+        <Bottomnav />
+      </div>
 
       </div>
     </>
   )
 }
 
-export default Help
+export default HelpUser

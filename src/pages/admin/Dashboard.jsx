@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosRefresh, IoIosRemove } from "react-icons/io";
 import Sidebar from "../../components/Sidebar";
 import { Modal, Button, Label, Radio } from "flowbite-react";
@@ -17,6 +17,7 @@ import {
 
 } from "@ant-design/icons";
 import { RiUserFill, RiUser3Fill } from "react-icons/ri";
+import PurposeDropdown from "../../components/PurposeDropdown/PurposeDropdown";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -98,8 +99,7 @@ function Dashboard() {
 
   //for handling mulitple options purpose field in exisitingform
 
-
-
+  const [dropdownOpen, setDropdownOpen] = useState(false)
 
   // useEffect(() => {
 
@@ -1563,13 +1563,13 @@ function Dashboard() {
 
                       <thead className="h-20 text-lg text-black bg-[#f0f1fa]">
                         <tr>
-                         
+
 
                           {[
-                           
-                           "Last Name","First Name",
-                           
-                           "Type", "Forms filled",
+
+                            "Last Name", "First Name",
+
+                            "Type", "Forms filled",
 
                             // "Invoice Sent",
 
@@ -1586,8 +1586,8 @@ function Dashboard() {
                             "Call Scheduled", "Date", "Added to MDtoolbox",
 
                             "Script",
-                            "Scrip",
-                            "Scrip Email"
+                            "Script",
+                            "Script Email"
 
                             , "Status", "Notes", "Doctor",
 
@@ -2038,7 +2038,75 @@ function Dashboard() {
 
                             {/* purpose */}
 
-                            <td className="relative group">
+
+                            <PurposeDropdown item={item} index={index} handleUpdateUserField={handleUpdateUserField} />
+
+
+                            {/* working belwo */}
+
+
+                            {/* <td className="relative group">
+                              <div className="flex flex-col space-y-1">
+                                {[
+                                  { label: "Depression", value: "depression" },
+                                  { label: "PTSD", value: "ptsd" },
+                                  { label: "Anxiety", value: "anxiety" },
+                                  { label: "Chronic Pain", value: "chronicPain" },
+                                  { label: "Other", value: "other" },
+                                ].map((option) => {
+                                  // Ensure item.purpose is always an array
+                                  const purposes = Array.isArray(item?.purpose)
+                                    ? item.purpose
+                                    : (() => {
+                                      try {
+                                        return JSON.parse(item?.purpose || "[]");
+                                      } catch {
+                                        return [];
+                                      }
+                                    })();
+
+                                  return (
+                                    <label key={option.value} className="flex items-center space-x-2">
+                                      <input
+                                        type="checkbox"
+                                        value={option.value}
+                                        checked={purposes.includes(option.value)}
+                                        onChange={(e) => {
+                                          const newSelection = e.target.checked
+                                            ? [...purposes, option.value]
+                                            : purposes.filter((val) => val !== option.value);
+
+                                          handleUpdateUserField(index, "purpose", newSelection);
+                                        }}
+                                      />
+                                      <span>{option.label}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+
+                              <div className="custom-tooltip">
+                                {Array.isArray(item?.purpose)
+                                  ? item.purpose.length > 0
+                                    ? item.purpose.join(", ")
+                                    : "No purpose selected"
+                                  : (() => {
+                                    try {
+                                      return JSON.parse(item?.purpose || "[]").join(", ") || "No purpose selected";
+                                    } catch {
+                                      return "No purpose selected";
+                                    }
+                                  })()}
+                              </div>
+                            </td> */}
+
+
+
+
+                            {/* working checkbox list below */}
+
+
+                            {/* <td className="relative group">
                               <select
                                 multiple
                                 value={Array.isArray(item?.purpose) ? item.purpose : JSON.parse(item?.purpose || "[]")}
@@ -2055,7 +2123,7 @@ function Dashboard() {
                                 <option value="other">Other</option>
                               </select>
 
-                              {/* Tooltip with safety check */}
+                              
                               <div className="custom-tooltip">
                                 {Array.isArray(item?.purpose)
                                   ? item.purpose.length > 0
@@ -2069,7 +2137,7 @@ function Dashboard() {
                                     }
                                   })()}
                               </div>
-                            </td>
+                            </td> */}
 
 
 

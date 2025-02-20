@@ -51,6 +51,10 @@ function Userprofile() {
     value: "",
     item: {},
   });
+
+  const [scriptLoading,setScriptLoading]=useState(false)
+
+
   const [scriptData, setScriptData] = useState({
     currentDate: "",
     drug: "",
@@ -106,7 +110,13 @@ function Userprofile() {
   };
 
   const submitScriptData = async () => {
+
+    if(!scriptData?.dispense || !scriptData?.drug || !scriptData?.dosage){
+      toast.error("Please fill the entries first")
+      return
+    }
     try {
+      setScriptLoading(true)
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}prescription/create`,
         scriptData,
@@ -116,6 +126,61 @@ function Userprofile() {
           },
         }
       );
+
+      if (response.status === 201) {
+
+        axios.put(`${process.env.REACT_APP_BACKEND_URL}existingforms/updatescript/${id}`,
+          {
+            script: `${scriptData?.dispense} ${scriptData?.drug} ODT ${scriptData?.dosage}mg `
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        ).then((response) => {
+          // console.log('see response', response)
+          console.log('updated script')
+                setScriptLoading(false)
+            toast.success("Script submitted successfully");
+
+          setScriptData({
+            currentDate: "",
+            drug: "",
+            dispense: "",
+            dosage: "",
+            note: "",
+            uid: id,
+            tracking_id: "",
+          })
+
+        }
+        ).catch((error) => {
+          setScriptLoading(false)
+
+          toast.error("Error submitting data");
+          console.log("error", error)
+
+          return
+        })
+
+      }
+
+      else {
+        toast.error("Error submitting data");
+        setScriptLoading(false)
+        return
+
+      }
+
+      // update the script in existingForm.script
+
+
+
+
+
+
+
       // console.log("getScreeningData", response.data); // Log the data received from the backend
       // setScreening(response.data); // Set the data to state if needed
       const getEMail = localStorage.getItem("Email@@");
@@ -276,6 +341,20 @@ function Userprofile() {
   };
 
 
+
+  function clinicalGroupByRefill(screeningForms) {
+    if (!Array.isArray(screeningForms)) return [];
+  
+    const grouped = screeningForms.reduce((acc, form) => {
+      const refillId = form.refillId ?? 0; // Treat null as 0 (original form)
+      if (!acc[refillId]) acc[refillId] = [];
+      acc[refillId].push(form);
+      return acc;
+    }, {});
+  
+    return Object.entries(grouped); // Convert object to array for iteration
+  }
+  
 
 
   const getRefill = async () => {
@@ -567,16 +646,16 @@ function Userprofile() {
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear() % 100; // Last two digits of year
-  
+
     let hours = date.getHours();
     const minutes = date.getMinutes().toString().padStart(2, "0"); // Ensure two-digit minutes
     const ampm = hours >= 12 ? "PM" : "AM";
-  
+
     hours = hours % 12 || 12; // Convert to 12-hour format
-  
+
     return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
   }
-  
+
 
   function isTypeExists(screeningForms, targetType) {
     return screeningForms?.some(
@@ -602,6 +681,33 @@ function Userprofile() {
         console.log(error);
       });
   };
+
+
+  const processScoresRefill = (scores) => {
+    const groupedScores = {};
+  
+    scores.forEach(({ refillId, key, score, createdAt }) => {
+      const refill = refillId === null ? 0 : refillId; // Treat null as 0
+  
+      if (!groupedScores[refill]) {
+        groupedScores[refill] = {
+          date: new Date(createdAt).toLocaleDateString(),
+          refillId: refill,
+          phq9: "N/A",
+          gad7: "N/A",
+          pcl5: "N/A",
+        };
+      }
+  
+      groupedScores[refill][key] = score;
+    });
+  
+    return Object.values(groupedScores).sort((a, b) => a.refillId - b.refillId);
+  };
+
+
+
+
 
   return (
     <>
@@ -797,7 +903,7 @@ function Userprofile() {
                             alignItems: "center",
                           }}
                         >
-                          
+
 
                           <div
                             style={{
@@ -805,9 +911,9 @@ function Userprofile() {
                               color: "#000",
                               color: "green",
                               fontWeight: "bolder",
-                              display:'flex',
-                              justifyContent:'flex-start',
-                              flexDirection:'row',
+                              display: 'flex',
+                              justifyContent: 'flex-start',
+                              flexDirection: 'row',
                               // width:'100%'
                             }}
                           >
@@ -817,14 +923,14 @@ function Userprofile() {
                             </Label>
 
                             <p
-                            style={{
-                              fontSize: 13,
-                              color: "#000",
-                            }}
-                          >
-                            Answer:
+                              style={{
+                                fontSize: 13,
+                                color: "#000",
+                              }}
+                            >
+                              Answer:
 
-                          </p>
+                            </p>
 
                             <p className="mx-3">{form?.optionanswer || " N/A "}</p>
 
@@ -1211,7 +1317,7 @@ function Userprofile() {
                 justifyContent: "center",
               }}
             >
-              <a href={`mailto:${data.email}`}>
+              <a href={`mailto:${data?.email}`}>
                 <img src={MailSVG} width={40} height={40} />
               </a>
               <a href={`sms:${information?.mobile}`}>
@@ -1272,12 +1378,48 @@ function Userprofile() {
             <div className="mt-10 relative overflow-x-auto">
               <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
                 <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                  <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
+
+                  
+                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+  <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
+    <tr>
+      <th scope="col" className="px-6 py-4">Date</th>
+      <th scope="col" className="px-6 py-4">PHQ-9</th>
+      <th scope="col" className="px-6 py-4">GAD-7</th>
+      <th scope="col" className="px-6 py-4">PCL-5</th>
+      <th scope="col" className="px-6 py-4">Refill Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    {Array.isArray(scores) && scores.length > 0 ? (
+      processScoresRefill(scores).map((entry, index) => (
+        <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+          <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+            {entry.date}
+          </td>
+          <td className="px-6 py-4">{entry.phq9}</td>
+          <td className="px-6 py-4">{entry.gad7}</td>
+          <td className="px-6 py-4">{entry.pcl5}</td>
+          <td className="px-6 py-4 font-semibold">{entry.refillId}</td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="5" className="text-center py-4">No data available</td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
+
+
+                  {/* <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
                     <tr>
                       <th scope="col" className="px-6 py-4">Date</th>
                       <th scope="col" className="px-6 py-4">PHQ-9</th>
                       <th scope="col" className="px-6 py-4">GAD-7</th>
                       <th scope="col" className="px-6 py-4">PCL-5</th>
+                      <th scope="col" className="px-6 py-4">Refill Count</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1297,7 +1439,7 @@ function Userprofile() {
                         <td colSpan="4" className="text-center py-4">No data available</td>
                       </tr>
                     )}
-                  </tbody>
+                  </tbody> */}
 
                 </table>
               </div>
@@ -1524,13 +1666,13 @@ function Userprofile() {
                   </table>
                 </div>
                 <button
-                  className="mt-10 bg-[#6984fb] px-10 py-4 text-white font-bold rounded-2xl"
-                  // disabled={!isFormValid()}
+                  className="mt-10 bg-[#6984fb] px-10 py-4 text-white font-bold rounded-2xl transition duration-150 ease-in-out hover:bg-[#627dfa]  active:bg-[#5a6de9] active:scale-100"
+                  disabled={scriptLoading}
                   onClick={() => {
                     submitScriptData();
                   }}
                 >
-                  Submit
+                  {scriptLoading ? "Loading..." : "Submit"}
                 </button>
                 {/* <button className="mt-10  bg-[#6984fb] px-10 py-4 text-white font-bold rounded-2xl">
                   Submit
@@ -1817,8 +1959,14 @@ function Userprofile() {
                       <th scope="col" className="px-6 py-3">
                         Status
                       </th>
+                      {/* <th scope="col" className="px-6 py-3">
+                        Refill Count
+                      </th> */}
                     </tr>
                   </thead>
+                 
+                 
+                 
                   <tbody>
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th

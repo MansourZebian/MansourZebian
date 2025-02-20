@@ -7,19 +7,25 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Refill() {
   const [data, setData] = useState([]);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading,setIsLoading]=useState(false)
 
   const [user, setUser] = useState({});
   const [isDisabled, setIsDisabled] = useState(false);
   const [screening, setScreening] = useState([]);
+  const [refillInfo, setRefillInfo] = useState([])
+
+  const [lastRefillId, setLastRefillId] = useState(null);
 
 
 
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Check if authentication token exists in localStorage
@@ -30,8 +36,73 @@ function Refill() {
       // You can validate the token here if needed
       getScreeningData(decodedUser.id);
       setIsAuthenticated(true);
+
+      // getLastRefillIdFilled(decodedUser.id);
+
     }
   }, []);
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (user?.id) {
+        getRefilledScore(user.id);
+      }
+    }, 5000); // 5000 milliseconds = 5 seconds
+
+    return () => clearInterval(interval); // Cleanup on component unmount
+  }, [user]);
+
+
+
+  // const getLastRefillIdFilled = async (id) => {
+
+  //   try {
+  //     const response = await axios.get(
+  //       `${process.env.REACT_APP_BACKEND_URL}score/getLastRefillId/${id}`, //userId
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //         },
+  //       }
+  //     );
+  //     console.log("score /getLastRefillId data.............>", response.data?.refillId);
+  //     setLastRefillId(response.data?.refillId);
+  //   } catch (error) {
+  //     console.log(error); // Log any errors that occur during the request
+  //   }
+
+  // }
+  const getRefilledScore = async (id) => {
+
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}score/${id}`, //userId
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      console.log("score data.............>", response?.data);
+
+      let filteredResponse = response?.data?.filter(item => {
+        const createdAt = new Date(item?.createdAt);
+        const twentyDaysAgo = new Date();
+        twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
+        return createdAt > twentyDaysAgo;
+      });
+
+      console.log('see filteredResponse', filteredResponse)
+      setRefillInfo(filteredResponse)
+
+
+
+    } catch (error) {
+      console.log(error); // Log any errors that occur during the request
+    }
+
+  }
 
   const getScreeningData = async (id) => {
     try {
@@ -71,21 +142,37 @@ function Refill() {
     getQuestions();
   }, []);
 
+  { console.log('user', user) }
+
   const submit = async () => {
+
+    if (!user?.id || !user?.first_name || !user?.last_name || !user?.email) {
+
+      toast.error("Some error occured, Please refresh the page");
+      return
+    }
+
+
     setIsDisabled(true);
+    setIsLoading(true)
     try {
       const key = uuidv4();
       await Promise.all(
-        data.map(async (ques) => {
+        data?.map(async (ques) => {
           const response = await axios.post(
             `${process.env.REACT_APP_BACKEND_URL}refill/userrefill`,
             {
-              uid: user.id,
-              r_id: ques.id,
+              uid: user?.id,
+              r_id: ques?.id,
               status: "active",
               answer: "", // You might need to adjust this part according to your data
               key: key, // You might need to adjust this part according to your data
-              optionanswer: ques.answer, // You might need to adjust this part according to your data
+              optionanswer: ques?.answer, // You might need to adjust this part according to your data
+
+
+          
+
+
             },
             {
               headers: {
@@ -96,10 +183,50 @@ function Refill() {
           console.log(response.data); // Logging the response if needed
         })
       );
-      try {
+
+
+
+
+
+          // for creating new entry in existing form  passing userId,first_name,last_name,email
+
+          await axios.post(
+            `${process.env.REACT_APP_BACKEND_URL}existingforms/create`,
+            {
+              userId: user.id,
+              first_name: user.first_name,
+              last_name: user.last_name,
+              email: user.email,
+              type: "Refill",
+              active:true
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          ).then((response) => {
+            setIsLoading(false)
+
+            console.log('see response', response)
+            toast.success("Submitted successfully!");
+
+          }).catch((error) => {
+            setIsLoading(false)
+            console.log('error ',error)
+            toast.error("Some Error occured!");
+
+            return
+          })
+
+          
+
+      // update the type
+      // try {
         //update existingform.type to "Refill"
 
-        axios.put(`${process.env.REACT_APP_BACKEND_URL}existingforms/updatetype/${user?.id}`,
+      /*
+  axios.put(`${process.env.REACT_APP_BACKEND_URL}existingforms/updatetype/${user?.id}`,
           {
             type: "Refill"
           },
@@ -110,33 +237,39 @@ function Refill() {
           }
         ).then((response) => {
           console.log('see response', response)
-          toast.success("Submitted successfully!");
-
-          setTimeout(() => {
-            window.location = "/payment";
-          }, 2000);
+          
 
         }
         ).catch((error) => {
           toast.error("Error submitting data");
           console.log("error", error)
           return
-        })
+        })      
+      */
 
 
+          // setTimeout(() => {
+          //   window.location = "/payment";
+          // }, 2000);
+          // setTimeout(() => {
+          //   // window.location = "/";
+          //   // navigate('/')
+          //   navigate(-1)
+          // }, 2000);
 
-      } catch (error) {
-        toast.error("Error submitting data");
-        console.log("error", error)
-        setIsDisabled(false);
 
-        return
-      }
+      // } catch (error) {
+      //   toast.error("Error submitting data");
+      //   console.log("error", error)
+      //   setIsDisabled(false);
+
+      //   return
+      // }
 
 
     } catch (error) {
       setIsDisabled(false);
-
+      setIsLoading(false)
       toast.error("Error submitting data: " + error);
       console.error("Error submitting data:", error); // Log error if submission fails
     }
@@ -208,48 +341,71 @@ function Refill() {
 
         {/* added refill option */}
         <div className="w-full text-red-600 text-lg font-bold my-5">
-          <p>Instruction: Select the form below you want to refill again and then come back to this page to submit this form to proceed further</p>
+          <p>Instruction: Please fill out  the forms below and then click Submit to proceed with your refill request</p>
         </div>
 
         <a
+          className={refillInfo?.some((item) => item.key === "phq9") ? "cursor-not-allowed pointer-events-none opacity-100" : ""}
+
           href={
-            "/refill/phq9"
+            refillInfo?.some((item) => item.key === "phq9") ? "" : "/refill/phq9"
           }
+          // href={
+          //   "/refill/phq9"
+          // }
           target="_blank"
           rel="noopener noreferrer"
+
         >
           <Checkcards
             title={"PHQ9"}
             checktitle={
-              "Refill PHQ9"
+              refillInfo?.some((item) => item.key === "phq9") ? "Refilled PHQ9" : "Refill PHQ9"
             }
+            disabled={refillInfo?.some((item) => item.key === "phq9") ? true : false}
 
           />
         </a>
         <a
+
+          // className={refillInfo?.some((item) => item.key === "pcl5") ? "cursor-not-allowed pointer-events-none opacity-100" : ""}
+
           href={
-            "/refill/pcl5"
+            refillInfo?.some((item) => item.key === "pcl5") ? "" : "/refill/pcl5"
           }
-           target="_blank"
+          target="_blank"
         >
           <Checkcards
             title={"PCL5"}
             checktitle={
-              "Refill PCL5"
+              refillInfo?.some((item) => item.key === "pcl5") ? "Refilled PCL5" : "Refill PCL5"
             }
+            disabled={refillInfo?.some((item) => item.key === "pcl5") ? true : false}
+
           />
         </a>
+
+        {console.log('>>', refillInfo.some((item) => item?.key === 'gad7'))}
+
         <a
+
+          className={refillInfo?.some((item) => item?.key === "gad7") ? "cursor-not-allowed pointer-events-none opacity-100" : ""}
+
           href={
-            "/refill/gad7"
+            refillInfo?.some((item) => item?.key === "gad7") ? "" : "/refill/gad7"
           }
+          // href={
+          //   "/refill/gad7"
+          // }
           target="_blank"
         >
           <Checkcards
             title={"GAD7"}
             checktitle={
-              "Refill GAD7"
+              refillInfo?.some((item) => item.key === "gad7") ? "Refilled GAD7" : "Refill GAD7"
             }
+            disabled={refillInfo?.some((item) => item.key === "gad7") ? true : false}
+
           />
         </a>
 
@@ -283,12 +439,12 @@ function Refill() {
 
         <div className="flex items-center w-full justify-center">
           <button
-            disabled={isDisabled}
+            disabled={isLoading}
             type="button"
             onClick={submit}
-            className=" mb-4 bg-[#7b89f8] hover:bg-[#CBC3E3] text-white py-2 px-20 rounded-full shadow-md shadow-[#7b89f8] mt-10"
+            className={`mb-4 bg-[#7b89f8]  hover:bg-[#CBC3E3] text-white py-2 px-20 rounded-full shadow-md ${isLoading ? "shadow-[#FFC107]" : "shadow-[#7b89f8]"} mt-10`}
           >
-            Submit
+            {isLoading?"Loading..":"Submit"}
           </button>
         </div>
       </div>

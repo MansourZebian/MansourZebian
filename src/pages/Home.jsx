@@ -25,7 +25,8 @@ function Home() {
     type: "",
     callScheduled: false,
     script: false,
-    status: ""
+    status: "",
+    sendTelehealthLink:false
   });
 
   const [prescription,setPrescription]=useState([{
@@ -98,7 +99,6 @@ function Home() {
     }
   }, []);
 
-
   const getRefillStatus = async (id) => {
     try {
       const response = await axios.get(
@@ -109,35 +109,72 @@ function Home() {
           },
         }
       );
-      // console.log("score data.............>", response);
-  
-      setScores(response.data); // Set the data to state
-  
-      // Find the latest createdAt timestamp from the scores
+
+      setScores(response.data); // Store the scores in state
+
+      // Find the latest createdAt timestamp
       const latestScore = response.data.reduce((latest, score) => {
         const createdAt = new Date(score.createdAt);
         return createdAt > latest ? createdAt : latest;
-      }, new Date(0)); // Initialize with epoch date (1970-01-01)
-  
-      // Calculate the refill time (24 hours after latest createdAt)
-      const refillTime = new Date(latestScore.getTime() + 24 * 60 * 60 * 1000); // Add 24 hours
+      }, new Date(0));
+
+      // Correctly calculate the refill date by adding 20 days
+      let refillTime = new Date(latestScore);
+      // console.log('refilltime',refillTime)
+      refillTime.setDate(refillTime.getDate() + 20); // This properly handles month transitions
+
       setRefillTime(refillTime); // Store the refill time in state
-  
-      // Check if 24 hours have passed since the latest score
+
+      // Check if the current date has passed the refill time
       const currentTime = new Date();
-      const timeDifference = currentTime - latestScore;
-      const oneDayInMillis = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-  
-      if (timeDifference < oneDayInMillis) {
-        // Disable refill if less than 24 hours have passed
-        setIsRefillAllowed(false);
-      } else {
-        setIsRefillAllowed(true);
-      }
+      setIsRefillAllowed(currentTime >= refillTime);
+
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
     }
-  };
+};
+
+
+  // const getRefillStatus = async (id) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${process.env.REACT_APP_BACKEND_URL}score/${id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //         },
+  //       }
+  //     );
+  //     // console.log("score data.............>", response);
+  
+  //     setScores(response.data); // Set the data to state
+  
+  //     // Find the latest createdAt timestamp from the scores
+  //     const latestScore = response.data.reduce((latest, score) => {
+  //       const createdAt = new Date(score.createdAt);
+  //       return createdAt > latest ? createdAt : latest;
+  //     }, new Date(0)); // Initialize with epoch date (1970-01-01)
+  
+  //     // Calculate the refill time (24 hours after latest createdAt)
+  //     // const refillTime = new Date(latestScore.getTime() + 20* 24 * 60 * 60 * 1000); // Add 24 hours
+  //     const refillTime = new Date(latestScore.getTime() + 20* 24 * 60 * 60 * 1000); // Add 24 hours
+  //     setRefillTime(refillTime); // Store the refill time in state
+  
+  //     // Check if 24 hours have passed since the latest score
+  //     const currentTime = new Date();
+  //     const timeDifference = currentTime - latestScore;
+  //     const oneDayInMillis = 20* 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+  
+  //     if (timeDifference < oneDayInMillis) {
+  //       // Disable refill if less than 24 hours have passed
+  //       setIsRefillAllowed(false);
+  //     } else {
+  //       setIsRefillAllowed(true);
+  //     }
+  //   } catch (error) {
+  //     console.log(error); // Log any errors that occur during the request
+  //   }
+  // };
   
 
   const getExistingFormInfo = async (uid) => {
@@ -419,12 +456,12 @@ if (user?.status) {
 // console.log('see .>',lastPrescription)
 if (prescription?.length > 0 && lastPrescription?.status) {
   
-  msg = `Done, Please schedule a tele-health visit here: ${lastPrescription?.tracking_id}`;
+  msg = `Shipment Tracking link: : ${lastPrescription?.tracking_id}`;
 }
 else if (user?.status === "approved" && user?.hasFilledForm && existingFormInfo?.script) {
   msg = "Shipment tracking link: [We don’t have a tracking link yet]";
 }
-else if (user?.status === "approved" && user?.hasFilledForm && existingFormInfo.callScheduled) {
+else if (user?.status === "approved" && user?.hasFilledForm && existingFormInfo.sendTelehealthLink) {
   msg = "It seems that you are a good candidate for the Ketamine Study. We sent you an email to schedule your telehealth visit.";
 } 
 
@@ -480,7 +517,7 @@ setMsg(msg)
         <Whitecard
           title={"Status:"}
 
-          msg={msg ? msg.toString() : "No message available"}
+          msg={msg ? msg.toString().replace(/(.{1,30})( +|$\n?)|(.{1,30})/g, '$1$3\n') : "No message available"}
 
           // msg={
           //   user?.status &&//formsFilled
@@ -626,7 +663,8 @@ setMsg(msg)
       <Card1
         title={"Request Refill "}
         img={"Applyicon.png"}
-        subtext={`${refill_length} of 3 refills are available`}
+        subtext={`${refill_length} of 3 refills requested
+ `}
         disabled={!(is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire) || (refill_length>=3 || !isRefillAllowed)}
       />
     </Link>

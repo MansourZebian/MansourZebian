@@ -3,7 +3,7 @@ import Navbar1 from "../../components/Navbar1";
 import { IoIosArrowForward } from "react-icons/io";
 import Bottomnav from "../../components/Bottomnav";
 import Sidebar2 from "../../components/Sidebar2";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { v4 as uuidv4 } from "uuid";
@@ -13,6 +13,7 @@ function RefillForm() {
   const params = useParams();
   const [data, setData] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Check if authentication token exists in localStorage
@@ -89,20 +90,20 @@ function RefillForm() {
       i.answer == "Several days"
         ? 1
         : i.answer === "More than half the days"
-        ? 2
-        : i.answer === "Nearly every day"
-        ? 3
-        : i.answer === "Not at all"
-        ? 0
-        : i.answer === "A little bit"
-        ? 1
-        : i.answer === "Moderately"
-        ? 2
-        : i.answer === "Quite a bit"
-        ? 3
-        : i.answer === "Extremely"
-        ? 4
-        : 0
+          ? 2
+          : i.answer === "Nearly every day"
+            ? 3
+            : i.answer === "Not at all"
+              ? 0
+              : i.answer === "A little bit"
+                ? 1
+                : i.answer === "Moderately"
+                  ? 2
+                  : i.answer === "Quite a bit"
+                    ? 3
+                    : i.answer === "Extremely"
+                      ? 4
+                      : 0
     );
     const sum = filterArry?.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
@@ -113,81 +114,132 @@ function RefillForm() {
     const sumAsString = sum?.toString();
     console.log(".............filterArry", filterArry, sumAsString, user);
 
-    await axios
-      .post(
-        `${process.env.REACT_APP_BACKEND_URL}score/create`,
-        {
-          key: data[0]?.type,
-          score: parseInt(sumAsString),
-          uid: user?.id,
+
+
+    // getting latestRefillId 
+    const response = await axios.get(
+      `${process.env.REACT_APP_BACKEND_URL}score/getLastRefillId/${user?.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+      }
+      //getting refillId
+    ).then(async (response) => {
+      console.log(response.data);
+      const refillId =await response.data?.refillId;
+      console.log('see refillId', refillId)
+
+      //calling api to updated refillId in score
+
+      await axios
+        .post(
+          `${process.env.REACT_APP_BACKEND_URL}score/create`,
+          {
+            key: data[0]?.type,
+            score: parseInt(sumAsString),
+            uid: user?.id,
+            refillId: parseInt(refillId) + 1
           },
-        }
-      )
-      .then((response) => {
-        toast.success("Score added successfully");
-        // getScores();
-        // scoreModal(false);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    try {
-      const key = uuidv4();
-      await Promise.all(
-        data.map(async (ques) => {
-          // Push the answer value to the array
-
-          const response = await axios.post(
-            `${process.env.REACT_APP_BACKEND_URL}screeningform/useranswer`,
-            {
-              userId: user.id,
-              screeningformId: ques.id,
-              status: "active",
-              answer: "", // You might need to adjust this part according to your data
-              key: key, // You might need to adjust this part according to your data
-              optionanswer: ques.answer, // You might need to adjust this part according to your data
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-          console.log(response.data); // Logging the response if needed
+          }
+        )
+        .then(async (response) => {
+          
+          
+          // getScores();
+          // scoreModal(false);
+          toast.success("Score added successfully");
+
+          ///calling api to updated refillId in 
+
+          try {
+            const key = uuidv4();
+            await Promise.all(
+              data.map(async (ques) => {
+                // Push the answer value to the array
+      
+                const response = await axios.post(
+                  `${process.env.REACT_APP_BACKEND_URL}screeningform/useranswer`,
+                  {
+                    userId: user.id,
+                    screeningformId: ques.id,
+                    status: "active",
+                    answer: "", // You might need to adjust this part according to your data
+                    key: key, // You might need to adjust this part according to your data
+                    optionanswer: ques.answer, // You might need to adjust this part according to your data
+                    refillId: parseInt(refillId) + 1
+                  },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                  }
+                );
+                console.log(response.data); // Logging the response if needed
+              })
+            );
+      
+            toast.success("Submitted successfully!");
+
+            
+                    window.close();
+
+            // if (window.opener === null || window.opener === undefined) {
+            //   window.close();
+            // } else {
+            //   window.opener.location.reload();
+            //   window.close();
+            // }
+            // window.location = '/screening';
+      
+            //   switch (params.type) {
+            //     case "phq9":
+            //       window.location = "/refill/pcl5";
+            //       break;
+            //     case "pcl5":
+            //       window.location = "/refill/gad7";  
+            //       break;
+            //     case "gad7":
+            //       window.location = "/refill/questionnaire";
+            //       break;
+      
+            //     default:
+            //       window.location = "/refill";
+            //   }
+          } catch (error) {
+            setIsDisabled(false);
+            toast.error("Error submitting data: " + error);
+            console.error("Error submitting data:", error); // Log error if submission fails
+          }
+          
+          
+
+
+
         })
-      );
+        .catch((error) => {
+          console.log(error);
+          toast.error("Error adding score");
+        });
 
-      toast.success("Submitted successfully!");
-
-      window.close();
 
 
-      // window.location = '/screening';
 
-    //   switch (params.type) {
-    //     case "phq9":
-    //       window.location = "/refill/pcl5";
-    //       break;
-    //     case "pcl5":
-    //       window.location = "/refill/gad7";  
-    //       break;
-    //     case "gad7":
-    //       window.location = "/refill/questionnaire";
-    //       break;
 
-    //     default:
-    //       window.location = "/refill";
-    //   }
-    } catch (error) {
-      setIsDisabled(false);
-      toast.error("Error submitting data: " + error);
-      console.error("Error submitting data:", error); // Log error if submission fails
-    }
+    }).catch((error) => {
+      console.log(error);
+    })
+
+
+
+
+
+
+    
   };
 
   return (
@@ -199,7 +251,7 @@ function RefillForm() {
 
       <div
         className="px-5 min-[696px]:px-40 lg:px-60 max-[696px]:pb-40 min-[696px]:ml-5  xl:px-80"
-        // style={{ marginRight: 2000 }}
+      // style={{ marginRight: 2000 }}
       >
         <div className="px-5 flex flex-col items-start">
           {params.type === "phq9" && (
