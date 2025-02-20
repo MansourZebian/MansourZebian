@@ -80,17 +80,19 @@ function Screeningform() {
           to={
             screening.length > 0 &&
               screening.filter((item) => item.Screeningform.type === "phq9")
-                .length < 0
-              ? "/screening/phq9"
-              : "/"
+                .length > 0
+              ? "/"
+              : "/screening/phq9"
           }
         >
           <Checkcards
             title={"PHQ9"}
             checktitle={
-              screening.filter((item) => item.Screeningform.type === "phq9").length < 0
-                ? "Pending"
-                : "Form Completed"
+              screening.length > 0 &&
+                screening.filter((item) => item.Screeningform.type === "phq9")
+                  .length > 0
+                ? "Form Completed"
+                : "Pending"
             }
           />
         </Link>
@@ -98,9 +100,9 @@ function Screeningform() {
           to={
             screening.length > 0 &&
               screening.filter((item) => item.Screeningform.type === "pcl5")
-                .length < 0
-              ? "/screening/pcl5"
-              : "/"
+                .length > 0
+              ? "/"
+              : "/screening/pcl5"
           }
         >
           <Checkcards
@@ -108,9 +110,9 @@ function Screeningform() {
             checktitle={
               screening.length > 0 &&
                 screening.filter((item) => item.Screeningform.type === "pcl5")
-                  .length < 0
-                ? "Pending"
-                : "Form Completed"
+                  .length > 0
+                ? "Form Completed"
+                : "Pending"
             }
           />
         </Link>
@@ -118,9 +120,9 @@ function Screeningform() {
           to={
             screening.length > 0 &&
               screening.filter((item) => item.Screeningform.type === "gad7")
-                .length < 0
-              ? "/screening/gad7"
-              : "/"
+                .length > 0
+              ? "/"
+              : "/screening/gad7"
           }
         >
           <Checkcards
@@ -128,9 +130,9 @@ function Screeningform() {
             checktitle={
               screening.length > 0 &&
                 screening.filter((item) => item.Screeningform.type === "gad7")
-                  .length < 0
-                ? "Pending"
-                : "Form Completed"
+                  .length > 0
+                ? "Form Completed"
+                : "Pending"
             }
           />
         </Link>
@@ -140,9 +142,9 @@ function Screeningform() {
             screening.length > 0 &&
               screening.filter(
                 (item) => item.Screeningform.type === "entry questionaire"
-              ).length < 0
-              ? "/screening/questionnaire"
-              : "/"
+              ).length > 0
+              ? "/"
+              : "/screening/questionnaire"
           }
         >
           <Checkcards
@@ -151,9 +153,9 @@ function Screeningform() {
               screening.length > 0 &&
                 screening.filter(
                   (item) => item.Screeningform.type === "entry questionaire"
-                ).length < 0
-                ? "Pending"
-                : "Form Completed"
+                ).length > 0
+                ? "Form Completed"
+                : "Pending"
             }
           />
         </Link>
