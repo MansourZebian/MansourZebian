@@ -1655,7 +1655,7 @@ function Dashboard() {
                           // >
                           <tr key={item?.id} className="bg-white border-b hover:bg-gray-50">
                             {/* Last Name Column */}
-                            <th scope="row" className="sticky left-0 z-20 px-3 py-2 font-medium text-gray-900 whitespace-nowrap bg-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-gray-200">
+                            <th scope="row" className="sticky left-0  px-3 py-2 font-medium text-gray-900 whitespace-nowrap bg-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-gray-200">
                               <div className="flex items-center gap-2">
                                 <div className="relative group">
                                   <RiUser3Fill
