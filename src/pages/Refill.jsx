@@ -13,12 +13,13 @@ function Refill() {
   const [data, setData] = useState([]);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading,setIsLoading]=useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const [user, setUser] = useState({});
   const [isDisabled, setIsDisabled] = useState(false);
   const [screening, setScreening] = useState([]);
   const [refillInfo, setRefillInfo] = useState([])
+  const [userRefillInfo, setUserRefillInfo] = useState({refillsAllowed: null, refillDuration: null})
 
 
 
@@ -55,8 +56,8 @@ function Refill() {
     return () => clearInterval(interval); // Cleanup on component unmount
   }, [user]);
 
-// to get current length of refill
- 
+  // to get current length of refill
+
   // const getLastRefillIdFilled = async (id) => {
 
   //   try {
@@ -91,12 +92,29 @@ function Refill() {
       let filteredResponse = response?.data?.filter(item => {
         const createdAt = new Date(item?.createdAt);
         const twentyDaysAgo = new Date();
-        twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
+        // twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
+        twentyDaysAgo.setDate(twentyDaysAgo.getDate() - Number(userRefillInfo?.refillDuration));
         return createdAt > twentyDaysAgo;
       });
 
       console.log('see filteredResponse', filteredResponse)
       setRefillInfo(filteredResponse)
+
+
+
+
+      let token = localStorage.getItem("token");
+      let user = jwtDecode(token);
+      let userId = user?.id;
+
+      axios.get(`${process.env.REACT_APP_BACKEND_URL}users/getUserRefillInfo/${userId}`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }).then((response) => {
+          console.log("response", response.data)
+
+          setUserRefillInfo(response.data)
+        }).catch((error) => {
+          console.log("error", error)
+        })
 
 
 
@@ -154,8 +172,8 @@ function Refill() {
       return
     }
 
-      
-    
+
+
 
 
 
@@ -185,15 +203,17 @@ function Refill() {
         return acc;
       }, {});
 
+
+
       // console.log("refill", groupedRefill);
 
       // Check if any group has less than 3 records
-      const lessThanThree = Object.values(groupedRefill).length < 3;
-      
+      const allowedLimit = Object.values(groupedRefill).length < Number(userRefillInfo?.refillsAllowed);
+
       // console.log(lessThanThree);
 
       // console.log("is Refill allowed", lessThanThree);
-      if(!lessThanThree){
+      if (!allowedLimit) {
         toast.error("You have already filled the Refill form 3 times");
         setIsLoading(false)
         return
@@ -216,7 +236,7 @@ function Refill() {
               optionanswer: ques?.answer, // You might need to adjust this part according to your data
 
 
-          
+
 
 
             },
@@ -234,42 +254,42 @@ function Refill() {
 
 
 
-          // for creating new entry in existing form  passing userId,first_name,last_name,email
+      // for creating new entry in existing form  passing userId,first_name,last_name,email
 
-          await axios.post(
-            `${process.env.REACT_APP_BACKEND_URL}existingforms/create`,
-            {
-              userId: user.id,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              email: user.email,
-              type: "Refill",
-              active:true
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          ).then((response) => {
-            setIsLoading(false)
+      await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}existingforms/create`,
+        {
+          userId: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          type: "Refill",
+          active: true
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      ).then((response) => {
+        setIsLoading(false)
 
-            console.log('see response', response)
-            toast.success("Submitted successfully!");
+        console.log('see response', response)
+        toast.success("Submitted successfully!");
 
-          }).catch((error) => {
-            setIsLoading(false)
-            console.log('error ',error)
-            toast.error("Some Error occured!");
+      }).catch((error) => {
+        setIsLoading(false)
+        console.log('error ', error)
+        toast.error("Some Error occured!");
 
-            return
-          })
+        return
+      })
 
-          
+
 
       // update the type
       // try {
-        //update existingform.type to "Refill"
+      //update existingform.type to "Refill"
 
       /*
   axios.put(`${process.env.REACT_APP_BACKEND_URL}existingforms/updatetype/${user?.id}`,
@@ -294,14 +314,14 @@ function Refill() {
       */
 
 
-          // setTimeout(() => {
-          //   window.location = "/payment";
-          // }, 2000);
-          // setTimeout(() => {
-          //   // window.location = "/";
-          //   // navigate('/')
-          //   navigate(-1)
-          // }, 2000);
+      // setTimeout(() => {
+      //   window.location = "/payment";
+      // }, 2000);
+      // setTimeout(() => {
+      //   // window.location = "/";
+      //   // navigate('/')
+      //   navigate(-1)
+      // }, 2000);
 
 
       // } catch (error) {
@@ -490,7 +510,7 @@ function Refill() {
             onClick={submit}
             className={`mb-4 bg-[#7b89f8]  hover:bg-[#CBC3E3] text-white py-2 px-20 rounded-full shadow-md ${isLoading ? "shadow-[#FFC107]" : "shadow-[#7b89f8]"} mt-10`}
           >
-            {isLoading?"Loading..":"Submit"}
+            {isLoading ? "Loading.." : "Submit"}
           </button>
         </div>
       </div>

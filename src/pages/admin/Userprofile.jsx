@@ -17,9 +17,15 @@ import { v4 as uuidv4 } from "uuid";
 import { EmailEditorModal } from "../../components/EmailViewer/EmailViewerModal";
 
 function Userprofile() {
-    const [emailData, setEmailData] = useState({ subject: null, body: null, email: null, firstName: null })
-    const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
-  
+  const [emailData, setEmailData] = useState({ subject: null, body: null, email: null, firstName: null })
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+
+
+  const [refillsAllowed, setRefillsAllowed] = useState(null);
+  const [refillDuration, setRefillDuration] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+
   const [status, setStatus] = useState('Loading..');
   const [openModal, setOpenModal] = useState(false);
   const [imagesDocs, setImagesDocs] = useState(false);
@@ -80,11 +86,34 @@ function Userprofile() {
     if (authToken) {
       const decodedUser = jwtDecode(authToken);
       setUser(decodedUser);
+      console.log('see decodeduser', decodedUser)
+
       // You can validate the token here if needed
 
       setIsAuthenticated(true);
     }
   }, []);
+
+  useEffect(() => {
+    // api call to get user
+
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}users/getUserRefillInfo/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      }
+    }
+    ).then((res) => {
+      // console.log('see res', res)
+      setRefillDuration(res.data.refillDuration)
+      setRefillsAllowed(res.data.refillsAllowed)
+    }).catch((error) => {
+      console.log('error', error)
+    })
+
+
+
+
+  }, [id])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -100,6 +129,61 @@ function Userprofile() {
 
     return () => clearInterval(interval);
   }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    if (!refillsAllowed || !refillDuration) {
+      toast.error("Please fill the entries first")
+      return
+    }
+
+    console.log('refillsAllowed', refillsAllowed)
+    console.log('refillDuration', refillDuration)
+
+    // axios.put(`$`)
+    try {
+
+      axios.put(
+        `${process.env.REACT_APP_BACKEND_URL}users/updateRefillsAllowed`,
+        {
+          id: id,
+          refillDuration,
+          refillsAllowed
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+
+      axios.put(
+        `${process.env.REACT_APP_BACKEND_URL}users/updateRefillDuration`,
+        {
+          id: id,
+          refillDuration,
+          refillsAllowed
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+
+
+      toast.success("Refill info updated successfully")
+
+    } catch (error) {
+      toast.error("Error while updating refill info")
+
+      console.log('error while updating refill info', error)
+
+    }
+
+
+  }
 
   const padZero = (num) => {
     return num < 10 ? "0" + num : num;
@@ -132,11 +216,11 @@ function Userprofile() {
         // gettting selected user info from localstorage
 
         // localStorage.setItem("ProfileName@@",item.first_name)
-                                      // localStorage.setItem("Email@@", item.email);
+        // localStorage.setItem("Email@@", item.email);
 
         let userFirstName = localStorage.getItem("ProfileName@@");
         let userEmail = localStorage.getItem("Email@@");
-       
+
         // Get the template body and subject
         let body = res?.data?.body || "";
         let subject = res?.data?.subject || "";
@@ -155,7 +239,7 @@ function Userprofile() {
 
         })
 
-        
+
 
 
         setIsEmailModalOpen(true)
@@ -166,7 +250,7 @@ function Userprofile() {
       );
 
 
-      
+
       setScriptLoading(true)
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}prescription/create`,
@@ -225,7 +309,7 @@ function Userprofile() {
       }
 
 
-      
+
 
 
       // update the script in existingForm.script
@@ -742,10 +826,10 @@ function Userprofile() {
 
   const processScoresRefill = (scores) => {
     const groupedScores = {};
-  
+
     scores.forEach(({ refillId, key, score, createdAt }) => {
       const refill = refillId === null ? 0 : refillId; // Treat null as refill 0
-  
+
       // Initialize row if not exists
       if (!groupedScores[refill]) {
         groupedScores[refill] = {
@@ -756,14 +840,14 @@ function Userprofile() {
           pcl5: "N/A",
         };
       }
-  
+
       // Assign the correct score to the corresponding key
       groupedScores[refill][key] = score;
     });
-  
+
     return Object.values(groupedScores).sort((a, b) => a.refillId - b.refillId);
   };
-  
+
 
 
 
@@ -1398,6 +1482,51 @@ function Userprofile() {
               </a>
             </div>
           </div>
+        </div>
+
+        {/* update refillsAllowd and refillDuration */}
+
+
+
+
+        <div className="flex items-center gap-2 mt-10 justify-left">
+
+          {
+            (
+              <form onSubmit={handleSubmit}>
+
+                
+                  <label className="font-bold">Number of refills allowed</label>
+                  <input value={refillsAllowed} onChange={(e) => {
+                    setRefillsAllowed(e.target.value)
+
+                  }}
+                    type="number" placeholder="Refills Allowed" className="border border-[#e1e1e1]  items-center p-3  mx-2  rounded-lg bg-white" />
+
+
+                
+
+
+                
+                  <label className="font-bold">Number of days before user can fill refill form</label>
+
+                  <input
+                    value={refillDuration} onChange={(e) => {
+                      setRefillDuration(e.target.value)
+
+                    }}
+                    type="number" placeholder="Refill Duration" className="border border-[#e1e1e1]  items-center p-3  mx-2  rounded-lg bg-white" />
+
+
+                <button
+                  className=" bg-[#7b89f8] hover:bg-[#CBC3E3] text-white px-20 py-3 rounded-full shadow-md shadow-[#7b89f8]">
+                  Update Refills
+                </button>
+              </form>
+            )
+
+          }
+
         </div>
 
         <div className=" mt-10">
@@ -2370,29 +2499,29 @@ function Userprofile() {
             Chat on Discord
           </Button>
         </div>
-      </div>
+      </div >
 
       <div className="p-10">
-      
-      
-                {(emailData?.body && emailData.subject && emailData?.email && emailData?.firstName) && <EmailEditorModal
-                  isOpen={true}
-                  onClose={() => {
-                    setEmailData(
-                      { subject: null, body: null, email: null, firstName: null }
-                    )
-                    setIsEmailModalOpen(false)
-                  }}
-                  email={emailData?.email}
-                  firstName={emailData?.firstName}
-                  initialSubject={emailData?.subject}
-                  // initialBody="<p>This is an email body.</p>" 
-                  initialBody={
-                    emailData?.body}
-                  setEmailData={setEmailData}
-                />}
-      
-              </div>
+
+
+        {(emailData?.body && emailData.subject && emailData?.email && emailData?.firstName) && <EmailEditorModal
+          isOpen={true}
+          onClose={() => {
+            setEmailData(
+              { subject: null, body: null, email: null, firstName: null }
+            )
+            setIsEmailModalOpen(false)
+          }}
+          email={emailData?.email}
+          firstName={emailData?.firstName}
+          initialSubject={emailData?.subject}
+          // initialBody="<p>This is an email body.</p>" 
+          initialBody={
+            emailData?.body}
+          setEmailData={setEmailData}
+        />}
+
+      </div>
     </>
   );
 }

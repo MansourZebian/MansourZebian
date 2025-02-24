@@ -14,6 +14,7 @@ function RefillForm() {
   const [data, setData] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate()
+  const [userRefillInfo, setUserRefillInfo] = useState({refillsAllowed: null, refillDuration: null})
 
   useEffect(() => {
     // Check if authentication token exists in localStorage
@@ -23,6 +24,20 @@ function RefillForm() {
       setUser(decodedUser);
       // You can validate the token here if needed
       setIsAuthenticated(true);
+
+      // let token = localStorage.getItem("token");
+      // let user = jwtDecode(token);
+      let userId = decodedUser?.id;
+
+      axios.get(`${process.env.REACT_APP_BACKEND_URL}users/getUserRefillInfo/${userId}`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }).then((response) => {
+          // console.log("response", response.data)
+
+          setUserRefillInfo(response.data)
+        }).catch((error) => {
+          console.log("error", error)
+        })
+
     }
   }, []);
 
@@ -112,7 +127,8 @@ function RefillForm() {
       // console.log("refill", groupedRefill);
 
       // Check if any group has less than 3 records
-      const lessThanThree = Object.values(groupedRefill).length < 3;
+      // const lessThanThree = Object.values(groupedRefill).length < 3;
+      const lessThanThree = Object.values(groupedRefill).length < Number(userRefillInfo?.refillsAllowed);
       setRefill_length(Object.values(groupedRefill).length);
       // console.log(lessThanThree);
       setAllowRefill(lessThanThree);
@@ -186,7 +202,10 @@ function RefillForm() {
       // console.log("refill", groupedRefill);
 
       // Check if any group has less than 3 records
-      const lessThanThree = Object.values(groupedRefill).length < 3;
+      // const lessThanThree = Object.values(groupedRefill).length < 3;
+      //lessThanThree can be less than refillsAllowedLimit
+      const lessThanThree = Object.values(groupedRefill).length < Number(userRefillInfo?.refillsAllowed);
+
       setAllowRefill(lessThanThree);
 
       setRefill_length(Object.values(groupedRefill).length);
@@ -195,10 +214,10 @@ function RefillForm() {
 
       // console.log(lessThanThree);
 
-      console.log('see refillId:',refillId)
-      console.log("is Refill allowed", lessThanThree);
+      // console.log('see refillId:',refillId)
+      // console.log("is Refill allowed", lessThanThree);
       if(!lessThanThree){
-        toast.error("You have already filled the Refill form 3 times");
+        toast.error(`You have already filled the Refill form ${Number(userRefillInfo?.refillsAllowed)} times`);
         return
       }
 

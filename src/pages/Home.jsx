@@ -13,23 +13,24 @@ import { Link, useNavigate } from "react-router-dom";
 
 function Home() {
   const [screening, setScreening] = useState([]);
-
+  const [decodedUserInfo, setDecodedUserInfo] = useState({})
   const [user, setUser] = useState({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [is_phq9, setIs_phq9] = useState(false);
   const [is_gad7, setIs_gad7] = useState(false);
   const [is_pcl5, setIs_pcl5] = useState(false);
   const [is_entryquestionaire, setIs_entryquestionaire] = useState(false);
-  const [msg,setMsg]=useState("")
+  const [msg, setMsg] = useState("")
+  const [userRefillInfo, setUserRefillInfo] = useState({ refillsAllowed: null, refillDuration: null })
   const [existingFormInfo, setExistingFormInfo] = useState({
     type: "",
     callScheduled: false,
     script: false,
     status: "",
-    sendTelehealthLink:false
+    sendTelehealthLink: false
   });
 
-  const [prescription,setPrescription]=useState([{
+  const [prescription, setPrescription] = useState([{
     id: null,
     uid: null,
     drug: null,
@@ -38,9 +39,9 @@ function Home() {
     note: null,
     tracking_id: null,
     status: null,
-    createdAt:null,
-    updatedAt:null
-}])
+    createdAt: null,
+    updatedAt: null
+  }])
 
   const [information, setInformation] = useState([]);
   const [emergencycontact, setEmergencycontact] = useState([]);
@@ -69,6 +70,7 @@ function Home() {
       navigate("/admin");
 
     }
+    setDecodedUserInfo(decodedUser)
 
   }, [])
 
@@ -92,17 +94,26 @@ function Home() {
       getRefill(id);
 
       setIsAuthenticated(true);
+      getRefillStatus(decodedUser)
 
       getExistingFormInfo(decodedUser.id);
       getPrescriptionFormInfo(decodedUser.id);
-      getRefillStatus(decodedUser.id)
     }
   }, []);
 
-  const getRefillStatus = async (id) => {
+  useEffect(() => {
+
+    if (decodedUserInfo?.id) {
+      console.log('see ')
+
+
+    }
+  }, [])
+
+  const getRefillStatus = async (decodedUser) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}score/${id}`,
+        `${process.env.REACT_APP_BACKEND_URL}score/${decodedUser?.id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -118,21 +129,47 @@ function Home() {
         return createdAt > latest ? createdAt : latest;
       }, new Date(0));
 
+      let token = localStorage.getItem("token");
+      let user = jwtDecode(token);
+      let userId = user?.id;
+
+      axios.get(`${process.env.REACT_APP_BACKEND_URL}users/getUserRefillInfo/${userId}`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }).then((response) => {
+          console.log("response", response.data)
+
+          setUserRefillInfo(response.data)
+
+          //  
+          let days = Number(response.data?.refillDuration) || 0;
+
+          let refillTime = new Date(latestScore);
+
+          console.log('days', days)
+          // refillTime.setDate(refillTime.getDate() + 20); // This properly handles month transitions
+
+          refillTime.setDate(refillTime.getDate() + days); // This properly handles month transitions
+          console.log('see refilltime', refillTime)
+          setRefillTime(refillTime); // Store the refill time in state
+
+          // Check if the current date has passed the refill time
+          const currentTime = new Date();
+          setIsRefillAllowed(currentTime >= refillTime);
+
+
+
+
+        })
+        .catch((error) => {
+
+          console.log(error);
+        });
+
       // Correctly calculate the refill date by adding 20 days
-      let refillTime = new Date(latestScore);
-      // console.log('refilltime',refillTime)
-      refillTime.setDate(refillTime.getDate() + 20); // This properly handles month transitions
-
-      setRefillTime(refillTime); // Store the refill time in state
-
-      // Check if the current date has passed the refill time
-      const currentTime = new Date();
-      setIsRefillAllowed(currentTime >= refillTime);
 
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
     }
-};
+  };
 
 
   // const getRefillStatus = async (id) => {
@@ -146,25 +183,25 @@ function Home() {
   //       }
   //     );
   //     // console.log("score data.............>", response);
-  
+
   //     setScores(response.data); // Set the data to state
-  
+
   //     // Find the latest createdAt timestamp from the scores
   //     const latestScore = response.data.reduce((latest, score) => {
   //       const createdAt = new Date(score.createdAt);
   //       return createdAt > latest ? createdAt : latest;
   //     }, new Date(0)); // Initialize with epoch date (1970-01-01)
-  
+
   //     // Calculate the refill time (24 hours after latest createdAt)
   //     // const refillTime = new Date(latestScore.getTime() + 20* 24 * 60 * 60 * 1000); // Add 24 hours
   //     const refillTime = new Date(latestScore.getTime() + 20* 24 * 60 * 60 * 1000); // Add 24 hours
   //     setRefillTime(refillTime); // Store the refill time in state
-  
+
   //     // Check if 24 hours have passed since the latest score
   //     const currentTime = new Date();
   //     const timeDifference = currentTime - latestScore;
   //     const oneDayInMillis = 20* 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-  
+
   //     if (timeDifference < oneDayInMillis) {
   //       // Disable refill if less than 24 hours have passed
   //       setIsRefillAllowed(false);
@@ -175,7 +212,7 @@ function Home() {
   //     console.log(error); // Log any errors that occur during the request
   //   }
   // };
-  
+
 
   const getExistingFormInfo = async (uid) => {
     try {
@@ -187,7 +224,7 @@ function Home() {
           },
         }
       );
-      if(response.status===200){
+      if (response.status === 200) {
 
         setExistingFormInfo(response?.data?.data);
         // console.log(response?.data?.data)
@@ -197,7 +234,7 @@ function Home() {
 
 
     } catch (error) {
-      console.log("getinfo not fetched",error);
+      console.log("getinfo not fetched", error);
 
     }
   };
@@ -213,7 +250,7 @@ function Home() {
           },
         }
       );
-      if(response.status===200){
+      if (response.status === 200) {
 
         setPrescription(response?.data);
         // console.log("prescription",response?.data)
@@ -223,7 +260,7 @@ function Home() {
 
 
     } catch (error) {
-      console.log("getinfo not fetched",error);
+      console.log("getinfo not fetched", error);
 
     }
   };
@@ -422,7 +459,8 @@ function Home() {
       // console.log("refill", groupedRefill);
 
       // Check if any group has less than 3 records
-      const lessThanThree = Object.values(groupedRefill).length < 3;
+      const lessThanThree = Object.values(groupedRefill).length < Number(userRefillInfo?.refillsAllowed);
+      // console.log("lessThanThree", lessThanThree);
       setRefill_length(Object.values(groupedRefill).length);
       // console.log(lessThanThree);
       setAllowRefill(lessThanThree);
@@ -440,51 +478,51 @@ function Home() {
   );
 
   // console.log(phl9Sc, pcl9Sc);
-useEffect(()=>{
+  useEffect(() => {
 
-  let msg = null;
+    let msg = null;
 
-if (user?.status) {
+    if (user?.status) {
 
-  // if(user?.status==="pending"){
-  //   msg="Thank you for filling out all the forms. We will send you an email soon to schedule your telehealth visit.";
-  // }
-  let lastPrescription =null;
-  if(prescription.length>0){
-    lastPrescription = prescription[prescription.length - 1]; // Get the latest prescription
-  }
-// console.log('see .>',lastPrescription)
-if (prescription?.length > 0 && lastPrescription?.status) {
-  
-  msg = `Shipment Tracking link: : ${lastPrescription?.tracking_id}`;
-}
-else if (user?.status === "approved" && user?.hasFilledForm && existingFormInfo?.script) {
-  msg = "Shipment tracking link: [We don’t have a tracking link yet]";
-}
-else if (user?.status === "approved" && user?.hasFilledForm && existingFormInfo.sendTelehealthLink) {
-  msg = "It seems that you are a good candidate for the Ketamine Study. We sent you an email to schedule your telehealth visit.";
-} 
+      // if(user?.status==="pending"){
+      //   msg="Thank you for filling out all the forms. We will send you an email soon to schedule your telehealth visit.";
+      // }
+      let lastPrescription = null;
+      if (prescription.length > 0) {
+        lastPrescription = prescription[prescription.length - 1]; // Get the latest prescription
+      }
+      // console.log('see .>',lastPrescription)
+      if (prescription?.length > 0 && lastPrescription?.status) {
 
- 
- 
-   
+        msg = `Shipment Tracking link: : ${lastPrescription?.tracking_id}`;
+      }
+      else if (user?.status === "approved" && user?.hasFilledForm && existingFormInfo?.script) {
+        msg = "Shipment tracking link: [We don’t have a tracking link yet]";
+      }
+      else if (user?.status === "approved" && user?.hasFilledForm && existingFormInfo.sendTelehealthLink) {
+        msg = "It seems that you are a good candidate for the Ketamine Study. We sent you an email to schedule your telehealth visit.";
+      }
 
-  else if (user?.hasFilledForm && user?.status === "pending" && existingFormInfo?.type==="New Participant") {
-    msg = "Thank you for filling out all the forms. We will send you an email soon to schedule your telehealth visit.";
-}
 
-else if (user?.hasFilledForm && user?.status === "approved" && existingFormInfo?.type==="New Participant") {
-  msg = "Thank you for filling out all the forms. We will send you an email soon to schedule your telehealth visit.";
-}
-  
-  else if (user?.hasFilledForm && user?.status === "pending") {
+
+
+
+      else if (user?.hasFilledForm && user?.status === "pending" && existingFormInfo?.type === "New Participant") {
         msg = "Thank you for filling out all the forms. We will send you an email soon to schedule your telehealth visit.";
+      }
+
+      else if (user?.hasFilledForm && user?.status === "approved" && existingFormInfo?.type === "New Participant") {
+        msg = "Thank you for filling out all the forms. We will send you an email soon to schedule your telehealth visit.";
+      }
+
+      else if (user?.hasFilledForm && user?.status === "pending") {
+        msg = "Thank you for filling out all the forms. We will send you an email soon to schedule your telehealth visit.";
+      }
+
     }
-    
-}
-setMsg(msg)
-// console.log('see msg',msg)
-},[user,existingFormInfo,prescription])
+    setMsg(msg)
+    // console.log('see msg',msg)
+  }, [user, existingFormInfo, prescription])
   return (
     <>
       <Navbar1 />
@@ -524,19 +562,19 @@ setMsg(msg)
 
           //  ( // user?.status === "pending"
           //   (user?.status==="approved")?`Please fill out the forms below to move to the next step`:
-            
+
           //   (existingFormInfo.type==="New Participant" && user?.hasFilledForm && user?.status==="pending") ? `Thank you for filling out all the forms. We will send you an email soon to schedule your telehealth visit.`:
-            
-            
+
+
           //   (existingFormInfo.type==="New Participant" && user?.hasFilledForm && user?.status==="approved" && existingFormInfo?.script) ? `Shipment tracking link: [We don’t have a tracking link yet]`:
           //   //user particular existingForm.script(checkbox) ? `Shipment tracking link: [We don’t have a tracking link yet]`:
-            
+
           //   // user particular existingForm.CallScheduled ? ` It seems that you are a good candidate for the Ketamine Study. We sent you an email to schedule your telehealth visit.`:
           //   (existingFormInfo.type==="New Participant" && user?.status==="approved" && user?.hasFilledForm && existingFormInfo.callScheduled)?` It seems that you are a good candidate for the Ketamine Study. We sent you an email to schedule your telehealth visit.`:
           //   ( user?.hasFilledForm && user?.status==="pending") ? `Thank you for filling out all the forms. We will send you an email soon to schedule your telehealth visit.`:null
           //  )
           // }
-          
+
           // msg={
           //   is_phq9 &&
           //     is_gad7 &&
@@ -547,9 +585,9 @@ setMsg(msg)
           //     emergencycontact !== null &&
           //     documentverification !== null &&
           //     allowRefill &&
-             
+
           //     user.status === "approved"
-              
+
           //     ? `Done, Please schedule a tele-health visit here: https://telehealthvisit.timetap.com` //`Refills are Available for ${refill_length}/3 times`
           //     : user.status !== "approved"
           //       ? phl9Sc[0]?.score > 9 && pcl9Sc[0]?.score > 30
@@ -638,7 +676,7 @@ setMsg(msg)
           // }
           />
         </Link>
-        
+
         {/* <Link
           to={
             (!is_phq9 && !is_gad7 && !is_pcl5) ? "/" : "/refill"
@@ -656,31 +694,32 @@ setMsg(msg)
           />
         </Link> */}
 
-<div className="rounded-t-xl rounded-b-xl overflow-x-auto">
-  
-    <Link to={is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire && isRefillAllowed && refill_length < 3 ? "/refill" : "/"}>
-    
-      <Card1
-        title={"Request Refill "}
-        img={"Applyicon.png"}
-        subtext={`${refill_length} of 3 refills requested
+        <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
+
+          {/* <Link to={is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire && isRefillAllowed && refill_length < 3 ? "/refill" : "/"}> */}
+          <Link to={is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire && isRefillAllowed && refill_length < Number(userRefillInfo?.refillsAllowed) ? "/refill" : "/"}>
+
+            <Card1
+              title={"Request Refill "}
+              img={"Applyicon.png"}
+              subtext={`${refill_length} of ${userRefillInfo?.refillsAllowed} refills requested
  `}
-        disabled={!(is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire) || (refill_length>=3 || !isRefillAllowed)}
-      />
-    </Link>
+              disabled={!(is_phq9 && is_gad7 && is_pcl5 && is_entryquestionaire) || (refill_length >= Number(userRefillInfo?.refillsAllowed) || !isRefillAllowed)}
+            />
+          </Link>
 
-    {/* Display time outside the button */}
-    {!isRefillAllowed && refillTime && (
-      <div className="mt-4 text-sm text-gray-500">
-        You can refill after: <strong>{refillTime.toLocaleString()}</strong>
-      </div>
-    )}
-  </div>
-
-
+          {/* Display time outside the button */}
+          {!isRefillAllowed && refillTime && (
+            <div className="mt-4 text-sm text-gray-500">
+              You can refill after: <strong>{refillTime.toLocaleString()}</strong>
+            </div>
+          )}
+        </div>
 
 
-{/*
+
+
+        {/*
  // disabled={
               //   user.status !== "approved"
               //     ? true
