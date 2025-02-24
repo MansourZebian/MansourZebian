@@ -20,6 +20,8 @@ function Refill() {
   const [screening, setScreening] = useState([]);
   const [refillInfo, setRefillInfo] = useState([])
 
+
+
   const [lastRefillId, setLastRefillId] = useState(null);
 
 
@@ -53,8 +55,8 @@ function Refill() {
     return () => clearInterval(interval); // Cleanup on component unmount
   }, [user]);
 
-
-
+// to get current length of refill
+ 
   // const getLastRefillIdFilled = async (id) => {
 
   //   try {
@@ -152,10 +154,54 @@ function Refill() {
       return
     }
 
+      
+    
+
+
 
     setIsDisabled(true);
     setIsLoading(true)
+
+    //getting if refill is allowed by getting refill count last filled
     try {
+
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}refill/answers/${user?.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const refill = response.data;
+
+      // Group records by day
+      const groupedRefill = refill.reduce((acc, item) => {
+        const key = item.key; // Assuming day is the key to group by
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(item);
+        return acc;
+      }, {});
+
+      // console.log("refill", groupedRefill);
+
+      // Check if any group has less than 3 records
+      const lessThanThree = Object.values(groupedRefill).length < 3;
+      
+      // console.log(lessThanThree);
+
+      // console.log("is Refill allowed", lessThanThree);
+      if(!lessThanThree){
+        toast.error("You have already filled the Refill form 3 times");
+        setIsLoading(false)
+        return
+      }
+
+
+
+
       const key = uuidv4();
       await Promise.all(
         data?.map(async (ques) => {

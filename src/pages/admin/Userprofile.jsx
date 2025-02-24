@@ -14,8 +14,12 @@ import MailSVG from "../../assets/svgs/3.svg";
 import SMSSVG from "../../assets/svgs/2.svg";
 import SearchSVG from "../../assets/svgs/search.svg";
 import { v4 as uuidv4 } from "uuid";
+import { EmailEditorModal } from "../../components/EmailViewer/EmailViewerModal";
 
 function Userprofile() {
+    const [emailData, setEmailData] = useState({ subject: null, body: null, email: null, firstName: null })
+    const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+  
   const [status, setStatus] = useState('Loading..');
   const [openModal, setOpenModal] = useState(false);
   const [imagesDocs, setImagesDocs] = useState(false);
@@ -52,7 +56,7 @@ function Userprofile() {
     item: {},
   });
 
-  const [scriptLoading,setScriptLoading]=useState(false)
+  const [scriptLoading, setScriptLoading] = useState(false)
 
 
   const [scriptData, setScriptData] = useState({
@@ -111,11 +115,58 @@ function Userprofile() {
 
   const submitScriptData = async () => {
 
-    if(!scriptData?.dispense || !scriptData?.drug || !scriptData?.dosage){
+    if (!scriptData?.dispense || !scriptData?.drug || !scriptData?.dosage) {
       toast.error("Please fill the entries first")
       return
     }
     try {
+
+      //show email modal
+      axios.get(`${process.env.REACT_APP_BACKEND_URL}scriptemail/email-template/refill_alert`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }).then((res) => {
+        console.log('see reponse', res)
+
+        // gettting selected user info from localstorage
+
+        // localStorage.setItem("ProfileName@@",item.first_name)
+                                      // localStorage.setItem("Email@@", item.email);
+
+        let userFirstName = localStorage.getItem("ProfileName@@");
+        let userEmail = localStorage.getItem("Email@@");
+       
+        // Get the template body and subject
+        let body = res?.data?.body || "";
+        let subject = res?.data?.subject || "";
+
+        // Replace placeholders with actual values from `item`
+        body = body.replace(/{{firstName}}/g, userFirstName || "");
+        // body = body.replace(/{{scriptText}}/g, item.scrip || "");
+        // body = body.replace(/{{invoiceText}}/g, item.invoice || "");
+
+        // Update state
+        setEmailData({
+          subject: subject,
+          body: body,
+          email: userEmail,
+          firstName: userFirstName,
+
+        })
+
+        
+
+
+        setIsEmailModalOpen(true)
+      }).catch((error) => {
+        console.error("Email Error:", error);
+        toast.error("Error Sending Email!");
+      }
+      );
+
+
+      
       setScriptLoading(true)
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}prescription/create`,
@@ -141,8 +192,8 @@ function Userprofile() {
         ).then((response) => {
           // console.log('see response', response)
           console.log('updated script')
-                setScriptLoading(false)
-            toast.success("Script submitted successfully");
+          setScriptLoading(false)
+          toast.success("Script submitted successfully");
 
           setScriptData({
             currentDate: "",
@@ -173,6 +224,10 @@ function Userprofile() {
 
       }
 
+
+      
+
+
       // update the script in existingForm.script
 
 
@@ -183,18 +238,20 @@ function Userprofile() {
 
       // console.log("getScreeningData", response.data); // Log the data received from the backend
       // setScreening(response.data); // Set the data to state if needed
-      const getEMail = localStorage.getItem("Email@@");
-      await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}prescription/sendEmail`,
-        { ...scriptData, email: getEMail },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
 
-      toast.success("Alert Email send to user");
+
+      // const getEMail = localStorage.getItem("Email@@");
+      // await axios.post(
+      //   `${process.env.REACT_APP_BACKEND_URL}prescription/sendEmail`,
+      //   { ...scriptData, email: getEMail },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${localStorage.getItem("token")}`,
+      //     },
+      //   }
+      // );
+
+      // toast.success("Alert Email send to user");
 
       getNewScript();
     } catch (error) {
@@ -344,17 +401,17 @@ function Userprofile() {
 
   function clinicalGroupByRefill(screeningForms) {
     if (!Array.isArray(screeningForms)) return [];
-  
+
     const grouped = screeningForms.reduce((acc, form) => {
       const refillId = form.refillId ?? 0; // Treat null as 0 (original form)
       if (!acc[refillId]) acc[refillId] = [];
       acc[refillId].push(form);
       return acc;
     }, {});
-  
+
     return Object.entries(grouped); // Convert object to array for iteration
   }
-  
+
 
 
   const getRefill = async () => {
@@ -687,8 +744,9 @@ function Userprofile() {
     const groupedScores = {};
   
     scores.forEach(({ refillId, key, score, createdAt }) => {
-      const refill = refillId === null ? 0 : refillId; // Treat null as 0
+      const refill = refillId === null ? 0 : refillId; // Treat null as refill 0
   
+      // Initialize row if not exists
       if (!groupedScores[refill]) {
         groupedScores[refill] = {
           date: new Date(createdAt).toLocaleDateString(),
@@ -699,11 +757,13 @@ function Userprofile() {
         };
       }
   
+      // Assign the correct score to the corresponding key
       groupedScores[refill][key] = score;
     });
   
     return Object.values(groupedScores).sort((a, b) => a.refillId - b.refillId);
   };
+  
 
 
 
@@ -1379,37 +1439,37 @@ function Userprofile() {
               <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
                 <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 
-                  
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-  <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
-    <tr>
-      <th scope="col" className="px-6 py-4">Date</th>
-      <th scope="col" className="px-6 py-4">PHQ-9</th>
-      <th scope="col" className="px-6 py-4">GAD-7</th>
-      <th scope="col" className="px-6 py-4">PCL-5</th>
-      <th scope="col" className="px-6 py-4">Refill Count</th>
-    </tr>
-  </thead>
-  <tbody>
-    {Array.isArray(scores) && scores.length > 0 ? (
-      processScoresRefill(scores).map((entry, index) => (
-        <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-          <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-            {entry.date}
-          </td>
-          <td className="px-6 py-4">{entry.phq9}</td>
-          <td className="px-6 py-4">{entry.gad7}</td>
-          <td className="px-6 py-4">{entry.pcl5}</td>
-          <td className="px-6 py-4 font-semibold">{entry.refillId}</td>
-        </tr>
-      ))
-    ) : (
-      <tr>
-        <td colSpan="5" className="text-center py-4">No data available</td>
-      </tr>
-    )}
-  </tbody>
-</table>
+
+                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
+                      <tr>
+                        <th scope="col" className="px-6 py-4">Date</th>
+                        <th scope="col" className="px-6 py-4">PHQ-9</th>
+                        <th scope="col" className="px-6 py-4">GAD-7</th>
+                        <th scope="col" className="px-6 py-4">PCL-5</th>
+                        <th scope="col" className="px-6 py-4">Refill Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.isArray(scores) && scores.length > 0 ? (
+                        processScoresRefill(scores).map((entry, index) => (
+                          <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                              {entry.date}
+                            </td>
+                            <td className="px-6 py-4">{entry.phq9}</td>
+                            <td className="px-6 py-4">{entry.gad7}</td>
+                            <td className="px-6 py-4">{entry.pcl5}</td>
+                            <td className="px-6 py-4 font-semibold">{entry.refillId}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="text-center py-4">No data available</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
 
 
 
@@ -1964,9 +2024,9 @@ function Userprofile() {
                       </th> */}
                     </tr>
                   </thead>
-                 
-                 
-                 
+
+
+
                   <tbody>
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th
@@ -2311,6 +2371,28 @@ function Userprofile() {
           </Button>
         </div>
       </div>
+
+      <div className="p-10">
+      
+      
+                {(emailData?.body && emailData.subject && emailData?.email && emailData?.firstName) && <EmailEditorModal
+                  isOpen={true}
+                  onClose={() => {
+                    setEmailData(
+                      { subject: null, body: null, email: null, firstName: null }
+                    )
+                    setIsEmailModalOpen(false)
+                  }}
+                  email={emailData?.email}
+                  firstName={emailData?.firstName}
+                  initialSubject={emailData?.subject}
+                  // initialBody="<p>This is an email body.</p>" 
+                  initialBody={
+                    emailData?.body}
+                  setEmailData={setEmailData}
+                />}
+      
+              </div>
     </>
   );
 }

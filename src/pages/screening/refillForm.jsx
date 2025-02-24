@@ -61,6 +61,10 @@ function RefillForm() {
   const [user, setUser] = useState({});
   const [isDisabled, setIsDisabled] = useState(false);
 
+
+  const [refill_length, setRefill_length] = useState(0);
+  const [allowRefill, setAllowRefill] = useState(false);
+
   const getQuestions = async () => {
     await axios
       .get(`${process.env.REACT_APP_BACKEND_URL}screeningform/${params.type}`, {
@@ -80,10 +84,51 @@ function RefillForm() {
   useEffect(() => {
     // getData();
     getQuestions();
+    // getRefill(user?.id);
   }, [params.type]);
+
+  const getRefill = async (id) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}refill/answers/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const refill = response.data;
+
+      // Group records by day
+      const groupedRefill = refill.reduce((acc, item) => {
+        const key = item.key; // Assuming day is the key to group by
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(item);
+        return acc;
+      }, {});
+
+      // console.log("refill", groupedRefill);
+
+      // Check if any group has less than 3 records
+      const lessThanThree = Object.values(groupedRefill).length < 3;
+      setRefill_length(Object.values(groupedRefill).length);
+      // console.log(lessThanThree);
+      setAllowRefill(lessThanThree);
+    } catch (error) {
+      console.log(error); // Log any errors that occur during the request
+      return false;
+    }
+  };
 
   const submit = async () => {
     console.log(".............data", data);
+    if (!user?.id) {
+      toast.error("Some error occured, Please refresh the page");
+      return
+    }
+
     setIsDisabled(true);
 
     const filterArry = data?.map((i) =>
@@ -115,131 +160,190 @@ function RefillForm() {
     console.log(".............filterArry", filterArry, sumAsString, user);
 
 
+    //getting refill id no of times filled previously
+
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}refill/answers/${user?.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const refill = response.data;
+
+      // Group records by day
+      const groupedRefill = refill.reduce((acc, item) => {
+        const key = item.key; // Assuming day is the key to group by
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(item);
+        return acc;
+      }, {});
+
+      // console.log("refill", groupedRefill);
+
+      // Check if any group has less than 3 records
+      const lessThanThree = Object.values(groupedRefill).length < 3;
+      setAllowRefill(lessThanThree);
+
+      setRefill_length(Object.values(groupedRefill).length);
+
+      let refillId = await Object.values(groupedRefill).length+1
+
+      // console.log(lessThanThree);
+
+      console.log('see refillId:',refillId)
+      console.log("is Refill allowed", lessThanThree);
+      if(!lessThanThree){
+        toast.error("You have already filled the Refill form 3 times");
+        return
+      }
+
+       //calling api to updated refillId in score
+
+       await axios
+       .post(
+         `${process.env.REACT_APP_BACKEND_URL}score/create`,
+         {
+           key: data[0]?.type,
+           score: parseInt(sumAsString),
+           uid: user?.id,
+           refillId: refillId
+         },
+         {
+           headers: {
+             Authorization: `Bearer ${localStorage.getItem("token")}`,
+           },
+         }
+       )
+       .then(async (response) => {
+         
+         
+         // getScores();
+         // scoreModal(false);
+         toast.success("Score added successfully");
+
+         ///calling api to updated refillId in 
+
+         try {
+           const key = uuidv4();
+           await Promise.all(
+             data.map(async (ques) => {
+               // Push the answer value to the array
+     
+               const response = await axios.post(
+                 `${process.env.REACT_APP_BACKEND_URL}screeningform/useranswer`,
+                 {
+                   userId: user.id,
+                   screeningformId: ques.id,
+                   status: "active",
+                   answer: "", // You might need to adjust this part according to your data
+                   key: key, // You might need to adjust this part according to your data
+                   optionanswer: ques.answer, // You might need to adjust this part according to your data
+                   refillId: refillId
+                 },
+                 {
+                   headers: {
+                     Authorization: `Bearer ${localStorage.getItem("token")}`,
+                   },
+                 }
+               );
+               console.log(response.data); // Logging the response if needed
+             })
+           );
+     
+           toast.success("Submitted successfully!");
+
+           
+                   window.close();
+
+           // if (window.opener === null || window.opener === undefined) {
+           //   window.close();
+           // } else {
+           //   window.opener.location.reload();
+           //   window.close();
+           // }
+           // window.location = '/screening';
+     
+           //   switch (params.type) {
+           //     case "phq9":
+           //       window.location = "/refill/pcl5";
+           //       break;
+           //     case "pcl5":
+           //       window.location = "/refill/gad7";  
+           //       break;
+           //     case "gad7":
+           //       window.location = "/refill/questionnaire";
+           //       break;
+     
+           //     default:
+           //       window.location = "/refill";
+           //   }
+         } catch (error) {
+           setIsDisabled(false);
+           toast.error("Error submitting data: " + error);
+           console.error("Error submitting data:", error); // Log error if submission fails
+         }
+         
+         
+
+
+
+       })
+       .catch((error) => {
+         console.log(error);
+         toast.error("Error adding score");
+       });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    } catch (error) {
+      console.log(error); // Log any errors that occur during the request
+      return false;
+    }
+
+
 
     // getting latestRefillId 
-    const response = await axios.get(
-      `${process.env.REACT_APP_BACKEND_URL}score/getLastRefillId/${user?.id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-      //getting refillId
-    ).then(async (response) => {
-      console.log(response.data);
-      const refillId =await response.data?.refillId;
-      console.log('see refillId', refillId)
+    // const response = await axios.get(
+    //   `${process.env.REACT_APP_BACKEND_URL}score/getLastRefillId/${user?.id}`,
+    //   {
+    //     headers: {
+    //       Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //     },
+    //   }
+    //   //getting refillId
+    // ).then(async (response) => {
+    //   console.log(response.data);
+    //   const refillId =await response.data?.refillId;
+    //   console.log('see refillId', refillId)
 
-      //calling api to updated refillId in score
-
-      await axios
-        .post(
-          `${process.env.REACT_APP_BACKEND_URL}score/create`,
-          {
-            key: data[0]?.type,
-            score: parseInt(sumAsString),
-            uid: user?.id,
-            refillId: parseInt(refillId) + 1
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        )
-        .then(async (response) => {
-          
-          
-          // getScores();
-          // scoreModal(false);
-          toast.success("Score added successfully");
-
-          ///calling api to updated refillId in 
-
-          try {
-            const key = uuidv4();
-            await Promise.all(
-              data.map(async (ques) => {
-                // Push the answer value to the array
-      
-                const response = await axios.post(
-                  `${process.env.REACT_APP_BACKEND_URL}screeningform/useranswer`,
-                  {
-                    userId: user.id,
-                    screeningformId: ques.id,
-                    status: "active",
-                    answer: "", // You might need to adjust this part according to your data
-                    key: key, // You might need to adjust this part according to your data
-                    optionanswer: ques.answer, // You might need to adjust this part according to your data
-                    refillId: parseInt(refillId) + 1
-                  },
-                  {
-                    headers: {
-                      Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
-                  }
-                );
-                console.log(response.data); // Logging the response if needed
-              })
-            );
-      
-            toast.success("Submitted successfully!");
-
-            
-                    window.close();
-
-            // if (window.opener === null || window.opener === undefined) {
-            //   window.close();
-            // } else {
-            //   window.opener.location.reload();
-            //   window.close();
-            // }
-            // window.location = '/screening';
-      
-            //   switch (params.type) {
-            //     case "phq9":
-            //       window.location = "/refill/pcl5";
-            //       break;
-            //     case "pcl5":
-            //       window.location = "/refill/gad7";  
-            //       break;
-            //     case "gad7":
-            //       window.location = "/refill/questionnaire";
-            //       break;
-      
-            //     default:
-            //       window.location = "/refill";
-            //   }
-          } catch (error) {
-            setIsDisabled(false);
-            toast.error("Error submitting data: " + error);
-            console.error("Error submitting data:", error); // Log error if submission fails
-          }
-          
-          
-
-
-
-        })
-        .catch((error) => {
-          console.log(error);
-          toast.error("Error adding score");
-        });
-
-
-
-
-
-    }).catch((error) => {
-      console.log(error);
-    })
+    // }).catch((error) => {
+    //   console.log(error);
+    // })
 
 
 
 
 
 
-    
+
   };
 
   return (

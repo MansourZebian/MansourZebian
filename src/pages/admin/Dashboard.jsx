@@ -18,6 +18,7 @@ import {
 } from "@ant-design/icons";
 import { RiUserFill, RiUser3Fill } from "react-icons/ri";
 import PurposeDropdown from "../../components/PurposeDropdown/PurposeDropdown";
+import { EmailEditorModal } from "../../components/EmailViewer/EmailViewerModal";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -57,6 +58,10 @@ function Dashboard() {
   const [newUser, setNewUser] = useState([])
   const [oldUser, setOldUser] = useState([]) // will save same value when useEffect fetches to compare later
   const [Progress, setProgress] = useState(null)
+
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+  const [emailData, setEmailData] = useState({ subject: null, body: null, email: null, firstName: null })
+
 
   //filter to do
 
@@ -1657,10 +1662,11 @@ function Dashboard() {
                                     className="text-lg text-gray-600 cursor-pointer"
                                     onClick={() => {
                                       handleUserProfileClick(item?.userId);
-                                      localStorage.setItem("Email@@", item.email);
+                                      localStorage.setItem("ProfileName@@",item?.first_name)
+                                      localStorage.setItem("Email@@", item?.email);
                                     }}
                                   />
-                                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-30">
+                                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap ">
                                     View User Profile
                                   </div>
                                 </div>
@@ -1674,7 +1680,7 @@ function Dashboard() {
                               </div>
                             </th>
                             {/* First Name Column */}
-                            <th scope="row" className="sticky left-[140px] z-20 px-3 py-2 font-medium text-gray-900 whitespace-nowrap bg-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-gray-200">
+                            <th scope="row" className="sticky left-[140px] px-3 py-2 font-medium text-gray-900 whitespace-nowrap bg-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-gray-200">
                               <input
                                 readOnly
                                 disabled
@@ -1827,6 +1833,8 @@ function Dashboard() {
                                 onChange={async (e) => {
                                   try {
                                     handleUpdateUserField(index, "sendTelehealthLink", e.target.checked);
+                                    setIsEmailModalOpen(e.target.checked)
+
 
                                     if (e.target.checked) {
                                       if (!item?.email || !item?.first_name) {
@@ -1835,29 +1843,74 @@ function Dashboard() {
                                         return;
                                       }
 
-                                      const response2 = await axios.post(
-                                        `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/2`, // Ensure a `/` in the .env URL
-                                        {
+                                      axios.get(`${process.env.REACT_APP_BACKEND_URL}scriptemail/email-template/send_telehealth_link`, {
+                                        headers: {
+                                          Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                        },
+                                      }).then((res) => {
+                                        console.log('see reponse', res)
+                                        // setEmailData({
+                                        //   subject: res?.data?.subject,
+                                        //   body: res?.data?.body,
+                                        //   email: item.email,
+                                        //   firstName: item.first_name
+                                        // })
+
+                                        // Get the template body and subject
+                                        let body = res?.data?.body || "";
+                                        let subject = res?.data?.subject || "";
+
+                                        // Replace placeholders with actual values from `item`
+                                        body = body.replace(/{{firstName}}/g, item.first_name || "");
+
+
+                                        // Update state
+                                        setEmailData({
+                                          subject: subject,
+                                          body: body,
                                           email: item.email,
                                           firstName: item.first_name,
+
+                                        });
+
+
+                                      })
+                                      setIsEmailModalOpen(true)
+
+
+                                      //
+
+
+
+
+                                      // calling api
+                                      /*
+                                      const response2 = await axios.post(
+                                        `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/2`, // Ensure a `/` in the .env URL
+                              {
+                                email: item.email,
+                              firstName: item.first_name,
                                         },
-                                        {
-                                          headers: {
-                                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                              {
+                                headers: {
+                                Authorization: `Bearer ${localStorage.getItem("token")}`,
                                           },
                                         }
-                                      );
+                              );
 
-                                      if (response2.status === 200) {
-                                        console.log("Email sent successfully:", response2.status);
-                                        toast.success(
-                                          `Schedule a telehealth visit Email has been sent to ${item.first_name}`
-                                        );
+                              if (response2.status === 200) {
+                                console.log("Email sent successfully:", response2.status);
+                              toast.success(
+                              `Schedule a telehealth visit Email has been sent to ${item.first_name}`
+                              );
                                       } else {
-                                        toast.error(
-                                          "Could not send Schedule a telehealth visit Email. Please try again later."
-                                        );
+                                toast.error(
+                                  "Could not send Schedule a telehealth visit Email. Please try again later."
+                                );
                                       }
+                              */
+                                      // end calling api
+
                                     }
                                   } catch (error) {
                                     console.error("Error sending email:", error);
@@ -1948,29 +2001,68 @@ function Dashboard() {
                                         return
                                       }
 
-                                      // Send request
-                                      const response = await axios.post(
-                                        `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/3`, // Ensure `/` in .env
-                                        {
+
+                                      axios.get(`${process.env.REACT_APP_BACKEND_URL}scriptemail/email-template/update_prescription`, {
+                                        headers: {
+                                          Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                        },
+                                      }).then((res) => {
+                                        console.log('see reponse', res)
+                                        // setEmailData({
+                                        //   subject: res?.data?.subject,
+                                        //   body: res?.data?.body,
+                                        //   email: item.email,
+                                        //   firstName: item.first_name
+                                        // })
+
+                                        // Get the template body and subject
+                                        let body = res?.data?.body || "";
+                                        let subject = res?.data?.subject || "";
+
+                                        // Replace placeholders with actual values from `item`
+                                        body = body.replace(/{{firstName}}/g, item.first_name || "");
+                                        body = body.replace(/{{scriptText}}/g, item.scrip || "");
+                                        body = body.replace(/{{invoiceText}}/g, item.invoice || "");
+
+                                        // Update state
+                                        setEmailData({
+                                          subject: subject,
+                                          body: body,
                                           email: item.email,
                                           firstName: item.first_name,
-                                          scriptText: item.scrip,
-                                          invoiceText: item.invoice,
-                                        },
-                                        {
-                                          headers: {
-                                            Authorization: `Bearer ${localStorage.getItem("token")}`,
-                                          },
-                                        }
-                                      );
 
-                                      // Handle success
-                                      if (response.status === 200) {
-                                        console.log("Email sent successfully:", response.status);
-                                        toast.success(`Script Email has been sent to ${item.first_name}`);
-                                      } else {
-                                        toast.error("Could not send Script Email. Please try again later.");
-                                      }
+                                        });
+
+
+                                      })
+                                      setIsEmailModalOpen(true)
+
+
+                                      // Send request
+                                      // const response = await axios.post(
+                                      //   `${process.env.REACT_APP_BACKEND_URL}scriptemail/sendEmail/3`, // Ensure `/` in .env
+                                      //   {
+                                      //     email: item.email,
+                                      //     firstName: item.first_name,
+                                      //     scriptText: item.scrip,
+                                      //     invoiceText: item.invoice,
+                                      //   },
+                                      //   {
+                                      //     headers: {
+                                      //       Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                      //     },
+                                      //   }
+                                      // );
+
+                                      // // Handle success
+                                      // if (response.status === 200) {
+                                      //   console.log("Email sent successfully:", response.status);
+                                      //   toast.success(`Script Email has been sent to ${item.first_name}`);
+                                      // } else {
+                                      //   toast.error("Could not send Script Email. Please try again later.");
+                                      // }
+
+                                      //end calling api
                                     }
                                   } catch (error) {
                                     console.error("Error sending script email:", error);
@@ -2535,6 +2627,28 @@ function Dashboard() {
           {/* ending */}
         </div>
 
+        {/* <EmailEditorModal isOpen={true} onClose={() => setIsEmailModalOpen(false)} initialText="<p>Hello, <b>world!</b></p>" /> */}
+        <div className="p-10">
+
+
+          {(emailData?.body && emailData.subject && emailData?.email && emailData?.firstName) && <EmailEditorModal
+            isOpen={isEmailModalOpen}
+            onClose={() => {
+              setEmailData(
+                { subject: null, body: null, email: null, firstName: null }
+              )
+              setIsEmailModalOpen(false)
+            }}
+            email={emailData?.email}
+            firstName={emailData?.firstName}
+            initialSubject={emailData?.subject}
+            // initialBody="<p>This is an email body.</p>" 
+            initialBody={
+              emailData?.body}
+            setEmailData={setEmailData}
+          />}
+
+        </div>
 
 
 
