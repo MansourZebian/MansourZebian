@@ -1495,27 +1495,27 @@ function Userprofile() {
             (
               <form onSubmit={handleSubmit}>
 
-                
-                  <label className="font-bold">Number of refills allowed</label>
-                  <input value={refillsAllowed} onChange={(e) => {
-                    setRefillsAllowed(e.target.value)
+
+                <label className="font-bold">Number of refills allowed</label>
+                <input value={refillsAllowed} onChange={(e) => {
+                  setRefillsAllowed(e.target.value)
+
+                }}
+                  type="number" placeholder="Refills Allowed" className="border border-[#e1e1e1]  items-center p-3  mx-2  rounded-lg bg-white" />
+
+
+
+
+
+
+                <label className="font-bold">Number of days before user can fill refill form</label>
+
+                <input
+                  value={refillDuration} onChange={(e) => {
+                    setRefillDuration(e.target.value)
 
                   }}
-                    type="number" placeholder="Refills Allowed" className="border border-[#e1e1e1]  items-center p-3  mx-2  rounded-lg bg-white" />
-
-
-                
-
-
-                
-                  <label className="font-bold">Number of days before user can fill refill form</label>
-
-                  <input
-                    value={refillDuration} onChange={(e) => {
-                      setRefillDuration(e.target.value)
-
-                    }}
-                    type="number" placeholder="Refill Duration" className="border border-[#e1e1e1]  items-center p-3  mx-2  rounded-lg bg-white" />
+                  type="number" placeholder="Refill Duration" className="border border-[#e1e1e1]  items-center p-3  mx-2  rounded-lg bg-white" />
 
 
                 <button
@@ -1737,15 +1737,20 @@ function Userprofile() {
                             : "Pending"}
                         </td>
                       </tr>
-                      <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+
+                      
+
+                        {Object.values(refillGroup)?.length ? (
+                          Object.values(refillGroup)?.map((item, index) => (
+                            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        
                         <th
                           scope="row"
                           className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         >
                           Refill Request
                         </th>
-                        {Object.values(refillGroup)?.length ? (
-                          Object.values(refillGroup)?.map((item, index) => (
+
                             <React.Fragment key={index}>
                               <td className="px-6 py-4">
                                 {formatDate(item[0]?.createdAt)}
@@ -1756,9 +1761,10 @@ function Userprofile() {
                               <td className="px-6 py-4">
                                 {Object.values(refillGroup)?.length < 3
                                   ? "Available for Request"
-                                  : "3 Completed"}
+                                  : "Completed"}
                               </td>
                             </React.Fragment>
+                      </tr>
                           ))
                         ) : (
                           <>
@@ -1767,7 +1773,6 @@ function Userprofile() {
                             <td className="px-6 py-4">Pending</td>
                           </>
                         )}
-                      </tr>
                     </tbody>
                   </table>
                 </div>

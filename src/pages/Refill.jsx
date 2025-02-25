@@ -657,10 +657,10 @@ function Refill() {
 
         <div className="flex items-center w-full justify-center">
           <button
-            disabled={(!isRefillAllowed) || isLoading}
+            disabled={ isLoading}
             type="button"
             onClick={submit}
-            className={`mb-4  ${!isRefillAllowed? 'bg-gray-400 cursor-not-allowed' : 'bg-[#7b89f8]' }  hover:bg-[#CBC3E3] text-white py-2 px-20 rounded-full shadow-md ${isLoading ? "shadow-[#FFC107]" : "shadow-[#7b89f8]"} mt-10`}
+            className={`mb-4  bg-[#7b89f8]  hover:bg-[#CBC3E3] text-white py-2 px-20 rounded-full shadow-md ${isLoading ? "shadow-[#FFC107]" : "shadow-[#7b89f8]"} mt-10`}
           >
             {isLoading ? "Loading.." : "Submit"}
           </button>
