@@ -19,7 +19,7 @@ function Refill() {
   const [isDisabled, setIsDisabled] = useState(false);
   const [screening, setScreening] = useState([]);
   const [refillInfo, setRefillInfo] = useState([])
-  const [userRefillInfo, setUserRefillInfo] = useState({refillsAllowed: null, refillDuration: null})
+  const [userRefillInfo, setUserRefillInfo] = useState({ refillsAllowed: null, refillDuration: null })
 
 
 
@@ -87,34 +87,52 @@ function Refill() {
           },
         }
       );
-      console.log("score data.............>", response?.data);
-
-      let filteredResponse = response?.data?.filter(item => {
-        const createdAt = new Date(item?.createdAt);
-        const twentyDaysAgo = new Date();
-        // twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
-        twentyDaysAgo.setDate(twentyDaysAgo.getDate() - Number(userRefillInfo?.refillDuration));
-        return createdAt > twentyDaysAgo;
-      });
-
-      console.log('see filteredResponse', filteredResponse)
-      setRefillInfo(filteredResponse)
-
-
+      // console.log("score data.............>", response?.data);
 
 
       let token = localStorage.getItem("token");
       let user = jwtDecode(token);
       let userId = user?.id;
+      let refillDuration = null;
 
       axios.get(`${process.env.REACT_APP_BACKEND_URL}users/getUserRefillInfo/${userId}`,
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }).then((response) => {
-          console.log("response", response.data)
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }).then((resp) => {
+          // console.log("response", response.data)
 
-          setUserRefillInfo(response.data)
+          setUserRefillInfo(resp.data)
+          refillDuration = Number(resp.data?.refillDuration)
+
+
+          let filteredResponse = response?.data?.filter(item => {
+            const createdAt = new Date(item?.createdAt);
+            const twentyDaysAgo = new Date();
+            // twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
+           
+            twentyDaysAgo.setDate(twentyDaysAgo.getDate() - refillDuration);
+            // console.log('createdAt', createdAt)
+            // console.log('twentyDaysAgo', twentyDaysAgo)
+            // console.log("Number(userRefillInfo?.refillDuration)", days)
+
+            return createdAt > twentyDaysAgo;
+          });
+
+          // console.log('see filteredResponse', filteredResponse)
+
+          // console.log('see filteredResponse', filteredResponse)
+          setRefillInfo(filteredResponse)
+
+
+          // console.log("refillDuration", refillDuration)
         }).catch((error) => {
           console.log("error", error)
         })
+
+
+
+
+
+
+
 
 
 
@@ -150,7 +168,7 @@ function Refill() {
       })
       .then((response) => {
         setData(response.data);
-        console.log(response.data);
+        // console.log(response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -162,7 +180,7 @@ function Refill() {
     getQuestions();
   }, []);
 
-  { console.log('user', user) }
+  // { console.log('user', user) }
 
   const submit = async () => {
 
@@ -451,7 +469,7 @@ function Refill() {
           />
         </a>
 
-        {console.log('>>', refillInfo.some((item) => item?.key === 'gad7'))}
+        {/* {console.log('>>', refillInfo.some((item) => item?.key === 'gad7'))} */}
 
         <a
 
