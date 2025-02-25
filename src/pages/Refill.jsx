@@ -21,6 +21,8 @@ function Refill() {
   const [refillInfo, setRefillInfo] = useState([])
   const [userRefillInfo, setUserRefillInfo] = useState({ refillsAllowed: null, refillDuration: null })
 
+  const [refill_length, setRefill_length] = useState(0);
+  const [allowRefill, setAllowRefill] = useState(false);
 
 
   const [lastRefillId, setLastRefillId] = useState(null);
@@ -35,6 +37,8 @@ function Refill() {
     const authToken = localStorage.getItem("token");
     if (authToken) {
       const decodedUser = jwtDecode(authToken);
+      getRefilledScore(decodedUser.id); //also being running in interval
+
       setUser(decodedUser);
       // You can validate the token here if needed
       getScreeningData(decodedUser.id);
@@ -42,8 +46,47 @@ function Refill() {
 
       // getLastRefillIdFilled(decodedUser.id);
 
+      getRefill(decodedUser.id);
+
     }
+
   }, []);
+
+  const getRefill = async (id) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}refill/answers/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const refill = response.data;
+
+      // Group records by day
+      const groupedRefill = refill.reduce((acc, item) => {
+        const key = item.key; // Assuming day is the key to group by
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(item);
+        return acc;
+      }, {});
+
+      // console.log("refill", groupedRefill);
+
+      // Check if any group has less than 3 records
+      const lessThanThree = Object.values(groupedRefill).length < Number(userRefillInfo?.refillsAllowed);
+      // console.log("lessThanThree", lessThanThree);
+      setRefill_length(Object.values(groupedRefill).length);
+      // console.log(lessThanThree);
+      setAllowRefill(lessThanThree);
+    } catch (error) {
+      console.log(error); // Log any errors that occur during the request
+      return false;
+    }
+  };
 
 
   useEffect(() => {
@@ -107,7 +150,7 @@ function Refill() {
             const createdAt = new Date(item?.createdAt);
             const twentyDaysAgo = new Date();
             // twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
-           
+
             twentyDaysAgo.setDate(twentyDaysAgo.getDate() - refillDuration);
             // console.log('createdAt', createdAt)
             // console.log('twentyDaysAgo', twentyDaysAgo)
@@ -432,8 +475,14 @@ function Refill() {
           className={refillInfo?.some((item) => item.key === "phq9") ? "cursor-not-allowed pointer-events-none opacity-100" : ""}
 
           href={
-            refillInfo?.some((item) => item.key === "phq9") ? "" : "/refill/phq9"
+            (!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "phq9")) ? "#" : "/refill/phq9"
           }
+          onClick={(e) => {
+            if (!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "phq9")) {
+              e.preventDefault(); // Prevent navigation
+              alert("You cannot navigate at this time."); // Optional: Show a message
+            }
+          }}
           // href={
           //   "/refill/phq9"
           // }
@@ -444,27 +493,37 @@ function Refill() {
           <Checkcards
             title={"PHQ9"}
             checktitle={
-              refillInfo?.some((item) => item.key === "phq9") ? "Refilled PHQ9" : "Refill PHQ9"
+              (!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "phq9")) ? "Refilled PHQ9" : "Refill PHQ9"
             }
-            disabled={refillInfo?.some((item) => item.key === "phq9") ? true : false}
+            disabled={!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "phq9") ? true : false}
 
           />
         </a>
         <a
 
+          className={refillInfo?.some((item) => item?.key === "pcl5") ? "cursor-not-allowed pointer-events-none opacity-100" : ""}
+
+
           // className={refillInfo?.some((item) => item.key === "pcl5") ? "cursor-not-allowed pointer-events-none opacity-100" : ""}
 
           href={
-            refillInfo?.some((item) => item.key === "pcl5") ? "" : "/refill/pcl5"
+            (!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "pcl5")) ? "" : "/refill/pcl5"
           }
+          onClick={(e) => {
+            if (!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "pcl5")) {
+              e.preventDefault(); // Prevent navigation
+              alert("You cannot navigate at this time."); // Optional: Show a message
+            }
+          }}
+
           target="_blank"
         >
           <Checkcards
             title={"PCL5"}
             checktitle={
-              refillInfo?.some((item) => item.key === "pcl5") ? "Refilled PCL5" : "Refill PCL5"
+              (!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "pcl5")) ? "Refilled PCL5" : "Refill PCL5"
             }
-            disabled={refillInfo?.some((item) => item.key === "pcl5") ? true : false}
+            disabled={!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "pcl5") ? true : false}
 
           />
         </a>
@@ -476,8 +535,15 @@ function Refill() {
           className={refillInfo?.some((item) => item?.key === "gad7") ? "cursor-not-allowed pointer-events-none opacity-100" : ""}
 
           href={
-            refillInfo?.some((item) => item?.key === "gad7") ? "" : "/refill/gad7"
+            (!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "gad7")) ? "" : "/refill/gad7"
           }
+
+          onClick={(e) => {
+            if (!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "gad7")) {
+              e.preventDefault(); // Prevent navigation
+              alert("You cannot navigate at this time."); // Optional: Show a message
+            }
+          }}
           // href={
           //   "/refill/gad7"
           // }
@@ -486,9 +552,9 @@ function Refill() {
           <Checkcards
             title={"GAD7"}
             checktitle={
-              refillInfo?.some((item) => item.key === "gad7") ? "Refilled GAD7" : "Refill GAD7"
+              (!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "gad7")) ? "Refilled GAD7" : "Refill GAD7"
             }
-            disabled={refillInfo?.some((item) => item.key === "gad7") ? true : false}
+            disabled={!(refill_length < userRefillInfo?.refillsAllowed) || refillInfo?.some((item) => item.key === "gad7") ? true : false}
 
           />
         </a>
