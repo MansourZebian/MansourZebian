@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 const customStyles = {
   content: {
     width: "50%",
-    height: "50vh",
+    height: "60vh",
     margin: "auto",
     padding: "10px",
     borderRadius: "10px",
