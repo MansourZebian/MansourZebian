@@ -38,6 +38,9 @@ function Setting() {
                 .required("Required"),
               username: Yup.string().required("Required"),
               role_name: Yup.string().required("Required"),
+              first_name: Yup.string().required("Required"),
+              last_name: Yup.string().required("Required"),
+
             })}
             onSubmit={async (values, { setSubmitting, resetForm }) => {
               setSubmitting(true);
@@ -47,7 +50,10 @@ function Setting() {
               formData.append("username", values.username);
               formData.append("password", values.password);
               formData.append("role_name", values.role_name);
+              formData.append("first_name", values.first_name);
+              formData.append("last_name", values.last_name);
 
+              // console.log(values.email, values.username, values.password, values.role_name);
               await axios
                 .post(
                   `${process.env.REACT_APP_BACKEND_URL}users/create`,
@@ -100,6 +106,45 @@ function Setting() {
                   className="text-red-500"
                 />
               </div>
+
+              {/* firstname */}
+
+              <div className="mb-10  flex flex-col ">
+                <p className="text-2xl text-left font-bold mb-3">
+                  First Name
+                </p>
+
+                <Field
+                  name="first_name"
+                  type="text"
+                  className="w-[48%] border h-10 border-[#e1e1e1] border-4 items-center p-4 mb-3 rounded-full bg-transparent"
+                />
+                <ErrorMessage
+                  name="first_name"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+
+              {/* lastname */}
+
+              <div className="mb-10  flex flex-col ">
+                <p className="text-2xl text-left font-bold mb-3">
+                  Last Name
+                </p>
+
+                <Field
+                  name="last_name"
+                  type="text"
+                  className="w-[48%] border h-10 border-[#e1e1e1] border-4 items-center p-4 mb-3 rounded-full bg-transparent"
+                />
+                <ErrorMessage
+                  name="last_name"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+
 
               <div className="mb-10  flex flex-col ">
                 <p className="text-2xl text-left font-bold mb-3">

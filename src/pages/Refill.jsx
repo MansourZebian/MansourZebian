@@ -232,7 +232,7 @@ function Refill() {
 
       // console.log("is Refill allowed", lessThanThree);
       if (!allowedLimit) {
-        toast.error("You have already filled the Refill form 3 times");
+        toast.error(`You have already filled the Refill form ${userRefillInfo?.refillsAllowed} times`);
         setIsLoading(false)
         return
       }
