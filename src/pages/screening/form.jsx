@@ -89,20 +89,20 @@ function Form() {
       i.answer == "Several days"
         ? 1
         : i.answer === "More than half the days"
-        ? 2
-        : i.answer === "Nearly every day"
-        ? 3
-        : i.answer === "Not at all"
-        ? 0
-        : i.answer === "A little bit"
-        ? 1
-        : i.answer === "Moderately"
-        ? 2
-        : i.answer === "Quite a bit"
-        ? 3
-        : i.answer === "Extremely"
-        ? 4
-        : 0
+          ? 2
+          : i.answer === "Nearly every day"
+            ? 3
+            : i.answer === "Not at all"
+              ? 0
+              : i.answer === "A little bit"
+                ? 1
+                : i.answer === "Moderately"
+                  ? 2
+                  : i.answer === "Quite a bit"
+                    ? 3
+                    : i.answer === "Extremely"
+                      ? 4
+                      : 0
     );
     const sum = filterArry?.reduce(
       (accumulator, currentValue) => accumulator + currentValue,
@@ -171,7 +171,7 @@ function Form() {
           window.location = "/screening/pcl5";
           break;
         case "pcl5":
-          window.location = "/screening/gad7";  
+          window.location = "/screening/gad7";
           break;
         case "gad7":
           window.location = "/screening/questionnaire";
@@ -193,11 +193,19 @@ function Form() {
       <div className="max-[696px]:invisible">
         <Sidebar2 />
       </div>
-
-      <div
+      <form
         className="px-5 min-[696px]:px-40 lg:px-60 max-[696px]:pb-40 min-[696px]:ml-5  xl:px-80"
         // style={{ marginRight: 2000 }}
+        onSubmit={(e) => {
+          e.preventDefault(); // Prevent default submission
+          submit();
+        }}
       >
+        {/* 
+        <div
+          className="px-5 min-[696px]:px-40 lg:px-60 max-[696px]:pb-40 min-[696px]:ml-5  xl:px-80"
+        // style={{ marginRight: 2000 }}
+        > */}
         <div className="px-5 flex flex-col items-start">
           {params.type === "phq9" && (
             <p className="text-black font-semibold mb-4">
@@ -229,11 +237,14 @@ function Form() {
 
               {item.option !== null &&
                 JSON.parse(item.option).map((option, index_) => (
-                  <div className="flex flex-col items-start">
+                  <div key={index_} className="flex flex-col items-start">
                     <label className="text-black mr-3">
                       <input
                         type="radio"
+                        name={`question_${index}`} // Grouping radios together
                         value={option}
+                        required={item.requiredanswer} // Will work now
+                        // required={true} // Will work now
                         checked={item.answer === option}
                         onChange={(e) => {
                           setData((prevData) => {
@@ -248,7 +259,7 @@ function Form() {
                   </div>
                 ))}
 
-              {item.requiredanswer && (
+              {/* {item.requiredanswer && (
                 <input
                   type="search"
                   id="search"
@@ -264,7 +275,7 @@ function Form() {
                     });
                   }}
                 />
-              )}
+              )} */}
             </div>
           ))}
         </div>
@@ -272,15 +283,17 @@ function Form() {
         <center>
           <button
             disabled={isDisabled}
-            type="button"
-            onClick={submit}
+            type="submit"
+            // onClick={submit}
             className="flex items-center mb-4 bg-[#7b89f8] hover:bg-[#CBC3E3] text-white py-2 px-20 rounded-full shadow-md shadow-[#7b89f8] mt-10"
           >
             Continue
             <IoIosArrowForward className="ml-2" />
           </button>
         </center>
-      </div>
+        {/* </div> */}
+      </form>
+
 
       <div className="min-[696px]:invisible">
         <Bottomnav />

@@ -372,10 +372,19 @@ function RefillForm() {
         <Sidebar2 />
       </div>
 
-      <div
+      <form
+        className="px-5 min-[696px]:px-40 lg:px-60 max-[696px]:pb-40 min-[696px]:ml-5  xl:px-80"
+        // style={{ marginRight: 2000 }}
+        onSubmit={(e) => {
+          e.preventDefault(); // Prevent default submission
+          submit();
+        }}
+      >
+
+      {/* <div
         className="px-5 min-[696px]:px-40 lg:px-60 max-[696px]:pb-40 min-[696px]:ml-5  xl:px-80"
       // style={{ marginRight: 2000 }}
-      >
+      > */}
         <div className="px-5 flex flex-col items-start">
           {params.type === "phq9" && (
             <p className="text-black font-semibold mb-4">
@@ -407,11 +416,15 @@ function RefillForm() {
 
               {item.option !== null &&
                 JSON.parse(item.option).map((option, index_) => (
-                  <div className="flex flex-col items-start">
+                  <div key={index_} className="flex flex-col items-start">
                     <label className="text-black mr-3">
                       <input
                         type="radio"
+                        name={`question_${index}`} // Grouping radios together
                         value={option}
+                        required={item.requiredanswer} // Will work now
+
+                        // value={option}
                         checked={item.answer === option}
                         onChange={(e) => {
                           setData((prevData) => {
@@ -426,7 +439,7 @@ function RefillForm() {
                   </div>
                 ))}
 
-              {item.requiredanswer && (
+              {/* {item.requiredanswer && (
                 <input
                   type="search"
                   id="search"
@@ -442,7 +455,7 @@ function RefillForm() {
                     });
                   }}
                 />
-              )}
+              )} */}
             </div>
           ))}
         </div>
@@ -450,15 +463,18 @@ function RefillForm() {
         <center>
           <button
             disabled={isDisabled}
-            type="button"
-            onClick={submit}
+            // type="button"
+            type="submit"
+            // onClick={submit}
             className="flex items-center mb-4 bg-[#7b89f8] hover:bg-[#CBC3E3] text-white py-2 px-20 rounded-full shadow-md shadow-[#7b89f8] mt-10"
           >
             Continue
             <IoIosArrowForward className="ml-2" />
           </button>
         </center>
-      </div>
+      {/* </div> */}
+
+      </form>
 
       <div className="min-[696px]:invisible">
         <Bottomnav />
