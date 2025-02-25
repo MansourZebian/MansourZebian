@@ -711,7 +711,7 @@ function Home() {
           {/* Display time outside the button */}
           {!isRefillAllowed && refillTime && (
             <div className="mt-4 text-sm text-gray-500">
-              You can refill after: <strong>{refillTime.toLocaleString()}</strong>
+              {refill_length<Number(userRefillInfo?.refillsAllowed) &&<p>  You can refill after: <strong>{refillTime.toLocaleString()}</strong></p> }
             </div>
           )}
         </div>
