@@ -23,6 +23,9 @@ function Refill() {
 
   const [refill_length, setRefill_length] = useState(0);
   const [allowRefill, setAllowRefill] = useState(false);
+  const [isRefillAllowed, setIsRefillAllowed] = useState(false);
+  const [refillTime, setRefillTime] = useState(null);
+
 
 
   const [lastRefillId, setLastRefillId] = useState(null);
@@ -38,6 +41,7 @@ function Refill() {
     if (authToken) {
       const decodedUser = jwtDecode(authToken);
       getRefilledScore(decodedUser.id); //also being running in interval
+      getRefillStatus(decodedUser)
 
       setUser(decodedUser);
       // You can validate the token here if needed
@@ -85,6 +89,68 @@ function Refill() {
     } catch (error) {
       console.log(error); // Log any errors that occur during the request
       return false;
+    }
+  };
+
+
+  const getRefillStatus = async (decodedUser) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}score/${decodedUser?.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      // setScores(response.data); // Store the scores in state
+
+      // Find the latest createdAt timestamp
+      const latestScore = response.data.reduce((latest, score) => {
+        const createdAt = new Date(score.createdAt);
+        return createdAt > latest ? createdAt : latest;
+      }, new Date(0));
+
+      let token = localStorage.getItem("token");
+      let user = jwtDecode(token);
+      let userId = user?.id;
+
+      axios.get(`${process.env.REACT_APP_BACKEND_URL}users/getUserRefillInfo/${userId}`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }).then((response) => {
+          console.log("response", response.data)
+
+          // setUserRefillInfo(response.data)
+
+          //  
+          let days = Number(response.data?.refillDuration) || 0;
+
+          let refillTime = new Date(latestScore);
+
+          // console.log('days', days)
+          // refillTime.setDate(refillTime.getDate() + 20); // This properly handles month transitions
+
+          refillTime.setDate(refillTime.getDate() + days); // This properly handles month transitions
+          console.log('see refilltime', refillTime)
+          setRefillTime(refillTime); // Store the refill time in state
+
+          // Check if the current date has passed the refill time
+          const currentTime = new Date();
+          setIsRefillAllowed(currentTime >= refillTime);
+
+
+
+
+        })
+        .catch((error) => {
+
+          console.log(error);
+        });
+
+      // Correctly calculate the refill date by adding 20 days
+
+    } catch (error) {
+      console.log(error); // Log any errors that occur during the request
     }
   };
 
@@ -337,6 +403,7 @@ function Refill() {
 
         console.log('see response', response)
         toast.success("Submitted successfully!");
+        navigate('/') // go back to previous page
 
       }).catch((error) => {
         setIsLoading(false)
@@ -587,12 +654,13 @@ function Refill() {
           transparent={true}
         /> */}
 
+
         <div className="flex items-center w-full justify-center">
           <button
-            disabled={isLoading}
+            disabled={(!isRefillAllowed) || isLoading}
             type="button"
             onClick={submit}
-            className={`mb-4 bg-[#7b89f8]  hover:bg-[#CBC3E3] text-white py-2 px-20 rounded-full shadow-md ${isLoading ? "shadow-[#FFC107]" : "shadow-[#7b89f8]"} mt-10`}
+            className={`mb-4  ${!isRefillAllowed? 'bg-gray-400 cursor-not-allowed' : 'bg-[#7b89f8]' }  hover:bg-[#CBC3E3] text-white py-2 px-20 rounded-full shadow-md ${isLoading ? "shadow-[#FFC107]" : "shadow-[#7b89f8]"} mt-10`}
           >
             {isLoading ? "Loading.." : "Submit"}
           </button>
