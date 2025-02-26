@@ -29,14 +29,14 @@ function Forgot() {
       email: email,
 
     }).then((res) => {
-      console.log(res.data?.data);
+      // console.log(res.data?.data);
       setOtpSent(true);
       setLoading(false);
       toast.success("OTP sent successfully");
     }).catch((err) => {
-      console.log("error", err);
+      console.log("error", err?.response?.data?.msg);
       setLoading(false);
-      toast.error(err?.response?.data?.message || err?.message);
+      toast.error(err?.response?.data?.msg || err?.message);
     });
     setLoading(false);
 
