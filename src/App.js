@@ -41,6 +41,7 @@ import TrackingLink from "./pages/TrackingLink";
 import AdminAccount from '../src/components/AdminAccount';
 import RefillForm from "./pages/screening/refillForm";
 import HelpUser from "./pages/HelpUser";
+import Forgot from "./pages/Forgot";
 
 function App() {
   return (
@@ -106,6 +107,7 @@ function App() {
           <Route path="/screening/questionnaire" element={<Questionnaire />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Signup />} />
+          <Route path="/forgot" element={<Forgot />} />
           <Route path="/administrative" element={<Administrativeform />} />
           <Route path="/administrative/consent" element={<Consentform />} />
           <Route

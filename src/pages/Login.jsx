@@ -133,7 +133,8 @@ function Login() {
             <button type='submit' className="mb-4 bg-[#7b89f8] hover:bg-[#CBC3E3] text-white  py-2 px-20 rounded-full shadow-md shadow-[#7b89f8]">Sign In</button><br />
 
 
-            <a className='text-[#6c77d6]' href="/register">Forgot Password?</a>
+            {/* <a className='text-[#6c77d6]' href="/register">Forgot Password?</a> */}
+            <a className='text-[#6c77d6]' href="/forgot">Forgot Password?</a>
           </Form>
         </Formik>
 
