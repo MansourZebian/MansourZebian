@@ -1678,6 +1678,106 @@ function Userprofile() {
 
 
           {/* Questionnaires */}
+
+          {/* original */}
+          {/* <div className="mb-10">
+            <h1 className="text-2xl font-bold text-left">Questionnaires</h1>
+            <div className="mt-10 relative overflow-x-auto">
+              <div class="rounded-t-xl rounded-b-xl ">
+                <div className="overflow-x-auto">
+                  <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead class="h-20 text-lg text-black bg-[#f0f1fa] ">
+                      <tr>
+                        <th scope="col" class="px-6 py-3">
+                          Document
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                          Sent
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                          Received
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th
+                          scope="row"
+                          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        >
+                          Entry Questionnaire
+                        </th>
+
+                        <td class="px-6 py-4">
+                          {isTypeExists(screening, "entry questionaire")
+                            ? formatDate(
+                                screening.filter(
+                                  (form) =>
+                                    form.Screeningform.type ===
+                                    "entry questionaire"
+                                )[0].createdAt
+                              )
+                            : "No Submission"}
+                        </td>
+                        <td class="px-6 py-4">
+                          {isTypeExists(screening, "entry questionaire")
+                            ? formatDate(
+                                screening.filter(
+                                  (form) =>
+                                    form.Screeningform.type ===
+                                    "entry questionaire"
+                                )[0].createdAt
+                              )
+                            : "No Submission"}
+                        </td>
+                        <td class="px-6 py-4">
+                          {isTypeExists(screening, "entry questionaire")
+                            ? "Processed"
+                            : "Pending"}
+                        </td>
+                      </tr>
+                      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th
+                          scope="row"
+                          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        >
+                          Refill Request
+                        </th>
+                        {Object.values(refillGroup)?.length ? (
+                          Object.values(refillGroup)?.map((item) => (
+                            <>
+                              <td class="px-6 py-4">
+                                {formatDate(item[0]?.createdAt)}
+                              </td>
+                              <td class="px-6 py-4">
+                                {formatDate(item[0]?.updatedAt)}
+                              </td>
+                              <td class="px-6 py-4">
+                                {Object.values(refillGroup)?.length < 3
+                                  ? "Available for Request"
+                                  : "3 Completed"}
+                              </td>
+                            </>
+                          ))
+                        ) : (
+                          <>
+                            <td class="px-6 py-4">No Submission</td>
+                            <td class="px-6 py-4">No Submission</td>
+                            <td class="px-6 py-4">Pending</td>
+                          </>
+                        )}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div> */}
+
+          {/* new */}
           <div className="mb-10">
             <h1 className="text-2xl font-bold text-left">Questionnaires</h1>
             <div className="mt-10 relative overflow-x-auto">
@@ -1738,9 +1838,33 @@ function Userprofile() {
                         </td>
                       </tr>
 
-                      
+                      {Object.values(refillGroup)?.length ? (
+                        Object.values(refillGroup)?.map((item, index) => (
+                          <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                              Refill Request
+                            </th>
+                            <td className="px-6 py-4">{formatDate(item[0]?.createdAt)}</td>
+                            <td className="px-6 py-4">{formatDate(item[0]?.updatedAt)}</td>
+                            <td className="px-6 py-4">
+                              {Object.values(refillGroup)?.length < 3 ? "Available for Request" : "Completed"}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        // ✅ Wrap inside a <tr> so table stays structured correctly
+                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                          <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Refill Request
+                          </th>
+                          <td className="px-6 py-4">No Submission</td>
+                          <td className="px-6 py-4">No Submission</td>
+                          <td className="px-6 py-4">Pending</td>
+                        </tr>
+                      )}
 
-                        {Object.values(refillGroup)?.length ? (
+                      {/* updated */}
+                      {/* {Object.values(refillGroup)?.length ? (
                           Object.values(refillGroup)?.map((item, index) => (
                             <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         
@@ -1772,7 +1896,7 @@ function Userprofile() {
                             <td className="px-6 py-4">No Submission</td>
                             <td className="px-6 py-4">Pending</td>
                           </>
-                        )}
+                        )} */}
                     </tbody>
                   </table>
                 </div>
