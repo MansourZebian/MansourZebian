@@ -209,7 +209,8 @@ function Form() {
         <div className="px-5 flex flex-col items-start">
           {params.type === "phq9" && (
             <p className="text-black font-semibold mb-4">
-              Form: Patient Health Questionnaire-9
+              {/* Form: Patient Health Questionnaire-9 */}
+              Instructions: Over the last 2 weeks, how often have you been bothered by the following problems?
             </p>
           )}
 
@@ -227,7 +228,8 @@ function Form() {
 
           {params.type === "gad7" && (
             <p className="text-black font-semibold mb-4">
-              Form: Generalized Anxiety Disorder-7
+              {/* Form: Generalized Anxiety Disorder-7 */}
+              Instructions: Over the last 2 weeks, how often have you been bothered by the following problems?
             </p>
           )}
 
