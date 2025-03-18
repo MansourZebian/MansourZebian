@@ -31,7 +31,7 @@ function RefillForm() {
 
       axios.get(`${process.env.REACT_APP_BACKEND_URL}users/getUserRefillInfo/${userId}`,
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }).then((response) => {
-          // console.log("response", response.data)
+          // console.log("getUserRefillInfo response", response.data)
 
           setUserRefillInfo(response.data)
         }).catch((error) => {
@@ -89,7 +89,7 @@ function RefillForm() {
       })
       .then((response) => {
         setData(response.data);
-        console.log(response.data);
+        // console.log("screeningform getQuestions",response.data);
       })
       .catch((error) => {
         console.log(error);

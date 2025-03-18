@@ -128,7 +128,7 @@ function Questionnaire() {
       </div>
 
       <div className="px-5 min-[696px]:px-40 lg:px-60 min-[696px]:ml-40 max-[696px]:pb-40  xl:px-80">
-        <div className="px-5 flex flex-col items-start">
+        <div className="px-5 flex flex-col items-start text-left">
           {data.map((item, index) => (
             <div key={index} className="mb-4">
               <p className="text-[#6984FB] font-bold">{item.question}</p>

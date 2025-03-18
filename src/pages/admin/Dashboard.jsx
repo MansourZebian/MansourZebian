@@ -1009,14 +1009,15 @@ function Dashboard() {
 
   const handleUserProfileClick = async (id) => {
     // console.log(id);
-    const documentVerification = await getDocumentverification(id);
-    const consent = await getConsent(id);
-    const emergencyContact = await getEmergencycontact(id);
-    const information = await getInformation(id);
+    // const documentVerification = await getDocumentverification(id);
+    // const consent = await getConsent(id);
+    // const emergencyContact = await getEmergencycontact(id);
+    // const information = await getInformation(id);
 
     // if (documentVerification && consent && emergencyContact && information) {
     // window.location.href = `/admin/userprofile/${id}`;
-    navigate(`/admin/userprofile/${id}`);
+    // navigate(`/admin/userprofile/${id}`);
+    window.open(`/admin/userprofile/${id}`, '_blank', 'noopener,noreferrer');
     // } else {
     //   alert("Administration is not submitted");
     // }
