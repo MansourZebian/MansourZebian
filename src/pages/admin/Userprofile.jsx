@@ -21,6 +21,9 @@ function Userprofile() {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
 
 
+  
+
+
   const [refillsAllowed, setRefillsAllowed] = useState(null);
   const [refillDuration, setRefillDuration] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -55,6 +58,11 @@ function Userprofile() {
   const [clinicalFormModal, setClinicalFormModal] = useState(false);
   const [clinicalFormModalType, setClinicalFormModalType] = useState("");
 
+
+  const [clinicalFormModalRefill, setClinicalFormModalRefill] = useState(false);
+  const [clinicalFormModalRefillId, setClinicalFormModalRefillId] = useState(null);
+
+
   const [administrativeModal, setAdministrativeModal] = useState(false);
   const [administrativeModalType, setAdministrativeModalType] = useState("");
   const [tackingLink, setTackingLink] = useState({
@@ -80,13 +88,20 @@ function Userprofile() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // console.log("refillGroup", refillGroup);
   const [user, setUser] = useState({});
+
+
+  const [selectedQuestions, setSelectedQuestions] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+
+
   useEffect(() => {
     // Check if authentication token exists in localStorage
     const authToken = localStorage.getItem("token");
     if (authToken) {
       const decodedUser = jwtDecode(authToken);
       setUser(decodedUser);
-      console.log('see decodeduser', decodedUser)
+      // console.log('see decodeduser', decodedUser)
 
       // You can validate the token here if needed
 
@@ -130,6 +145,31 @@ function Userprofile() {
     return () => clearInterval(interval);
   }, []);
 
+
+  const handleScoreClick = (entry, formType) => {
+    setClinicalFormModalType(formType);
+    setClinicalFormModalRefill(true);
+
+    if (entry?.refillId === 0) {
+      setClinicalFormModalRefillId(null);
+      return;
+    }
+
+    setClinicalFormModalRefillId(Number(entry?.refillId));
+  };
+
+
+  const handleRowClick = (type) => {
+    // Filter questions based on the clicked row type
+    const filteredQuestions = screening.filter(
+      (form) => form?.Screeningform?.type === type
+    );
+
+    setSelectedQuestions(filteredQuestions);
+    setIsModalOpen(true);
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -138,8 +178,8 @@ function Userprofile() {
       return
     }
 
-    console.log('refillsAllowed', refillsAllowed)
-    console.log('refillDuration', refillDuration)
+    // console.log('refillsAllowed', refillsAllowed)
+    // console.log('refillDuration', refillDuration)
 
     // axios.put(`$`)
     try {
@@ -1019,16 +1059,121 @@ function Userprofile() {
 </Modal> */}
 
 
-      {/* original clinical modal */}
+      {/* original clinical modal when refillId===null */}
       <Modal
         show={clinicalFormModal}
         onClose={() => setClinicalFormModal(false)}
+      >
+        <Modal.Header>
+          {clinicalFormModalType}
+
+
+        </Modal.Header>
+        <Modal.Body>
+          <div className="space-y-6">
+            {screening?.length &&
+              screening?.filter(i => i?.refillId === null)?.map(
+                (form, index) =>
+                  form?.Screeningform?.type
+                    ?.replace(/[0-9]/g, "")
+                    ?.toUpperCase() ===
+                  clinicalFormModalType?.split("-")[0] && (
+                    <div className="flex items-center gap-2" key={index}>
+
+
+                      <div>
+                        <h5 style={{ fontSize: 18, fontWeight: "bold" }}>
+                          {form?.Screeningform?.question}
+
+                        </h5>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+
+
+                          <div>
+
+
+
+                            <div
+                              style={{
+                                fontSize: 13,
+                                color: "#000",
+                                color: "green",
+                                fontWeight: "bolder",
+                                display: 'flex',
+                                justifyContent: 'flex-start',
+                                flexDirection: 'row',
+                                // width:'100%'
+                              }}
+                            >
+
+                              <p
+                                style={{
+                                  fontSize: 13,
+                                  color: "#000",
+                                }}
+                              >
+                                Answer:
+
+                              </p>
+
+                              <p className="mx-3">{form?.optionanswer || " N/A "}</p>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+              )}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <div
+            style={{
+              position: "absolute",
+              right: 25,
+              fontSize: 20,
+              fontWeight: "bold",
+            }}
+          >
+            Total Score  ={" "}
+
+            {scores.map(
+              (item, index) =>
+                item?.key?.replace(/[0-9]/g, "")?.toUpperCase() ===
+                clinicalFormModalType?.split("-")[0] &&
+                item?.refillId === null &&
+                item?.uid == id &&
+                item?.score + " "
+            )}
+          </div>
+          <Button color="gray" onClick={() => setClinicalFormModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+
+      {/*END original clinical modal when refillId===null */}
+
+
+      {/* Modal for refill */}
+
+
+      <Modal
+        show={clinicalFormModalRefill}
+        onClose={() => setClinicalFormModalRefill(false)}
       >
         <Modal.Header>{clinicalFormModalType}</Modal.Header>
         <Modal.Body>
           <div className="space-y-6">
             {screening?.length &&
-              screening?.map(
+              screening?.filter(i => i?.refillId === clinicalFormModalRefillId)?.map(
                 (form, index) =>
                   form?.Screeningform?.type
                     ?.replace(/[0-9]/g, "")
@@ -1049,35 +1194,37 @@ function Userprofile() {
                         >
 
 
-                          <div
-                            style={{
-                              fontSize: 13,
-                              color: "#000",
-                              color: "green",
-                              fontWeight: "bolder",
-                              display: 'flex',
-                              justifyContent: 'flex-start',
-                              flexDirection: 'row',
-                              // width:'100%'
-                            }}
-                          >
+                          <div>
 
-                            <Label className="text-blue-500 mr-5">
+                            {/* <span className="text-blue-500 mr-5 text-sm">
                               {formatDateWithTime(form.createdAt)}
-                            </Label>
+                            </span> */}
 
-                            <p
+                            <div
                               style={{
                                 fontSize: 13,
                                 color: "#000",
+                                color: "green",
+                                fontWeight: "bolder",
+                                display: 'flex',
+                                justifyContent: 'flex-start',
+                                flexDirection: 'row',
+                                // width:'100%'
                               }}
                             >
-                              Answer:
 
-                            </p>
+                              <p
+                                style={{
+                                  fontSize: 13,
+                                  color: "#000",
+                                }}
+                              >
+                                Answer:
 
-                            <p className="mx-3">{form?.optionanswer || " N/A "}</p>
+                              </p>
 
+                              <p className="mx-3">{form?.optionanswer || " N/A "}</p>
+                            </div>
 
                           </div>
                         </div>
@@ -1096,20 +1243,23 @@ function Userprofile() {
               fontWeight: "bold",
             }}
           >
-            totalScores  ={" "}
+            Total Score  ={" "}
+            {/* {console.log("SEEE >> Scores", scores)} */}
             {scores.map(
               (item, index) =>
                 item?.key?.replace(/[0-9]/g, "")?.toUpperCase() ===
                 clinicalFormModalType?.split("-")[0] &&
+                item?.refillId === clinicalFormModalRefillId &&
                 item?.uid == id &&
                 item?.score + " "
             )}
           </div>
-          <Button color="gray" onClick={() => setClinicalFormModal(false)}>
+          <Button color="gray" onClick={() => setClinicalFormModalRefill(false)}>
             Close
           </Button>
         </Modal.Footer>
       </Modal>
+      {/* END Modal for refill */}
 
       {/* {information Admini Modal} */}
       <Modal
@@ -1568,7 +1718,65 @@ function Userprofile() {
               <div className="rounded-t-xl rounded-b-xl overflow-x-auto">
                 <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 
+                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
+                      <tr>
+                        <th scope="col" className="px-6 py-4">Date</th>
+                        <th scope="col" className="px-6 py-4">PHQ-9</th>
+                        <th scope="col" className="px-6 py-4">GAD-7</th>
+                        <th scope="col" className="px-6 py-4">PCL-5</th>
+                        <th scope="col" className="px-6 py-4">Refill Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.isArray(scores) && scores.length > 0 ? (
+                        processScoresRefill(scores).map((entry, index) => (
+                          <tr
+                            key={index}
+                            className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                          >
+                            <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                              {entry.date}
+                            </td>
 
+                            {/* PHQ-9 Column Click */}
+                            <td
+                              className="px-6 py-4 cursor-pointer text-blue-600 hover:underline"
+                              onClick={() => handleScoreClick(entry, "PHQ-9")}
+                            >
+                              {entry.phq9}
+                            </td>
+
+                            {/* GAD-7 Column Click */}
+                            <td
+                              className="px-6 py-4 cursor-pointer text-blue-600 hover:underline"
+                              onClick={() => handleScoreClick(entry, "GAD-7")}
+                            >
+                              {entry.gad7}
+                            </td>
+
+                            {/* PCL-5 Column Click */}
+                            <td
+                              className="px-6 py-4 cursor-pointer text-blue-600 hover:underline"
+                              onClick={() => handleScoreClick(entry, "PCL-5")}
+                            >
+                              {entry.pcl5}
+                            </td>
+
+                            <td className="px-6 py-4 font-semibold">{entry.refillId}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="text-center py-4">
+                            No data available
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+
+                  {/* 
                   <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead className="h-20 text-lg text-[#6984FB] bg-white border-b">
                       <tr>
@@ -1586,9 +1794,54 @@ function Userprofile() {
                             <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                               {entry.date}
                             </td>
-                            <td className="px-6 py-4">{entry.phq9}</td>
-                            <td className="px-6 py-4">{entry.gad7}</td>
-                            <td className="px-6 py-4">{entry.pcl5}</td>
+                            <td className="px-6 py-4 cursor-pointer"
+
+                              onClick={() => {
+                                // console.log("clicked", entry)
+                                setClinicalFormModalType("PHQ-9");
+                                setClinicalFormModalRefill(true)
+                                // console.log("S refillId", entry?.refillId)
+                                if (entry?.refillId === 0) {
+                                  setClinicalFormModalRefillId(null)
+                                  return
+                                }
+                                setClinicalFormModalRefillId(Number(entry?.refillId))
+                                // woking here
+                              }}
+
+                            >{entry.phq9}</td>
+
+                            <td className="px-6 py-4 cursor-pointer"
+
+                              onClick={() => {
+                                // console.log("clicked", entry)
+                                setClinicalFormModalType("GAD-7");
+                                setClinicalFormModalRefill(true)
+                                // console.log("S refillId", entry?.refillId)
+                                if (entry?.refillId === 0) {
+                                  setClinicalFormModalRefillId(null)
+                                  return
+                                }
+                                setClinicalFormModalRefillId(Number(entry?.refillId))
+                                // woking here
+                              }}
+
+                            >{entry.gad7}</td>
+                            <td className="px-6 py-4 cursor-pointer" 
+                             onClick={() => {
+                              // console.log("clicked", entry)
+                              setClinicalFormModalType("PCL-5");
+                              setClinicalFormModalRefill(true)
+                              // console.log("S refillId", entry?.refillId)
+                              if (entry?.refillId === 0) {
+                                setClinicalFormModalRefillId(null)
+                                return
+                              }
+                              setClinicalFormModalRefillId(Number(entry?.refillId))
+                              // woking here
+                            }}
+                            
+                          >{entry.pcl5}</td>
                             <td className="px-6 py-4 font-semibold">{entry.refillId}</td>
                           </tr>
                         ))
@@ -1598,7 +1851,7 @@ function Userprofile() {
                         </tr>
                       )}
                     </tbody>
-                  </table>
+                  </table> */}
 
 
 
@@ -1801,7 +2054,11 @@ function Userprofile() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                      <tr
+                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleRowClick("entry questionaire")}
+                      >
+                        {/* <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"> */}
                         <th
                           scope="row"
                           className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
@@ -1863,40 +2120,7 @@ function Userprofile() {
                         </tr>
                       )}
 
-                      {/* updated */}
-                      {/* {Object.values(refillGroup)?.length ? (
-                          Object.values(refillGroup)?.map((item, index) => (
-                            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        
-                        <th
-                          scope="row"
-                          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                        >
-                          Refill Request
-                        </th>
 
-                            <React.Fragment key={index}>
-                              <td className="px-6 py-4">
-                                {formatDate(item[0]?.createdAt)}
-                              </td>
-                              <td className="px-6 py-4">
-                                {formatDate(item[0]?.updatedAt)}
-                              </td>
-                              <td className="px-6 py-4">
-                                {Object.values(refillGroup)?.length < 3
-                                  ? "Available for Request"
-                                  : "Completed"}
-                              </td>
-                            </React.Fragment>
-                      </tr>
-                          ))
-                        ) : (
-                          <>
-                            <td className="px-6 py-4">No Submission</td>
-                            <td className="px-6 py-4">No Submission</td>
-                            <td className="px-6 py-4">Pending</td>
-                          </>
-                        )} */}
                     </tbody>
                   </table>
                 </div>
@@ -2111,7 +2335,7 @@ function Userprofile() {
                               onChange={async (e) => {
 
 
-                                console.log(e.target.checked, "see item.tracking_id:", item?.tracking_id);
+                                // console.log(e.target.checked, "see item.tracking_id:", item?.tracking_id);
                                 if (!item?.tracking_id || item?.tracking_id.length <= 8) {
                                   toast.error("Please provide a valid tracking link");
                                   return;
@@ -2477,14 +2701,18 @@ function Userprofile() {
                         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
-                          if (
-                            !information?.id ||
-                            !emergencycontact?.id ||
-                            !documentverification?.id
-                          )
-                            return;
+                          if (!consent?.id) return; // Only block opening if consent data is missing
                           setAdministrativeModal(true);
                           setAdministrativeModalType("Consent form");
+                          // if (
+                          //   !information?.id ||
+                          //   !emergencycontact?.id ||
+                          //   !documentverification?.id
+                          // )
+                          //   return;
+
+                          // setAdministrativeModal(true);
+                          // setAdministrativeModalType("Consent form");
                         }}
                       >
                         Consent form
@@ -2514,9 +2742,8 @@ function Userprofile() {
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (
-                            !information?.id ||
-                            !emergencycontact?.id ||
-                            !documentverification?.id
+
+                            !emergencycontact?.id
                           )
                             return;
                           setAdministrativeModal(true);
@@ -2548,17 +2775,13 @@ function Userprofile() {
                         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
-                          if (
-                            !information?.id ||
-                            !emergencycontact?.id ||
-                            !documentverification?.id
-                          )
+                          if (!information?.id)
                             return;
                           setAdministrativeModal(true);
                           setAdministrativeModalType("Address");
                         }}
                       >
-                        address
+                        Address
                       </th>
 
                       <td className="px-6 py-4">
@@ -2583,11 +2806,7 @@ function Userprofile() {
                         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
-                          if (
-                            !information?.id ||
-                            !emergencycontact?.id ||
-                            !documentverification?.id
-                          )
+                          if (!documentverification?.id)
                             return;
                           setAdministrativeModal(true);
                           setAdministrativeModalType("Verification Document");
@@ -2630,6 +2849,23 @@ function Userprofile() {
         </div>
       </div >
 
+      {/* modal showing questionaire */}
+      {
+        //entry questionaire modal
+
+        isModalOpen &&
+        (<Modal2
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          questions={selectedQuestions}
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          selectedQuestions={selectedQuestions} />
+
+        )
+
+      }
+
       <div className="p-10">
 
 
@@ -2651,8 +2887,50 @@ function Userprofile() {
         />}
 
       </div>
+
+
     </>
   );
 }
+
+
+const Modal2 = ({ isOpen, onClose, questions }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="z-50 fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center">
+      <div className="bg-white p-6 rounded-lg w-1/3 max-h-[80vh] flex flex-col">
+        <h2 className="text-lg font-bold mb-4">Entry Questionnaire</h2>
+
+        {/* Scrollable Area */}
+        <div className="overflow-y-auto max-h-[60vh] pr-2">
+          <ul className="space-y-3 text-left">
+            {questions.length > 0 ? (
+              questions.map((q, index) => (
+                <li key={index} className="border-b pb-2">
+                  <p className="font-medium">{q.Screeningform.question}</p>
+                  <p className="text-gray-700">
+                    Answer: {q.answer || "No Answer"}
+                  </p>
+                </li>
+              ))
+            ) : (
+              <p className="text-gray-700">No questions available.</p>
+            )}
+          </ul>
+        </div>
+
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded self-end"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
+
 
 export default Userprofile;
